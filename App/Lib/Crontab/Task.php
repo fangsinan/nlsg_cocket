@@ -163,47 +163,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
 
-    //发送公告 7
-    public function pushNotice1($taskId, $fromWorkerId,$data,$path){
-
-        try {
-            $live_id=Config::getInstance()->getConf('web.live_id_now');
-            $live_id=6;
-            $noticeObj  = new LiveNotice();
-            $noticeList = $noticeObj->get($noticeObj->tableName,['live_id'=>$live_id,'is_send'=>0,'is_del'=>0],'id,live_id,content,time,ctime');
-            if(!empty($noticeList)){
-                $idArr=[];
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7, 'content' =>$noticeList]);
-
-                $ListPort = swoole_get_local_ip (); //获取监听ip
-                //推送消息
-                $UserServiceObj=new UserService();
-                $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
-
-                if(!empty($noticeList)){
-                    //修改标记
-                    $idArr=array_column($noticeList, 'id');
-                    $noticeObj->update($noticeObj->tableName,['is_send'=>1],['id'=>$idArr]);
-                }
-
-                return [
-                    'data' => $idArr,
-                    'path' => $path
-                ];
-            }
-
-        }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
-        }
-
-    }
     //发送公告 7
     public function pushNotice($taskId, $fromWorkerId,$data,$path){
 
@@ -244,7 +208,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -302,7 +266,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -403,7 +367,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -458,7 +422,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -614,7 +578,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -701,7 +665,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -781,7 +745,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live2.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
