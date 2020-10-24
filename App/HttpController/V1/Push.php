@@ -103,7 +103,7 @@ class Push extends Controller
     {
         $client = $this->caller()->getClient();
         $message=$this->caller()->getArgs();//获取所有参数
-
+print_r($message);
         if(empty($message['accessUserToken'])){$message['accessUserToken']=0;};
         if(empty($message['user_id'])){$message['user_id']=0;};
         if(empty($message['live_id'])){$message['live_id']=0;};
