@@ -49,7 +49,7 @@ class UserService
             }
 
             $UserObj = new UserModel();
-            $UserInfo = $UserObj->getOne (UserModel::$table, ['token' => $token], 'id,level,expire_time,phone username,nick_name');
+            $UserInfo = $UserObj->getOne (UserModel::$table, ['token' => $token], 'id,level,expire_time,phone username,nickname');
             if (empty($UserInfo) ) { //不是有效用户
                 return Status::Error (Status::CODE_FORBIDDEN, '用户信息不存在');
 
@@ -67,7 +67,7 @@ class UserService
                 return Status::Error (Status::CODE_FORBIDDEN, '被禁言');
             }
             $UserObj = new UserModel();
-            $UserInfo = $UserObj->getOne (UserModel::$table, ['id' => $user_id], 'id,level,expire_time,phone username,nick_name,headimg');
+            $UserInfo = $UserObj->getOne (UserModel::$table, ['id' => $user_id], 'id,level,expire_time,phone username,nickname,headimg');
             if ( empty($UserInfo) ) { //不是有效用户
                 return Status::Error (Status::CODE_FORBIDDEN, '用户信息不存在');
 

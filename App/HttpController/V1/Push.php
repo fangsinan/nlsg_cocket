@@ -70,11 +70,11 @@ class Push extends Controller
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
             $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content' => '进入直播间','content_text' => '进入直播间',
-                'userinfo' => ['level' => $UserInfo['result']['level'], 'nick_name' => $UserInfo['result']['nick_name'],'headimg'=> $headimg]]);
+                'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
 
@@ -114,13 +114,13 @@ print_r($message);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
 
             $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
 
             $data = Common::ReturnJson (Status::CODE_OK,'发送成功',
                 ['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
-                    'level' => $UserInfo['result']['level'],'nick_name' => $UserInfo['result']['nick_name']]]);
+                    'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
             $user_id=$UserInfo['result']['id'];
@@ -163,11 +163,11 @@ print_r($message);
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
-            $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'nick_name' => $UserInfo['result']['nick_name']]);
+            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
+            $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'nickname' => $UserInfo['result']['nickname']]);
 
             $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 4, 'content' => $content,'content_gift' => $content,
-                'userinfo' => ['level' => $UserInfo['result']['level'], 'nick_name' => $UserInfo['result']['nick_name']]]);
+                'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname']]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
 
