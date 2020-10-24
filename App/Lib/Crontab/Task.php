@@ -101,6 +101,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     8=>直播结束
     9=>禁言
     10=>线下课成交订单
+    11=>排行榜
+    12=> 礼物
+     *
      */
 
 

@@ -110,6 +110,7 @@ class Push extends Controller
 
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
+        print_r($UserInfo);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
@@ -134,7 +135,8 @@ class Push extends Controller
 
 
                 $LiveComment=new LiveCommentModel();
-                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'ctime'=>time()]);
+                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'ctime'=>date('Y-m-d H:i:s',time())]);
+                echo $LiveComment->getLastQuery();
             });
 
         }else{
