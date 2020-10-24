@@ -533,21 +533,21 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ->where('o.type', 14)->where('o.live_id',$live_id)->where('o.status',1)
                     ->where('o.product_id',0,'>')->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
                     ->orderBy('o.id','ASC')
-                    ->get($OrderObj->tableName .' o',null,'o.id,u.nick_name,o.product_id,o.live_num,o.pay_price');
+                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price');
 
                 if(!empty($OrderInfo)){
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
-                        $val['nick_name']=Common::textDecode($val['nick_name']);
+                        $val['nickname']=Common::textDecode($val['nickname']);
                         switch ($val['product_id']){
                             case 1: //经营能量
-                                $res[]=$val['nick_name'].':您已成功购买'.$val['live_num'].'张经营能量门票';
+                                $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
                                 break;
                             case 2: //一代天骄
-                                $res[]=$val['nick_name'].':您已支付成功一代天骄定金';
+                                $res[]=$val['nickname'].':您已支付成功一代天骄定金';
                                 break;
                             case 3: //演说能量
-                                $res[]=$val['nick_name'].':您已支付成功演说能量定金';
+                                $res[]=$val['nickname'].':您已支付成功演说能量定金';
                                 break;
                         }
                     }
@@ -614,10 +614,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ->where('o.type', 10)->where('o.live_id',$live_id)->where('o.status',1)->where('o.twitter_id != ?',[0])
                     ->groupBy('twitter_id')
                     ->orderBy('u_num','DESC')
-                    ->get($OrderObj->tableName .' o',[0,10],'count(*) u_num,u.id user_id,u.nick_name,u.username,u.headimg');
+                    ->get($OrderObj->tableName .' o',[0,10],'count(*) u_num,u.id user_id,u.nickname,u.phone username,u.headimg');
 
                 foreach($OrderInfo as $key=>$val){
-                    $OrderInfo[$key]['nick_name']=Common::textDecode($val['nick_name']);
+                    $OrderInfo[$key]['nickname']=Common::textDecode($val['nickname']);
                 }
 
                 //根据用户不同 获取邀请名次
@@ -703,21 +703,21 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ->where('o.reward_num',0,'>')->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
                     ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
                     ->orderBy('o.id','ASC')
-                    ->get($OrderObj->tableName .' o',null,'o.id,u.nick_name,o.product_id,o.live_num,o.pay_price,reward,reward_num');
+                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price,reward,reward_num');
                 //echo $OrderObj->getLastQuery();
                 if(!empty($OrderInfo)){
                     $res=[];
                     foreach($OrderInfo as &$v){
-                        $v['nick_name']=Common::textDecode($v['nick_name']);
+                        $v['nickname']=Common::textDecode($v['nickname']);
 //                        switch ($val['reward']){
 //                            case 1: //经营能量
-//                                $res[]=$val['nick_name'].':您已成功购买'.$val['live_num'].'张经营能量门票';
+//                                $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
 //                                break;
 //                            case 2: //一代天骄
-//                                $res[]=$val['nick_name'].':您已支付成功一代天骄定金';
+//                                $res[]=$val['nickname'].':您已支付成功一代天骄定金';
 //                                break;
 //                            case 3: //演说能量
-//                                $res[]=$val['nick_name'].':您已支付成功演说能量定金';
+//                                $res[]=$val['nickname'].':您已支付成功演说能量定金';
 //                                break;
 //                        }
                     }
