@@ -49,7 +49,7 @@ class UserService
             }
 
             $UserObj = new UserModel();
-            $UserInfo = $UserObj->getOne (UserModel::$table, ['token' => $token], 'id,level,expire_time,username,nick_name');
+            $UserInfo = $UserObj->getOne (UserModel::$table, ['token' => $token], 'id,level,expire_time,phone username,nick_name');
             if (empty($UserInfo) ) { //不是有效用户
                 return Status::Error (Status::CODE_FORBIDDEN, '用户信息不存在');
 
