@@ -185,6 +185,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*');
             if(empty($listRst)) return '';
             $idArr=[];
+            print_r($listRst);
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
