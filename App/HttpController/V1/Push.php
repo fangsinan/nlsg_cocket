@@ -103,14 +103,14 @@ class Push extends Controller
     {
         $client = $this->caller()->getClient();
         $message=$this->caller()->getArgs();//获取所有参数
-print_r($message);
+
         if(empty($message['accessUserToken'])){$message['accessUserToken']=0;};
         if(empty($message['user_id'])){$message['user_id']=0;};
         if(empty($message['live_id'])){$message['live_id']=0;};
 
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
-        print_r($UserInfo);
+
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
@@ -119,7 +119,8 @@ print_r($message);
             $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
 
             $data = Common::ReturnJson (Status::CODE_OK,'发送成功',
-                ['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
+                ['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
+//                ['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
                     'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
