@@ -26,13 +26,13 @@
 <script>
 
     var live_id=6;
-    var live_id=311;
+    var live_id=410;
     var user_id=211172;
 //    var wsServer = 'ws://172.17.176.246:9520';
 //     var wsServer = 'ws://192.168.0.116:9520?live_id='+live_id+'&user_id='+user_id;
 //     var wsServer = 'ws://live.api.test.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
-    var wsServer = 'wss://live.api.v3.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
     var wsServer = 'ws://live.api.test.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
+    var wsServer = 'ws://live.apiv4.test.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
     var websocket = null;
     var lockReconnect = false;  //避免ws重复连接
 
@@ -161,7 +161,7 @@
 
     function addLine(data,type,user) {
         if(type==2){
-            $("#line").append("<li>"+user.level+' '+user.nick_name+' '+data+"</li>");
+            $("#line").append("<li>"+user.level+' '+user.nickname+' '+data+"</li>");
         }else if(type==3){
             $("#tm").append("<li>"+data+"</li>");
         }
