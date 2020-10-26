@@ -45,12 +45,12 @@ return [
     'msg_Log'=>'/Log/msg',
 
     //直播key
-    'live_redis_key'=>'live_v4_key_', //主要用于存储负载时各个服务器的fd链接
+    'live_redis_key'=>'livev4_key_', //主要用于存储负载时各个服务器的fd链接
     //直播人数
-    'live_redis_number'=>'live_v4_number_',
+    'live_redis_number'=>'livev4_number_',
     //直播关闭列表
-    'live_colse_list'=>'live_v4_colse_list', //用于关闭fd链接
+    'live_colse_list'=>'livev4_colse_list', //用于关闭fd链接
     //在线人数基数
-    'live_redis_number_base'=>'live_v4_number_base',
+    'live_redis_number_base'=>'livev4_number_base',
     'IMAGES_URL' => 'https://image.nlsgapp.com/'
 ];
