@@ -190,7 +190,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
                 print_r($arr);
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_id'=>$live_id,'is_send'=>0,'is_del'=>0],'id,live_id,content,type,created_at,length');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_send'=>0,'is_del'=>0],'id,live_id,content,type,created_at,length');
                 echo $noticeObj->getLastQuery();
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7, 'content' =>$noticeList]);
