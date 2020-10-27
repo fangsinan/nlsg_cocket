@@ -185,13 +185,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*');
             if(empty($listRst)) return '';
             $idArr=[];
-            print_r($listRst);
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                print_r($arr);
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_send'=>0,'is_del'=>0],'id,live_id,content,type,created_at,length');
-                echo $noticeObj->getLastQuery();
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_done'=>0,'is_del'=>0],'id,live_id,content,type,created_at,length');
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7, 'content' =>$noticeList]);
                     $ListPort = swoole_get_local_ip (); //获取监听ip
@@ -202,7 +199,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if(!empty($noticeList)){
                         //修改标记
                         $idArr=array_column($noticeList, 'id');
-                        $noticeObj->update($noticeObj->tableName,['is_send'=>1],['id'=>$idArr]);
+                        $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
                         $noticeObj->getLastQuery();
                     }
                 }
