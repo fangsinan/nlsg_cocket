@@ -401,7 +401,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 //多个
                 $res = self::getLivePushDetail($push_info);
 
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res]);
+                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res,'ios_content' =>$res ]);
 
                 $ListPort = swoole_get_local_ip (); //获取监听ip
                 //推送消息
