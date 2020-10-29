@@ -45,7 +45,17 @@ class live extends  Controller
         $params = $this->request()->getRequestParam();
 
         if( empty($arguments['live_id']) ){
-            return $this->writeJson(Status::CODE_FAIL,[],'error');
+            return $this->writeJson(Status::CODE_FAIL,[],'error:live_id');
+        }
+
+        $method_list = [
+            'PushProduct',//产品推送6
+            'getLivePushOrder',//订单推送10
+            'getLiveOrderRanking',//排行榜11
+            'getLiveGiftOrder',//礼物订单12
+        ];
+        if( empty($arguments['method']) || in_array($arguments['method'],$method_list) ){
+            return $this->writeJson(Status::CODE_FAIL,[],'error:method');
         }
         $TaskObj=new Task([
             'method'    => $params['method'],

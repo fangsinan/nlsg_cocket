@@ -722,7 +722,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
 
     /**
-     * 订单推送  12
+     * 礼物订单推送  12
      */
     public static function getLiveGiftOrder($taskId, $fromWorkerId,$data,$path){
 
