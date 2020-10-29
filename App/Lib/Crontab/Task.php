@@ -441,10 +441,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             $pushObj = new LivePush();
             $UserServiceObj=new UserService();
-            $now = time();
+            $now = date('Y-m-d H:i:s',time());
             $where = [
-                'live_id' => $live_id,
-                '(push_time < ?)'=>[$now],
+                'live_info_id' => $live_id,
+                '(push_at < ?)'=>[$now],
                 'is_push' => 0,
                 'is_del' => 0,
             ];
@@ -501,32 +501,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                 $fields = 'id,title name,price,subtitle,cover_img img';
                 $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
-//                switch ($val['push_gid']){
-//                    case 1: //经营能量
-//                        $Info=[
-//                            'name'=>'经营能量',
-//                            'price'=>1000,
-//                            'subtitle'=>'',
-//                            'img'=>'/live/jynl/jynlts.jpg'
-//                        ];
-//                        break;
-//                    case 2: //一代天骄
-//                        $Info=[
-//                            'name'=>'一代天骄·领袖班',
-//                            'price'=>3000,
-//                            'subtitle'=>'',
-//                            'img'=>'/live/jynl/ydtjts.jpg'
-//                        ];
-//                        break;
-//                    case 3: //演说能量
-//                        $Info=[
-//                            'name'=>'演说能量',
-//                            'price'=>3000,
-//                            'subtitle'=>'',
-//                            'img'=>'/live/jynl/ysnlts.jpg'
-//                        ];
-//                        break;
-//                }
             }else if($val['push_type'] == 6){
                 $Info=[
                         'name'=>'幸福360会员',
@@ -545,7 +519,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //修改标记
             $idArr=array_column($push_info, 'id');
             $LivePushObj=new LivePush();
-            $LivePushObj->update($LivePushObj->tableName,['is_push'=>1],['id'=>$idArr]);
+            $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
         }
 
         return $res;
