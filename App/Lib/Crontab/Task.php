@@ -380,7 +380,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     /**
      * 产品推送  6
      */
-    public static function PushProduct($taskId, $fromWorkerId,$data,$path){
+    public static function y_PushProduct($taskId, $fromWorkerId,$data,$path){
 
         try {
 
@@ -430,6 +430,49 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }
 
     }
+
+    /**
+     * 产品推送  6
+     */
+    public static function PushProduct($taskId, $fromWorkerId,$data,$path){
+
+        try {
+            $live_id = $data['live_id'];
+
+            $pushObj = new LivePush();
+            $UserServiceObj=new UserService();
+            $now = time();
+            $where = [
+                'live_id' => $live_id,
+                '(push_time < ?)'=>[$now],
+                'is_push' => 0,
+                'is_del' => 0,
+            ];
+            $push_info = $pushObj->get($pushObj->tableName,$where,'*');
+            if(!empty($push_info)){
+                //多个
+                $res = self::getLivePushDetail($push_info);
+
+                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res]);
+
+                $ListPort = swoole_get_local_ip (); //获取监听ip
+                //推送消息
+                $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
+            }
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+
+
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
 
     //产品推送
     public static function getLivePushDetail($push_info){

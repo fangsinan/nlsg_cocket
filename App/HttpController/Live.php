@@ -1,36 +1,33 @@
 <?php
 namespace App\HttpController;
 
-use App\Lib\Auth\Aes;
-use App\Lib\Cache\Cache;
+
+
 use App\Lib\Crontab\Task;
-use App\Lib\Redis\Redis;
 use App\Lib\Message\Status;
-use App\Model\V1\LiveCommentModel;
-use App\Services\V1\UserService;
-use App\WebSocket\Common;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
 use EasySwoole\Http\AbstractInterface\Controller;
-use App\Lib\Auth\Des;
-use App\Lib\Auth\IAuth;
-use App\Lib\Auth\Time;
-use EasySwoole\EasySwoole\ServerManager;
 
 /**
- * 调试页面暂时保留
- * Index controller
+ * live controller
  */
 class live extends  Controller
 {
+
+    private $params = [];
+    public function __construct()
+    {
+        $this->params = $this->request()->getRequestParam();
+    }
     public function index()
     {
         return $this->writeJson(Status::CODE_OK,[],'success');
     }
 
-    function demo(){
+    //push
+    public function push(){
 
         $params = $this->request()->getRequestParam();
-        print_r($params);
 
         $TaskObj=new Task([
             'method'=>'getLiveOrderRanking',
@@ -46,5 +43,30 @@ class live extends  Controller
         return $this->writeJson(Status::CODE_OK,[],'success  ok');
     }
 
+
+
+
+    public function __call($name,$arguments){
+
+        print_r($name);
+        print_r($arguments);
+
+        if( empty($arguments['live_id']) ){
+            return $this->writeJson(Status::CODE_FAIL,[],'error');
+        }
+        $TaskObj=new Task([
+            'method'    => $name,
+            'path'      =>[
+                'dir'   => '/Crontab',
+                'name'  => 'pro_',
+            ],
+            'data'      => $arguments
+        ]);
+        TaskManager::async ($TaskObj);
+
+
+        return $this->writeJson(Status::CODE_OK,[],'success');
+
+    }
 
 }
