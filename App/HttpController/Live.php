@@ -17,7 +17,7 @@ class live extends  Controller
     protected $paramss = [];
     function __construct()
     {
-        $this->$paramss = $this->request()->getRequestParam();
+        $this->paramss = $this->request()->getRequestParam();
     }
     public function index()
     {
