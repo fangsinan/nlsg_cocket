@@ -14,11 +14,7 @@ use EasySwoole\Http\AbstractInterface\Controller;
 class live extends  Controller
 {
 
-    private $params = [];
-    public function __construct()
-    {
-        $this->params = $this->request()->getRequestParam();
-    }
+
     public function index()
     {
         return $this->writeJson(Status::CODE_OK,[],'success');
@@ -46,7 +42,7 @@ class live extends  Controller
 
 
 
-    public function __call($name,$arguments){
+    protected function __call($name,$arguments){
 
         print_r($name);
         print_r($arguments);
