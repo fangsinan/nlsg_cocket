@@ -394,7 +394,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 'is_del' => 0,
                 'is_done' => 0,
             ];
-            $push_info = $pushObj->get($pushObj->tableName,$where,'*');
+            $push_info = $pushObj->get($pushObj->tableName,$where,'id,push_type,push_gid');
+            echo $pushObj->getLastQuery();
             if(!empty($push_info)){
                 //多个
                 $res = self::getLivePushDetail($push_info);
