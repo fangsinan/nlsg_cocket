@@ -392,6 +392,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 '(push_at < ?)'=>[$now],
                 'is_push' => 0,
                 'is_del' => 0,
+                'is_done' => 0,
             ];
             $push_info = $pushObj->get($pushObj->tableName,$where,'*');
             if(!empty($push_info)){
