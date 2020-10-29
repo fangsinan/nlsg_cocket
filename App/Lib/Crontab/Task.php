@@ -594,7 +594,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function getLiveOrderRanking($taskId, $fromWorkerId,$data,$path){
 
         try {
-
+            print_r($data);
             echo 1111;
             return;
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
