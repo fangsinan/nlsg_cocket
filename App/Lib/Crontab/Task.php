@@ -30,6 +30,7 @@ use App\Utility\Tools\Tool;
 use App\Lib\Cache\Cache;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
+use phpDocumentor\Reflection\Types\Iterable_;
 
 /**
  * Class MillisecondTask
@@ -401,8 +402,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $res = self::getLivePushDetail($push_info);
 
                 $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res]);
+                print_r($data);
 
                 $ListPort = swoole_get_local_ip (); //获取监听ip
+                print_r($ListPort);
+                print_r($live_id);
                 //推送消息
                 $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
             }
@@ -414,6 +418,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            print_r('error');
             //短信通知
             Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
@@ -441,8 +446,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }elseif( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
+                print_r($Info);
                 $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`order`'=>0]);
                 $Info['workinfo_id']=$WorkInfoData['id'];
+                print_r($Info);
+
             }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
                 $fields = 'id,name,price,subtitle,picture img';
                 $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
@@ -459,6 +467,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ];
             }
 
+
             $res[]= [
                 'push_info' => $val,
                 'son_info' => $Info,
@@ -470,7 +479,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $LivePushObj=new LivePush();
             $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
         }
-
+        print_r($res);
         return $res;
     }
 
