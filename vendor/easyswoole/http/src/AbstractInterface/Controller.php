@@ -36,7 +36,7 @@ abstract class Controller
         $this->allowMethods = array_diff($list,
             [
                 '__hook','__destruct',
-                '__clone','__construct',
+                '__clone','__construct','__call',
                 '__callStatic','__get','__set',
                 '__isset','__unset','__sleep',
                 '__wakeup','__toString','__invoke',

@@ -41,21 +41,19 @@ class live extends  Controller
 
 
 
-    public function __call($name,$arguments){
-
-        print_r($name);
-        print_r($arguments);
+    public function LiveTask(){
+        $params = $this->request()->getRequestParam();
 
         if( empty($arguments['live_id']) ){
             return $this->writeJson(Status::CODE_FAIL,[],'error');
         }
         $TaskObj=new Task([
-            'method'    => $name,
+            'method'    => $params['method'],
             'path'      =>[
                 'dir'   => '/Crontab',
                 'name'  => 'pro_',
             ],
-            'data'      => $arguments
+            'data'      => $params
         ]);
         TaskManager::async ($TaskObj);
 
