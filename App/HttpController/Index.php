@@ -3,10 +3,13 @@ namespace App\HttpController;
 
 use App\Lib\Auth\Aes;
 use App\Lib\Cache\Cache;
+use App\Lib\Crontab\Task;
 use App\Lib\Redis\Redis;
 use App\Lib\Message\Status;
+use App\Model\V1\LiveCommentModel;
 use App\Services\V1\UserService;
 use App\WebSocket\Common;
+use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
 use EasySwoole\Http\AbstractInterface\Controller;
 use App\Lib\Auth\Des;
 use App\Lib\Auth\IAuth;
@@ -120,6 +123,64 @@ class Index extends  Controller
 
         return $this->writeJson(Status::CODE_OK,$data,'success');
 
+    }
+
+    function demo(){
+
+        $params             = $this->request()->getRequestParam();
+        print_r($params);
+
+        $TaskObj=new Task([
+            'method'=>'getLiveOrderRanking',
+            'path'=>[
+                'dir'=>'/Crontab',
+                'name'=>'Ranking_',
+            ],
+            'data'=>[
+            ]
+        ]);
+        TaskManager::async ($TaskObj);
+        return $this->writeJson(Status::CODE_OK,[],'success  ok');
+
+
+
+        $UserServiceObj = new UserService();
+        $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
+
+        if ( $UserInfo['statusCode'] == 200 ) { //获取成功
+
+            $live_id=$message['live_id'];
+            $UserInfo['result']['nickname']= \App\Lib\Common::textDecode($UserInfo['result']['nickname']);
+
+            $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
+
+            $data = Common::ReturnJson (Status::CODE_OK,'发送成功',
+                ['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
+        //                ['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
+                    'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
+
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            $user_id=$UserInfo['result']['id'];
+
+            // 异步推送
+            TaskManager::async (function () use ($client, $data, $ListPort,$user_id,$content,$live_id) {
+
+                //当前连接
+                $getfd = $client->getFd ();
+                $UserServiceObj=new UserService();
+                $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
+
+                $LiveComment=new LiveCommentModel();
+                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]);
+                echo $LiveComment->getLastQuery();
+            });
+
+        }else{
+            $server = ServerManager::getInstance()->getSwooleServer();
+            $getfd = $client->getFd ();
+            $data = Common::ReturnJson (Status::CODE_FAIL,$UserInfo['msg'],['type'=>2]);
+            $server->push ($getfd, $data);
+        }
     }
 
 
