@@ -431,6 +431,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         $WorkInfoObj=new WorksInfo();
         $goodsObj = new Goods();
         foreach($push_info as $key=>$val){
+            var_dump( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']));
+            var_dump( ($val['push_type'] == 2 || $val['push_type'] == 8) );
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
             if(($val['push_type'] == 1 || $val['push_type'] == 7) && !empty($val['push_gid']) ){
