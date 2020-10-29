@@ -346,7 +346,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                                 'forbid_time' => $forbid_time,
                             ];
                             //推送记录
-                            $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$res] ]);
+                            $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$res],'ios_content' => $res ]);
                             $ListPort = swoole_get_local_ip(); //获取监听ip
                             //推送消息
                             $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id,[],$val['user_id']);
@@ -367,61 +367,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             ];
 //            $live_id=Config::getInstance()->getConf('web.live_id_now');
 
-
-        }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
-        }
-
-    }
-
-
-    /**
-     * 产品推送  6
-     */
-    public static function y_PushProduct($taskId, $fromWorkerId,$data,$path){
-
-        try {
-
-            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
-            $Redis = new Redis();
-            $pushObj = new LivePush();
-            $UserServiceObj=new UserService();
-
-            //获取所有在线直播id
-//            keys live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
-            $now = time();
-            foreach($listRst as $key => $val) {
-                $arr = explode('_', $val);
-                $live_id = $arr[2];
-                $where = [
-                    'live_id' => $live_id,
-                    '(push_time < ?)'=>[$now],
-                    'is_push' => 0,
-                    'is_del' => 0,
-                ];
-                $push_info = $pushObj->get($pushObj->tableName,$where,'*');
-                if(!empty($push_info)){
-                    //多个
-                    $res = self::getLivePushDetail($push_info);
-
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res]);
-
-                    $ListPort = swoole_get_local_ip (); //获取监听ip
-                    //推送消息
-                    $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
-
-
-
-                }
-            }
-            return [
-                'data' => 1,
-                'path' => $path
-            ];
-//            $live_id = Config::getInstance()->getConf('web.live_id_now');
 
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
@@ -486,10 +431,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         foreach($push_info as $key=>$val){
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
-            if($val['push_type'] == 1 && !empty($val['push_gid']) ){
+            if(($val['push_type'] == 1 || $val['push_type'] == 7) && !empty($val['push_gid']) ){
                 $fields = 'id,name,price,subtitle,cover_pic img,user_id';
                 $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
-            }elseif($val['push_type'] == 2 && !empty($val['push_gid']) ){
+            }elseif( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
                 $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`order`'=>0]);
