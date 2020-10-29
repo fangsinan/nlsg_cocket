@@ -54,7 +54,7 @@ class live extends  Controller
             'getLiveOrderRanking',//排行榜11
             'getLiveGiftOrder',//礼物订单12
         ];
-        if( empty($params['method']) || in_array($params['method'],$method_list) ){
+        if( empty($params['method']) || !in_array($params['method'],$method_list) ){
             return $this->writeJson(Status::CODE_FAIL,[],'error:method');
         }
         $TaskObj=new Task([
