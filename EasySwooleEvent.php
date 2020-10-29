@@ -180,24 +180,24 @@ class EasySwooleEvent implements Event
 
 
 
-        $TaskObj=new Task([
-            'method'=>'PushProduct',
-            'path'=>[
-                'dir'=>'/Crontab',
-                'name'=>'pro_',
-            ],
-            'data'=>[
-            ]
-        ]);
-        //商品推送
-        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-            if ( $workerId == 0 ) {
-                Timer::getInstance()->loop(2 * 1000, function ()use ($TaskObj) {  //2s 更新在线人数
-                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                    TaskManager::async ($TaskObj);
-                });
-            }
-        });
+//        $TaskObj=new Task([
+//            'method'=>'PushProduct',
+//            'path'=>[
+//                'dir'=>'/Crontab',
+//                'name'=>'pro_',
+//            ],
+//            'data'=>[
+//            ]
+//        ]);
+//        //商品推送
+//        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//            if ( $workerId == 0 ) {
+//                Timer::getInstance()->loop(2 * 1000, function ()use ($TaskObj) {  //2s 更新在线人数
+//                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                    TaskManager::async ($TaskObj);
+//                });
+//            }
+//        });
 
         $TaskObj=new Task([
             'method'=>'getLivePushOrder',
