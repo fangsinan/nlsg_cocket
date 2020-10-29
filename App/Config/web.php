@@ -35,7 +35,7 @@ return [
 
     'Api_Url' => 'https://live.api.nlsgapp.com/',
 
-    'SYS_ERROR'=>['phone'=>18810355387,'tpl'=>'SMS_152505672'],//系统报错错误通知
+    'SYS_ERROR'=>['phone'=>15650701817,'tpl'=>'SMS_152505672'],//系统报错错误通知
 
     //easyswoole 文件缓存   报错日志 Log/cache_error
     'FileCache_Log'=>'/Temp/FileCache',

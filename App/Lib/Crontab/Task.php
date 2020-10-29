@@ -402,11 +402,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $res = self::getLivePushDetail($push_info);
 
                 $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res]);
-                print_r($data);
 
                 $ListPort = swoole_get_local_ip (); //获取监听ip
-                print_r($ListPort);
-                print_r($live_id);
                 //推送消息
                 $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
             }
@@ -436,8 +433,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         $WorkInfoObj=new WorksInfo();
         $goodsObj = new Goods();
         foreach($push_info as $key=>$val){
-            var_dump( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']));
-            var_dump( ($val['push_type'] == 2 || $val['push_type'] == 8) );
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
             if(($val['push_type'] == 1 || $val['push_type'] == 7) && !empty($val['push_gid']) ){
@@ -446,10 +441,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }elseif( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
-                print_r($Info);
-                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`order`'=>0]);
+                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
                 $Info['workinfo_id']=$WorkInfoData['id'];
-                print_r($Info);
 
             }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
                 $fields = 'id,name,price,subtitle,picture img';
@@ -479,7 +472,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $LivePushObj=new LivePush();
             $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
         }
-        print_r($res);
         return $res;
     }
 
