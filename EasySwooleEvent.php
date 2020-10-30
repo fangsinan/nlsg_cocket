@@ -254,25 +254,25 @@ class EasySwooleEvent implements Event
                 });
             }
         });
-        $TaskObj=new Task([
-            'method'=>'pushForbiddenWords',
-            'path'=>[
-                'dir'=>'/Crontab',
-                'name'=>'forbid_',
-            ],
-            'data'=>[
-            ]
-        ]);
-        //禁言
-        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-            if ( $workerId == 0 ) {
-                Timer::getInstance()->loop(10 * 1000, function ()use ($TaskObj) {  //30s
-//                Timer::getInstance()->loop(6000 * 1000, function ()use ($TaskObj) {  //30s
-                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                    TaskManager::async ($TaskObj);
-                });
-            }
-        });
+//        $TaskObj=new Task([
+//            'method'=>'pushForbiddenWords',
+//            'path'=>[
+//                'dir'=>'/Crontab',
+//                'name'=>'forbid_',
+//            ],
+//            'data'=>[
+//            ]
+//        ]);
+//        //禁言
+//        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//            if ( $workerId == 0 ) {
+//                Timer::getInstance()->loop(10 * 1000, function ()use ($TaskObj) {  //30s
+////                Timer::getInstance()->loop(6000 * 1000, function ()use ($TaskObj) {  //30s
+//                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                    TaskManager::async ($TaskObj);
+//                });
+//            }
+//        });
         $TaskObj=new Task([
             'method'=>'pushEnd',
             'path'=>[

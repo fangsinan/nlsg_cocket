@@ -290,6 +290,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //发送两次公告   一个是全员的禁言推送   另一个是个人发送情况
 //                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1,'user_id'=>0],'*');
             $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'*');
+            print_r($forbidden);
             if(!empty($forbidden)){
                 $forbidden['forbid_at'] = strtotime($forbidden['forbid_at']);
                 //推送禁言状态
@@ -317,7 +318,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //个人禁言
             $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1],'*');
-
+            print_r($forbidden);
             $idArr=[];
             if(!empty($forbidden) ) {
 
@@ -427,7 +428,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //push_gid 推送产品id，专栏id  精品课id  商品id
             if(($val['push_type'] == 1 || $val['push_type'] == 7) && !empty($val['push_gid']) ){
                 $fields = 'id,name,price,subtitle,cover_pic img,user_id';
-                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
+                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
             }elseif( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
