@@ -651,7 +651,7 @@ print_r($data);
                 ->where('o.reward_type', 5)->where('o.reward_num',0,'>')->where('is_live_order_send',0)
                 ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
                 ->orderBy('o.id','ASC')
-                ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price,reward,reward_num');
+                ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.relation_id,o.live_id,o.pay_price,reward,reward_num');
             echo $OrderObj->getLastQuery();
             if(!empty($OrderInfo)){
                 $res=[];
