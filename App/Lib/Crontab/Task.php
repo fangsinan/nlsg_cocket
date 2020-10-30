@@ -343,6 +343,17 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$res],'ios_content' => $res ]);
                         $ListPort = swoole_get_local_ip(); //获取监听ip
+                        print_r('1111');
+                        print_r($data);
+                        print_r('222');
+
+                        print_r($ListPort);
+                        print_r('333');
+
+                        print_r($live_id);
+                        print_r('444');
+
+                        print_r($val);
                         //推送消息
                         $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id,[],$val['user_id']);
 
