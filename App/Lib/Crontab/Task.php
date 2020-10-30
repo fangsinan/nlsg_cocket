@@ -382,16 +382,17 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $where = [
                 'live_info_id' => $live_id,
                 '(push_at < ?)'=>[$now],
-                'is_push' => 0,
+                'is_push' => 1,
                 'is_del' => 0,
                 'is_done' => 0,
             ];
             $push_info = $pushObj->get($pushObj->tableName,$where,'id,push_type,push_gid');
             echo $pushObj->getLastQuery();
             if(!empty($push_info)){
-                //多个$res = self::getLivePushDetail($push_info);
+                //多个
+                $res = self::getLivePushDetail($push_info);
 
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res,'ios_content' =>$res ]);
+                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
 
                 $ListPort = swoole_get_local_ip (); //获取监听ip
                 //推送消息
