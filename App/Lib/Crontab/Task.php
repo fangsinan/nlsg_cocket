@@ -280,7 +280,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public function pushForbiddenWords($taskId, $fromWorkerId,$data,$path){
 
         try {
-            $live_id = $data['live_id'];
+            $live_id = $data['live_info_id'];
             $forbiddenObj = new LiveForbiddenWordsModel();
             $UserServiceObj = new UserService();
 
@@ -374,7 +374,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function PushProduct($taskId, $fromWorkerId,$data,$path){
 
         try {
-            $live_id = $data['live_id'];
+            $live_id = $data['live_info_id'];
 
             $pushObj = new LivePush();
             $UserServiceObj=new UserService();

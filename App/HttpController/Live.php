@@ -44,8 +44,8 @@ class live extends  Controller
     public function LiveTask(){
         $params = $this->request()->getRequestParam();
 
-        if( empty($params['live_id']) ){
-            return $this->writeJson(Status::CODE_FAIL,[],'error:live_id');
+        if( empty($params['live_info_id']) ){
+            return $this->writeJson(Status::CODE_FAIL,[],'error:live_info_id');
         }
 
         $method_list = [
