@@ -189,7 +189,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_done'=>0,'is_del'=>0],'id,live_id,content,type,created_at,length');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_done'=>0,'is_del'=>0,'type'=>1],'id,live_id,content,type,created_at,length');
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0]  ]);
                     $ListPort = swoole_get_local_ip (); //获取监听ip
@@ -280,88 +280,79 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public function pushForbiddenWords($taskId, $fromWorkerId,$data,$path){
 
         try {
-
-            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $live_id = $data['live_id'];
             $forbiddenObj = new LiveForbiddenWordsModel();
             $UserServiceObj = new UserService();
-            $Redis = new Redis();
-            //获取所有在线直播id
-//            keys live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
 
-            if(empty($listRst)) return '';
+            $time=time();
 
-            foreach($listRst as $key => $val) {
-                $arr = explode('_', $val);
-                $live_id = $arr[2];
-                $time=time();
-
-                //是否全场禁言
-                //发送两次公告   一个是全员的禁言推送   另一个是个人发送情况
+            //是否全场禁言
+            //发送两次公告   一个是全员的禁言推送   另一个是个人发送情况
 //                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1,'user_id'=>0],'*');
-                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'*');
-                if(!empty($forbidden)){
-                    //推送禁言状态
-                    $all_res= [
-                        'user_id'       => 0,
-                        'is_forbid'     => $forbidden['is_forbid'],
-                        'forbid_ctime'  => $forbidden['forbid_ctime'],
-                        'forbid_time'   => $forbidden['forbid_time'],
+            $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'*');
+            if(!empty($forbidden)){
+                $forbidden['forbid_at'] = strtotime($forbidden['forbid_at']);
+                //推送禁言状态
+                $all_res= [
+                    'user_id'       => 0,
+                    'is_forbid'     => $forbidden['is_forbid'],
+                    'forbid_at'     => $forbidden['forbid_at'],
+                    'length'        => $forbidden['length'],
+                ];
+                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$all_res],'ios_content' => $all_res ]);
+                $ListPort = swoole_get_local_ip(); //获取监听ip
+                //推送消息
+                $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
+
+                //如果为全员禁言  直接返回
+                $length = ($forbidden['forbid_at'] + $forbidden['length']) - $time;
+                if ($length > 0  && $forbidden['is_forbid'] == 1) {
+                    return [
+                        'data' => [],
+                        'path' => $path
                     ];
-                    $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$all_res] ]);
-                    $ListPort = swoole_get_local_ip(); //获取监听ip
-                    //推送消息
-                    $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
-
-                    //如果为全员禁言  直接返回
-                    $forbid_time = ($val['forbid_ctime'] + $val['forbid_time']) - $time;
-                    if ($forbid_time > 0  && $forbidden['is_forbid'] == 1) {
-                        return [
-                            'data' => [],
-                            'path' => $path
-                        ];
-                    }
                 }
-                //如果是解禁的情况下 返回个人的禁言状态
-
-                //个人禁言
-                $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1],'*');
-
-                $idArr=[];
-                if(!empty($forbidden) ) {
-
-                    foreach ($forbidden as $key=>$val) {
-                        //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
-                        $forbid_time = ($val['forbid_ctime'] + $val['forbid_time']) - $time;
-                        if ($forbid_time <=0) {
-                            $idArr[]=$val['id']; //记录已解除禁言用户
-                        }else{
-                            $forbid_ctime=$val['forbid_ctime']; //开始时间
-                            $is_forbid = 1;    //禁言
-                            $forbid_time=$val['forbid_time']; //时长
-
-                            $res= [
-                                'user_id' => $val['user_id'],
-                                'is_forbid' => $is_forbid,
-                                'forbid_ctime' => $forbid_ctime,
-                                'forbid_time' => $forbid_time,
-                            ];
-                            //推送记录
-                            $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$res],'ios_content' => $res ]);
-                            $ListPort = swoole_get_local_ip(); //获取监听ip
-                            //推送消息
-                            $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id,[],$val['user_id']);
-
-                        }
-
-                    }
-                    //修改标记
-                    if(!empty($idArr)){
-                        $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_ctime'=>0,'forbid_time'=>0],['id'=>$idArr]);
-                    }
-                }
-
             }
+            //如果是解禁的情况下 返回个人的禁言状态
+
+            //个人禁言
+            $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1],'*');
+
+            $idArr=[];
+            if(!empty($forbidden) ) {
+
+                foreach ($forbidden as $key=>$val) {
+                    //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
+                    $val['forbid_at'] = strtotime($val['forbid_at']);
+                    $length = ($val['forbid_at'] + $val['length']) - $time;
+                    if ($length <=0) {
+                        $idArr[]=$val['id']; //记录已解除禁言用户
+                    }else{
+                        $forbid_at=$val['forbid_at']; //开始时间
+                        $is_forbid = 1;    //禁言
+                        $length=$val['length']; //时长
+
+                        $res= [
+                            'user_id' => $val['user_id'],
+                            'is_forbid' => $is_forbid,
+                            'forbid_at' => $forbid_at,
+                            'length' => $length,
+                        ];
+                        //推送记录
+                        $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$res],'ios_content' => $res ]);
+                        $ListPort = swoole_get_local_ip(); //获取监听ip
+                        //推送消息
+                        $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id,[],$val['user_id']);
+
+                    }
+
+                }
+                //修改标记
+                if(!empty($idArr)){
+                    $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_at'=>0,'length'=>0],['id'=>$idArr]);
+                }
+            }
+
             return [
                 'data' => $idArr,
                 'path' => $path
@@ -398,8 +389,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $push_info = $pushObj->get($pushObj->tableName,$where,'id,push_type,push_gid');
             echo $pushObj->getLastQuery();
             if(!empty($push_info)){
-                //多个
-                $res = self::getLivePushDetail($push_info);
+                //多个$res = self::getLivePushDetail($push_info);
 
                 $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' =>$res,'ios_content' =>$res ]);
 
@@ -415,7 +405,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            print_r('error');
             //短信通知
             Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }

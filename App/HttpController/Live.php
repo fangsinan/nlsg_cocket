@@ -50,6 +50,8 @@ class live extends  Controller
 
         $method_list = [
             'PushProduct',//产品推送6
+            'pushEnd',//直播结束8
+            'pushForbiddenWords',//禁言9
             'getLivePushOrder',//订单推送10
             'getLiveOrderRanking',//排行榜11
             'getLiveGiftOrder',//礼物订单12
