@@ -289,7 +289,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //是否全场禁言
             //发送两次公告   一个是全员的禁言推送   另一个是个人发送情况
 //                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1,'user_id'=>0],'*');
-            $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'*');
+            $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'user_id'=>0],'*');
             print_r($forbidden);
             if(!empty($forbidden)){
                 $forbidden['forbid_at'] = strtotime($forbidden['forbid_at']);
@@ -317,7 +317,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //如果是解禁的情况下 返回个人的禁言状态
 
             //个人禁言
-            $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1],'*');
+            $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'*');
+            print_r(1);
             print_r($forbidden);
             $idArr=[];
             if(!empty($forbidden) ) {
