@@ -222,9 +222,34 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public function pushEnd($taskId, $fromWorkerId,$data,$path){
 
         try {
-            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $live_id=$data['live_info_id'];
+
+
             $liveObj=new LiveInfo();
             $UserServiceObj = new UserService();
+
+            $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,end_at,is_begin');
+
+            $live_info =[];
+            if(!empty($liveInfo)){
+                $live_info=[
+                    'id'  => $live_id,
+                    'is_begin'=>$liveInfo['is_begin'],
+                ];
+            }
+            if(!empty($liveInfo) && $liveInfo['is_begin'] == 0 ) { //10分钟内推送
+                //推送记录
+                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
+                $ListPort = swoole_get_local_ip(); //获取监听ip
+                //推送消息
+                $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
+
+            }
+
+
+
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+
             $Redis = new Redis();
             //获取所有在线直播id
 //            keys live_key_*
@@ -233,35 +258,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $is_end=0;
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
-                $live_id=$arr[2];
 
-                $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,end_time,is_begin');
-
-                //echo $liveObj->getLastQuery();
-                $is_end=0;
-                $time=time();
-                $live_info =[];
-                if(!empty($liveInfo)){
-                    if($liveInfo['is_begin'] == 0){
-                        $is_end = 1;    //前端判断有误   结束判断的是1
-                    }
-                    $live_info=[
-                        'id'  => $live_id,
-                        'is_begin'=>$liveInfo['is_begin'],
-                        'is_end'  =>$is_end,
-                    ];
-                }
-                //if($is_end==1 && ($time-$liveInfo['end_time'])<600) { //10分钟内推送
-                if(!empty($liveInfo) && $liveInfo['is_begin'] == 0 ) { //10分钟内推送
-                    //推送记录
-                    $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content' => $live_info ]);
-                    $ListPort = swoole_get_local_ip(); //获取监听ip
-                    //推送消息
-                    $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
-
-                    $Redis->del($live_id_key.$live_id); //结束后删除直播间记录
-
-                }
             }
             return [
                 'data' => $is_end,
@@ -641,7 +638,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
         try {
             $live_id = $data['live_info_id'];
-print_r($data);
             $UserServiceObj=new UserService();
             $OrderObj = new Order();
             $UserObj = new User();
@@ -652,7 +648,6 @@ print_r($data);
                 ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
                 ->orderBy('o.id','ASC')
                 ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.relation_id,o.live_id,o.pay_price,reward,reward_num');
-            echo $OrderObj->getLastQuery();
             if(!empty($OrderInfo)){
                 $res=[];
                 foreach($OrderInfo as &$v){
@@ -664,7 +659,7 @@ print_r($data);
                     $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
                 }
 
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content' =>$OrderInfo]);
+                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content' =>$OrderInfo,'ios_content' =>$OrderInfo]);
 
                 $ListPort = swoole_get_local_ip (); //获取监听ip
                 //推送消息
