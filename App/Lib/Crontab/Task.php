@@ -290,7 +290,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //发送两次公告   一个是全员的禁言推送   另一个是个人发送情况
 //                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1,'user_id'=>0],'*');
             $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'user_id'=>0],'*');
-            print_r($forbidden);
             if(!empty($forbidden)){
                 $forbidden['forbid_at'] = strtotime($forbidden['forbid_at']);
                 //推送禁言状态
@@ -300,7 +299,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'forbid_at'     => $forbidden['forbid_at'],
                     'length'        => $forbidden['length'],
                 ];
-                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$all_res],'ios_content' => $all_res ]);
+                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$all_res,'ios_content' => $all_res ]);
                 $ListPort = swoole_get_local_ip(); //获取监听ip
                 //推送消息
                 $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
@@ -318,8 +317,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //个人禁言
             $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'*');
-            print_r(1);
-            print_r($forbidden);
             $idArr=[];
             if(!empty($forbidden) ) {
 
@@ -341,19 +338,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             'length' => $length,
                         ];
                         //推送记录
-                        $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content' =>[$res],'ios_content' => $res ]);
+                        $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
                         $ListPort = swoole_get_local_ip(); //获取监听ip
-                        print_r('1111');
-                        print_r($data);
-                        print_r('222');
-
-                        print_r($ListPort);
-                        print_r('333');
-
-                        print_r($live_id);
-                        print_r('444');
-
-                        print_r($val);
                         //推送消息
                         $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id,[],$val['user_id']);
 
@@ -649,72 +635,46 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
 
     /**
-     * 礼物订单推送  12
+     * 打赏礼物订单推送  12
      */
     public static function getLiveGiftOrder($taskId, $fromWorkerId,$data,$path){
 
         try {
+            $live_id = $data['live_info_id'];
 
-            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $UserServiceObj=new UserService();
             $OrderObj = new Order();
             $UserObj = new User();
-            $Redis = new Redis();
-            //获取所有在线直播id
-//            keys live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
-            //print_r($listRst);
-            if(empty($listRst)) return '';
-
-            foreach($listRst as $key => $val) {
-                $arr = explode('_', $val);
-                $live_id = $arr[2];
-
-                $OrderInfo=$OrderObj->db
-                    ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
-                    ->where('o.type', 5)->where('o.live_id',$live_id)->where('o.status',1)
-                    ->where('o.reward_num',0,'>')->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
-                    ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
-                    ->orderBy('o.id','ASC')
-                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price,reward,reward_num');
-                //echo $OrderObj->getLastQuery();
+            $OrderInfo=$OrderObj->db
+                ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
+                ->where('o.type', 5)->where('o.relation_id',$live_id)->where('o.status',1)
+                ->where('o.reward_type', 5)->where('o.reward_num',0,'>')->where('is_live_order_send',0)
+                ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
+                ->orderBy('o.id','ASC')
+                ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price,reward,reward_num');
+            if(!empty($OrderInfo)){
+                $res=[];
+                foreach($OrderInfo as &$v){
+                    $v['nickname']=Common::textDecode($v['nickname']);
+                }
                 if(!empty($OrderInfo)){
-                    $res=[];
-                    foreach($OrderInfo as &$v){
-                        $v['nickname']=Common::textDecode($v['nickname']);
-//                        switch ($val['reward']){
-//                            case 1: //经营能量
-//                                $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
-//                                break;
-//                            case 2: //一代天骄
-//                                $res[]=$val['nickname'].':您已支付成功一代天骄定金';
-//                                break;
-//                            case 3: //演说能量
-//                                $res[]=$val['nickname'].':您已支付成功演说能量定金';
-//                                break;
-//                        }
-                    }
-                    if(!empty($OrderInfo)){
-                        //修改标记
-                        $idArr=array_column($OrderInfo, 'id');
-                        $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
-                    }
-
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content' =>$OrderInfo]);
-
-                    $ListPort = swoole_get_local_ip (); //获取监听ip
-                    //推送消息
-                    $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
+                    //修改标记
+                    $idArr=array_column($OrderInfo, 'id');
+                    $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
                 }
 
+                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content' =>$OrderInfo]);
+
+                $ListPort = swoole_get_local_ip (); //获取监听ip
+                //推送消息
+                $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
             }
+
             return [
                 'data' => 1,
                 'path' => $path
             ];
 //            $live_id = Config::getInstance()->getConf('web.live_id_now');
-
-
 
 
 
