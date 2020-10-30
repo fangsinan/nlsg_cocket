@@ -641,7 +641,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
         try {
             $live_id = $data['live_info_id'];
-
+print_r($data);
             $UserServiceObj=new UserService();
             $OrderObj = new Order();
             $UserObj = new User();
