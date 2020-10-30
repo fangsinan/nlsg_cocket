@@ -237,7 +237,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_begin'=>$liveInfo['is_begin'],
                 ];
             }
-            if(!empty($liveInfo) && $liveInfo['is_begin'] == 0 ) { //10分钟内推送
+            if(!empty($liveInfo)) { //10分钟内推送
                 //推送记录
                 $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
                 $ListPort = swoole_get_local_ip(); //获取监听ip
