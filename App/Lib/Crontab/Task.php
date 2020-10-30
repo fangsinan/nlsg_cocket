@@ -652,6 +652,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
                 ->orderBy('o.id','ASC')
                 ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price,reward,reward_num');
+            echo $OrderObj->getLastQuery();
             if(!empty($OrderInfo)){
                 $res=[];
                 foreach($OrderInfo as &$v){

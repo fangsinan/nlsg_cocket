@@ -158,25 +158,25 @@ class EasySwooleEvent implements Event
             }
         });
 
-        //推送打赏礼物  getLiveGiftOrder
-        $TaskObj=new Task([
-            'method'=>'getLiveGiftOrder',
-            'path'=>[
-                'dir'=>'/Crontab',
-                'name'=>'GiftOrder_',
-            ],
-            'data'=>[
-            ]
-        ]);
-        //直播间排行榜
-        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-            if ( $workerId == 0 ) {
-                Timer::getInstance()->loop(5 * 1000, function ()use ($TaskObj) {  //60s 更新排行榜
-                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                    TaskManager::async ($TaskObj);
-                });
-            }
-        });
+//        //推送打赏礼物  getLiveGiftOrder
+//        $TaskObj=new Task([
+//            'method'=>'getLiveGiftOrder',
+//            'path'=>[
+//                'dir'=>'/Crontab',
+//                'name'=>'GiftOrder_',
+//            ],
+//            'data'=>[
+//            ]
+//        ]);
+//        //直播间排行榜
+//        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//            if ( $workerId == 0 ) {
+//                Timer::getInstance()->loop(5 * 1000, function ()use ($TaskObj) {  //60s 更新排行榜
+//                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                    TaskManager::async ($TaskObj);
+//                });
+//            }
+//        });
 
 
 
