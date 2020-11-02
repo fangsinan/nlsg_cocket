@@ -237,7 +237,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_begin'=>$liveInfo['is_begin'],
                 ];
             }
-            if(!empty($liveInfo)) { //10分钟内推送
+            if(!empty($liveInfo)) {
                 //推送记录
                 $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
                 $ListPort = swoole_get_local_ip(); //获取监听ip
@@ -547,8 +547,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function getLiveOrderRanking($taskId, $fromWorkerId,$data,$path){
 
         try {
-            print_r($data);
-            echo 1111;
+
             return;
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $UserServiceObj=new UserService();
@@ -641,13 +640,15 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $UserServiceObj=new UserService();
             $OrderObj = new Order();
             $UserObj = new User();
+            $time = date("Y-m-d H:i:s",time()-600);
             $OrderInfo=$OrderObj->db
                 ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
                 ->where('o.type', 5)->where('o.relation_id',$live_id)->where('o.status',1)
                 ->where('o.reward_type', 5)->where('o.reward_num',0,'>')->where('is_live_order_send',0)
-                ->where('o.pay_time',(time()-600),'>')    //查询前面十分钟的，避免历史数据推送
+                ->where('o.pay_time',$time,'>')    //查询前面十分钟的，避免历史数据推送
                 ->orderBy('o.id','ASC')
                 ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.relation_id,o.live_id,o.pay_price,reward,reward_num');
+            echo $OrderObj->getLastQuery();
             if(!empty($OrderInfo)){
                 $res=[];
                 foreach($OrderInfo as &$v){
