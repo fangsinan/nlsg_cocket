@@ -69,7 +69,7 @@ class Push extends Controller
         $live_id = $message['live_id'];
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
-        if ( $UserInfo['statusCode'] == 200 ) { //获取成功
+        if ( $UserInfo['statusCode'] == 200 or $UserInfo['statusCode'] == Status::CODE_FORBIDDEN ) { //获取成功
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';

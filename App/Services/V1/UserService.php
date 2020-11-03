@@ -25,7 +25,7 @@ class UserService
     //获取用户数据
     public function GetUserInfo($live_id,$user_id,$content='',$access_user_token=''){
         if(empty($live_id)){
-            return Status::Error (Status::CODE_FORBIDDEN, '直播live_id为空');
+            return Status::Error (Status::CODE_NOT_FOUND, '直播live_id为空');
         }
         if(empty($user_id)){
             //根据后端返回的token前端解密$token.'||'.13位时间戳
@@ -69,7 +69,7 @@ class UserService
             $UserObj = new UserModel();
             $UserInfo = $UserObj->getOne (UserModel::$table, ['id' => $user_id], 'id,level,expire_time,phone username,nickname,headimg');
             if ( empty($UserInfo) ) { //不是有效用户
-                return Status::Error (Status::CODE_FORBIDDEN, '用户信息不存在');
+                return Status::Error (Status::CODE_NOT_FOUND, '用户信息不存在');
 
             }
         }
@@ -77,7 +77,7 @@ class UserService
 //        echo $UserObj->db->getLastQuery().PHP_EOL;
 
         if ( empty($UserInfo) ) { //不是有效用户
-            return Status::Error (Status::CODE_FORBIDDEN, '用户信息不存在');
+            return Status::Error (Status::CODE_NOT_FOUND, '用户信息不存在');
 
         }
         if(!empty($content)) {
