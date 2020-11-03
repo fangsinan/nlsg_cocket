@@ -189,7 +189,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_done'=>0,'is_del'=>0,'type'=>1],'id,live_id,content,type,created_at,length');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_done'=>0,'is_del'=>0,'type'=>1],'id,live_id,live_info_id,content,type,created_at,length');
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0]  ]);
                     $ListPort = swoole_get_local_ip (); //获取监听ip
