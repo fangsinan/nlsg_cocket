@@ -84,6 +84,7 @@ print_r($data);
                 //当前连接
                 $getfd = $client->getFd ();
                 $UserServiceObj=new UserService();
+                    print_r(1);
                     print_r($data);
                 $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
 
