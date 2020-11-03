@@ -77,13 +77,14 @@ class Push extends Controller
                 'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
-
+print_r($data);
             // 异步推送
             TaskManager::async (function () use ($client, $data, $ListPort,$user_id,$live_id) {
 
                 //当前连接
                 $getfd = $client->getFd ();
                 $UserServiceObj=new UserService();
+                    print_r($data);
                 $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
 
                 $LiveLogin=new LiveLoginModel();
@@ -94,6 +95,8 @@ class Push extends Controller
             $server = ServerManager::getInstance()->getSwooleServer();
             $getfd = $client->getFd ();
             $data = Common::ReturnJson (Status::CODE_FAIL,$UserInfo['msg'],['type'=>5]);
+            print_r($data);
+
             $server->push ($getfd, $data);
         }
     }
