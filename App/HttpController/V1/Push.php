@@ -73,7 +73,7 @@ class Push extends Controller
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
-            $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content' => '进入直播间','content_text' => '进入直播间',
+            $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5,'content_text' => '进入直播间',
                 'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
@@ -84,7 +84,7 @@ class Push extends Controller
                 //当前连接
                 $getfd = $client->getFd ();
                 $UserServiceObj=new UserService();
-                    
+
                 $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
 
                 $LiveLogin=new LiveLoginModel();
