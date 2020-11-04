@@ -74,7 +74,7 @@ class Push extends Controller
             $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
             $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5,'content_text' => '进入直播间',
-                'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
+                'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $ListPort = swoole_get_local_ip (); //获取监听ip
             //print_r($data);
