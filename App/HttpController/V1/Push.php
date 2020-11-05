@@ -72,7 +72,12 @@ class Push extends Controller
         if ( $UserInfo['statusCode'] == 200 or $UserInfo['statusCode'] == Status::CODE_FORBIDDEN ) { //获取成功
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
-            $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
+            if(strpos($UserInfo['result']['headimg'],'http') == false){
+                $headimg = $IMAGES_URL.$UserInfo['result']['headimg'];
+            }else{
+                $headimg = $UserInfo['result']['headimg'];
+            }
+            //$headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
             $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5,'content_text' => '进入直播间',
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
