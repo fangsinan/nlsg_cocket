@@ -67,9 +67,6 @@ class WebSocketParser implements ParserInterface
         }
         // 设置被调用的Args
         $caller->setArgs($args ?? []);
-print_r(11);
-print_r($caller);
-print_r(11);
         return $caller;
 
     }
