@@ -69,6 +69,7 @@ class Push extends Controller
         $live_id = $message['live_id'];
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
+        print_r($UserInfo);
         if ( $UserInfo['statusCode'] == 200 or $UserInfo['statusCode'] == Status::CODE_FORBIDDEN ) { //获取成功
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
@@ -80,7 +81,7 @@ class Push extends Controller
             //$headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
             $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5,'content_text' => '进入直播间',
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
-
+print_r($data);
             $ListPort = swoole_get_local_ip (); //获取监听ip
             //print_r($data);
             // 异步推送
@@ -100,6 +101,7 @@ class Push extends Controller
             $server = ServerManager::getInstance()->getSwooleServer();
             $getfd = $client->getFd ();
             $data = Common::ReturnJson (Status::CODE_FAIL,$UserInfo['msg'],['type'=>5]);
+            print_r(22);
             print_r($data);
 
             $server->push ($getfd, $data);
