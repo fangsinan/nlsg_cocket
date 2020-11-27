@@ -206,7 +206,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     //广播评论
     public function Comment($taskId, $fromWorkerId,$data,$path){
-
+        echo 22;
         try {
 
             //获取redis
