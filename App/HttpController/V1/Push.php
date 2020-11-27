@@ -128,7 +128,7 @@ class Push extends Controller
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nickname']);
 
             $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
 
@@ -177,7 +177,7 @@ class Push extends Controller
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nickname']);
             $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'gift_price'=>$gift_price,'nick_name' => $UserInfo['result']['nick_name']]);
 
             $data = json_encode(['type' => 12, 'content' => $content,'content_gift' => $content,
