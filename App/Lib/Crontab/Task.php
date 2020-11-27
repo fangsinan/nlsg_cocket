@@ -225,6 +225,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
                     $list=$Redis->lrange($live_comment.$live_id,0,-1);// 获取所有数据
+                    print_r($list);
                     if(!empty($list)){
                         $arr=[];
                         $start=0;
