@@ -147,7 +147,7 @@ class Push extends Controller
                 $RedisObj->rpush($live_comment.$live_id,$data);
 
                 $LiveComment=new LiveCommentModel();
-                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'ctime'=>time()]);
+                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s'),time()]);
             });
 
         }else{
@@ -189,7 +189,7 @@ class Push extends Controller
                 $RedisObj->rpush($live_gift.$live_id,$data);
                 //送礼物
                 $LiveCommentObj=new LiveCommentModel();
-                $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'ctime'=>time()]);
+                $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s'),time()]);
 
             });
 
