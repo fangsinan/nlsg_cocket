@@ -136,7 +136,6 @@ class EasySwooleEvent implements Event
 //        Crontab::getInstance()->addTask(TaskProduct::class); //1 分钟执行一次  产品推送
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        print_r($ListPort);
 
         if( $ListPort['eth0']=='172.17.212.112' || $ListPort['eth0']=='172.17.176.246' ) {  //200主服务器
 
