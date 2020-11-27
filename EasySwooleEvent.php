@@ -135,6 +135,7 @@ class EasySwooleEvent implements Event
 //        Crontab::getInstance()->addTask(TaskProduct::class); //1 分钟执行一次  产品推送
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
+        echo $ListPort['eth0'];
         if( $ListPort['eth0']=='172.17.212.112') {  //200主服务器
 
             //更新在线人数
@@ -170,7 +171,6 @@ class EasySwooleEvent implements Event
                 if ($workerId == 0) {
                     Timer::getInstance()->loop(1 * 1000, function () use ($TaskObj) {  //2s 扫码评论
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        echo 1313;
                         TaskManager::async($TaskObj);
 
                     });
