@@ -79,6 +79,7 @@ class EasySwooleEvent implements Event
         Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,5);//配置http控制器最大解析层级
         Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER,function (){});//配置http控制器异常回调
         Di::getInstance()->set(SysConst::HTTP_CONTROLLER_POOL_MAX_NUM,15);//http控制器对象池最大数量*/
+        print_r(2222222);
 
         //创建队列消费进程
         $allNum = 3;
@@ -93,6 +94,7 @@ class EasySwooleEvent implements Event
                 PoolManager::getInstance ()->getPool (RedisPool::class)->preLoad (5);
             }
         });
+        print_r(1111111);
 
         /**
          * **************** websocket控制器 **********************
@@ -120,11 +122,13 @@ class EasySwooleEvent implements Event
         $register->set(EventRegister::onOpen, function (\swoole_server $server, \swoole_http_request $request) use ($websocketEvent) {
             $websocketEvent->onOpen($server, $request);
         });
+        print_r(444444);
 
         //自定义关闭事件
         $register->set(EventRegister::onClose, function (\swoole_server $server, int $fd, int $reactorId) use ($websocketEvent) {
             $websocketEvent->onClose($server, $fd, $reactorId);
         });
+        print_r(333333);
 
         /**
          * **************** websocket控制器 **********************
@@ -135,7 +139,7 @@ class EasySwooleEvent implements Event
 //        Crontab::getInstance()->addTask(TaskProduct::class); //1 分钟执行一次  产品推送
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        echo $ListPort['eth0'];
+        print_r($ListPort);
         if( $ListPort['eth0']=='172.17.212.112') {  //200主服务器
 
             //更新在线人数
@@ -310,7 +314,8 @@ class EasySwooleEvent implements Event
             });
 
         }
-
+print_r(000);
+print_r($ListPort);
         //热重载代码更新  关闭防止正式环境重启代理业务问题
 //        $swooleServer = ServerManager::getInstance()->getSwooleServer();
 //        $swooleServer->addProcess((new HotReload('HotReload', ['disableInotify' => false]))->getProcess());
