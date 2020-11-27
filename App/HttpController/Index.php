@@ -5,8 +5,9 @@ use App\Lib\Auth\Aes;
 use App\Lib\Cache\Cache;
 use App\Lib\Redis\Redis;
 use App\Lib\Message\Status;
+use App\Services\V1\PushService;
 use App\Services\V1\UserService;
-use App\WebSocket\Common;
+use App\Utility\Tools\Io;
 use EasySwoole\Http\AbstractInterface\Controller;
 use App\Lib\Auth\Des;
 use App\Lib\Auth\IAuth;
@@ -22,16 +23,16 @@ class Index extends  Controller
 
     /**
      * 直播返回标记
-     *1=>心跳    同时返回在线人数5s
-      2=>评论
-      //3=>弹幕
-      4=>礼物
-      5=>进入直播间
-      6=>商品推送
-      7=>公告
-      8=>直播结束
-      9=>禁言
-      10=>线下课成交订单
+    1=>心跳    保持连接同时返回在线人数5s     1
+    2=>评论
+    4=>礼物
+    5=>进入直播间
+    6=>小黄车商品推送             1
+    7=>公告                1
+    8=>直播结束             1
+    9=>禁言                   1
+    10=>线下课成交订单      1
+    12=>打赏推送到评论区                   1
      */
 
     /**
@@ -70,57 +71,60 @@ class Index extends  Controller
 
     }
 
-    //https://live.api.nlsgapp.com/Index/GetRedis?clear=0&set=0&type=0&num=0
-    //http://wechat.test.nlsgapp.com/websocket.html
     /**
-     * 0 真实
-     * 1 0->30
-     * 2 100->300
-     * 3 400->600
-     * 4 基数+redis链接
+     * 负载  直播间广播
      */
-    public function GetRedis(){
+    public function broadcast(){
 
-        $params             = $this->request()->getRequestParam();
-        $Redis = new Redis();
-        $live_redis_key=\EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.live_redis_key');
-        if(isset($params['clear']) && $params['clear']==1){
-            $Redis->DEL($live_redis_key); //使用魔术方法处理
-        }
+        $params  = $this->request()->getRequestParam();
+        $ListPort = swoole_get_local_ip(); //获取监听ip
+        $PushService=new PushService();
+        $rst=$PushService->Broadcast($ListPort['eth0'],$params);
 
-        $expire=$Redis->ttl($live_redis_key); //有效期 -2键不存在 -1没设置有效期
-
-        if(isset($params['set']) && $params['set']==1){//设置实时人数
-            $Redis->set ('live_redis_number', json_encode(['num'=>$params['num'],'type'=>$params['type']]), 300);
-            if($params['type']==4){
-                $Redis->set ('live_redis_number_base',$params['num'] , 10800);
-            }
-        }
-
-        $live_redis_number=\EasySwoole\EasySwoole\Config::getInstance()->getConf('web.live_redis_number');
-        $resultData = $Redis->get($live_redis_number);
-
-        $simulation_count=0;
-        if(!empty($resultData)){
-            $resultData=json_decode($resultData,true);
-            $simulation_count=$resultData['num'];
-        }
-
-        $UserServiceObj=new UserService();
-        $count=$UserServiceObj->linkNum();
-        //获取有序集合
-        $clients=$Redis->sMembers($live_redis_key);
-        $data=[
-            'expire'=>$expire,
-            'count'=>$count,
-            'simulation_count'=>$simulation_count,
-            'intro'=>'type 1 (0-30) 2 (100-300) 3 (400-600) 4 基数+redis数量 0 (真实) clear =1 清空redis  set=1 设置数量',
-            'redis'=>$clients,
-        ];
-
-        return $this->writeJson(Status::CODE_OK,$data,'success');
+        Io::WriteFile('','load_receive',$rst,2);
 
     }
 
+    /**
+     * 负载  禁言
+     */
+    public function forbid(){
+
+        $params  = $this->request()->getRequestParam();
+        $PushService=new PushService();
+        $rst=$PushService->forbidMessage($params);
+
+        Io::WriteFile('','forbid_receive',$rst,2);
+
+    }
+
+    /*public function LiveStartEnd(){
+
+        $params  = $this->request()->getRequestParam();
+        if(!isset($params['live_id'])){
+            return $this->writeJson(Status::CODE_FAIL,[],'直播间id有误');
+        }
+        if(!isset($params['user_id'])){
+            return $this->writeJson(Status::CODE_FAIL,[],'主播id有误');
+        }
+        $live_id=$params['live_id']+0;
+        $user_id=$params['user_id']+0;
+
+        //获取全员禁言中直播间
+        $forbidden=Live::create()->field('id')->get(['id'=>$live_id,'user_id'=>$user_id])->toArray();  //status  2 开始  1结束
+        if(!empty($forbidden) ) {
+            //推送记录
+            $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 7, 'content' => '', 'is_end' => $params['status']]);
+            TaskManager::getInstance()->async(function () use ($data, $live_id) {
+                //推送消息
+                $UserServiceObj = new PushService();
+                $UserServiceObj->pushMessage(0, $data, $live_id);
+            });
+            return $this->writeJson(Status::CODE_OK,[],'发送成功');
+        }else{
+            return $this->writeJson(Status::CODE_FAIL,[],'直播间有误');
+        }
+
+    }*/
 
 }

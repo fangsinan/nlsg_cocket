@@ -29,28 +29,33 @@ return [
     ],
     'app_sign_time'=>10, //sign 设置请求验证失效时间10秒
     'app_sign_cache_time'=>20, //sign 缓存失效时间20秒
-    'app_debug'=>true, //是否为调试模式
+    'app_debug'=>true, //是否为调试模式  关闭一次性验证请求
     'login_time_out_days'=>7, //用户登录失效时间
     'adminlogin_time_out'=>3600, //后台登录失效时间 1小时
 
     'Api_Url' => 'https://live.api.nlsgapp.com/',
+    'IMAGES_URL' => 'https://image.nlsgapp.com/',
 
-    'SYS_ERROR'=>['phone'=>15650701817,'tpl'=>'SMS_152505672'],//系统报错错误通知
+    'SYS_ERROR'=>['phone'=>18810355387,'tpl'=>'SMS_152505672'],//系统报错错误通知
 
     //easyswoole 文件缓存   报错日志 Log/cache_error
     'FileCache_Log'=>'/Temp/FileCache',
     //异步任务日志
     'Task_Log'=>'/Log/task',
-    'Pay_Log'=>'/Log/pay',
     'msg_Log'=>'/Log/msg',
 
     //直播key
-    'live_redis_key'=>'livev4_key_', //主要用于存储负载时各个服务器的fd链接
+    'live_redis_key'=>'livev4_key_', //主要用于存储负载时各个服务器的fd链接  172.17.212.112,51,23,211370  ip,fd,live_id,user_id
     //直播人数
     'live_redis_number'=>'livev4_number_',
-    //直播关闭列表
-    'live_colse_list'=>'livev4_colse_list', //用于关闭fd链接
-    //在线人数基数
-    'live_redis_number_base'=>'livev4_number_base',
-    'IMAGES_URL' => 'https://image.nlsgapp.com/'
+    'live_id_list'=>'livev4_id_list', //记录服务器 fd下对应的直播间和用户信息
+    'live_comment'=>'livev4_comment_',//评论
+    'live_join'=>'livev4_join_',//加入直播间
+    'live_gift'=>'livev4_gift_',//送礼物
+    'load_ip_arr'=>[ //负载服务器
+         '172.17.212.112',//182.92.56.200    32 64G
+         '172.17.111.140',//47.94.35.76      8 16G
+
+    ],
+
 ];

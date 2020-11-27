@@ -7,7 +7,6 @@
  */
 namespace App\WebSocket;
 
-
 use EasySwoole\Socket\AbstractInterface\ParserInterface;
 use EasySwoole\Socket\Client\WebSocket;
 use EasySwoole\Socket\Bean\Caller;
@@ -34,7 +33,6 @@ class WebSocketParser implements ParserInterface
     public function decode($raw, $client) : ? Caller
     {
         // 解析 客户端原始消息
-
         $data = json_decode($raw, true);
         if (!is_array($data)) {
             echo "decode message error! \n";
@@ -50,14 +48,15 @@ class WebSocketParser implements ParserInterface
          */
 //        $class = '\\App\\WebSocket\\'. ucfirst($data['class'] ?? 'Index');
 
+//        $class = '\\App\\HttpController\\V1\\'. ucfirst($data['class'] ?? 'Index');
         $class = '\\App\\HttpController\\V1\\'. ucfirst($data['controller'] ?? 'Index');
         $caller->setControllerClass($class);
 
         // 提供一个事件风格的写法
-        //         $eventMap = [
-        //             'index' => Index::class
-        //         ];
-        //         $caller->setControllerClass($eventMap[$data['class']] ?? Index::class);
+//         $eventMap = [
+//             'index' => Index::class
+//         ];
+//         $caller->setControllerClass($eventMap[$data['class']] ?? Index::class);
 
         // 设置被调用的方法
         $caller->setAction($data['action'] ?? 'index');
@@ -67,6 +66,7 @@ class WebSocketParser implements ParserInterface
         }
         // 设置被调用的Args
         $caller->setArgs($args ?? []);
+
         return $caller;
 
     }

@@ -13,16 +13,18 @@ use App\Lib\Message\Status;
 use App\Lib\Redis\Redis;
 use App\Model\V1\Column;
 use App\Model\V1\Goods;
+use App\Model\V1\LiveCommentModel;
 use App\Model\V1\LiveForbiddenWordsModel;
 use App\Model\V1\LiveInfo;
 use App\Model\V1\LiveNotice;
 //use App\Model\User;
 use App\Model\V1\LiveNumberModel;
 use App\Model\V1\LivePush;
-use App\Model\V1\Order;
 use App\Model\V1\User;
+use App\Model\V1\Order;
 use App\Model\V1\Works;
 use App\Model\V1\WorksInfo;
+use App\Services\V1\PushService;
 use App\Services\V1\UserService;
 use EasySwoole\EasySwoole\ServerManager;
 use App\Utility\Tools\Io;
@@ -30,7 +32,6 @@ use App\Utility\Tools\Tool;
 use App\Lib\Cache\Cache;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
-use phpDocumentor\Reflection\Types\Iterable_;
 
 /**
  * Class MillisecondTask
@@ -89,26 +90,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         return ['method'=>$method,'data'=>$rst];
     }
 
-
-    /**
-     * 直播返回标记
-     *1=>心跳    同时返回在线人数5s
-    2=>评论
-    //3=>弹幕
-    4=>礼物
-    5=>进入直播间
-    6=>商品推送
-    7=>公告
-    8=>直播结束
-    9=>禁言
-    10=>线下课成交订单
-    11=>排行榜
-    12=> 礼物
-     *
-     */
-
-
-
     /**
      * 任务执行完的回调
      * @param mixed $result  任务执行完成返回的结果
@@ -125,40 +106,91 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     }
 
+    /**
+     * 直播返回标记
+    1=>心跳    保持连接同时返回在线人数5s     1
+    2=>评论
+    4=>礼物
+    5=>进入直播间
+    6=>小黄车商品推送             1
+    7=>公告                1
+    8=>直播结束             1
+    9=>禁言                   1
+    10=>线下课成交订单      1
+    12=>打赏推送到评论区                   1
+     */
+
     //生成在线人数
     public function onlineNumber($taskId, $fromWorkerId,$data,$path){
 
         try {
-
             //获取redis
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $live_id_num=Config::getInstance()->getConf('web.live_redis_number');
             $Redis = new Redis();
 
             //获取所有在线直播id
-//            keys live_key_*
+//            keys 11_live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
             if(!empty($listRst)){
+                $LiveModel=new LiveNumberModel();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
                     $num=$Redis->scard($live_id_key.$live_id); //获取成员数据
-                    $Redis->set($live_id_num.$live_id,$num,86400); //设置在线人数
-                    //TaskManager::async(function ()use($live_id,$num){  });
-                    if($num>0) {
+                    $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
+                    if($num>100) {
                         //实时数据入库
-                        $LiveModel=new LiveNumberModel();
                         $LiveModel->add(LiveNumberModel::$table,['live_id'=>$live_id,'count'=>$num,'time'=>time()]);
                     }
                 }
             }
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
 
-            /*$live_redis_number_base=Config::getInstance()->getConf('web.live_redis_number_base');
-            $live_redis_number_base=Cache::Cache(2,$live_redis_number_base);
-            if(empty(($live_redis_number_base))){
-                $live_redis_number_base=0;
+    }
+
+    //加入直播间
+    public function Joinlive($taskId, $fromWorkerId,$data,$path){
+
+        try {
+
+            //获取redis
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $live_join=Config::getInstance()->getConf('web.live_join');
+            $Redis = new Redis();
+
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            $PushServiceObj=new PushService();
+
+            //获取所有在线直播id
+//            keys 11_live_key_*
+            $listRst=$Redis->keys($live_id_key.'*');
+            if(!empty($listRst)){ //获取直播间
+                foreach ($listRst as $val){
+                    $arr = explode ('_', $val);
+                    $live_id=$arr[2];
+                    $list=$Redis->lrange($live_join.$live_id,0,-1);// 获取所有数据
+                    if(!empty($list)){
+                        $start=0;
+                        $arr=[];
+                        foreach ($list as $key=>$val){
+                            $start=$key;
+                            $arr[]=$val;
+                        }
+                        $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
+                        $list=$data = Common::ReturnJson(Status::CODE_OK,'进入直播间',$arr);;
+                        $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
+                    }
+                }
             }
-            $count = $realcount + $live_redis_number_base;*/
 
             return [
                 'data' => 1,
@@ -167,7 +199,104 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
+    //广播评论
+    public function Comment($taskId, $fromWorkerId,$data,$path){
+
+        try {
+
+            //获取redis
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $live_comment=Config::getInstance()->getConf('web.live_comment');
+            $Redis = new Redis();
+
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            $PushServiceObj=new PushService();
+
+            //获取所有在线直播id
+//            keys 11_live_key_*
+            $listRst=$Redis->keys($live_id_key.'*');
+            if(!empty($listRst)){ //获取直播间
+                foreach ($listRst as $val){
+                    $arr = explode ('_', $val);
+                    $live_id=$arr[2];
+                    $list=$Redis->lrange($live_comment.$live_id,0,-1);// 获取所有数据
+                    if(!empty($list)){
+                        $arr=[];
+                        $start=0;
+                        foreach ($list as $key=>$val){
+                            $start=$key;
+                            $arr[]=$val;
+                        }
+                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',$arr);
+                        $Redis->ltrim($live_comment.$live_id,$start+1,-1);//删除已取出数据
+                        $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
+                    }
+                }
+            }
+
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
+    /**
+     * 礼物推送  12
+     */
+    public static function getLiveGiftOrder($taskId, $fromWorkerId,$data,$path){
+
+        try {
+
+            //获取redis
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $live_gift=Config::getInstance()->getConf('web.live_gift');
+            $Redis = new Redis();
+
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            $PushServiceObj=new PushService();
+
+            //获取所有在线直播id
+//            keys 11_live_key_*
+            $listRst=$Redis->keys($live_id_key.'*');
+            if(!empty($listRst)){ //获取直播间
+                foreach ($listRst as $val){
+                    $arr = explode ('_', $val);
+                    $live_id=$arr[2];
+                    $list=$Redis->lrange($live_gift.$live_id,0,-1);// 获取所有数据
+                    if(!empty($list)){
+                        $arr=[];
+                        $start=0;
+                        foreach ($list as $key=>$val){
+                            $start=$key;
+                            $arr[]=$val;
+                        }
+                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',$arr);
+                        $Redis->ltrim($live_gift.$live_id,$start+1,-1);//删除已取出数据
+                        $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
+                    }
+                }
+            }
+
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -179,33 +308,31 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $noticeObj  = new LiveNotice();
-            $UserServiceObj=new UserService();
+            $PushServiceObj=new PushService();
             $Redis = new Redis();
             //获取所有在线直播id
 //            keys live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
             if(empty($listRst)) return '';
             $idArr=[];
+            $ListPort = swoole_get_local_ip (); //获取监听ip
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_done'=>0,'is_del'=>0,'type'=>1],'id,live_id,live_info_id,content,type,created_at,length');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_id'=>$live_id,'is_send'=>0,'is_del'=>0],'id,live_id,content,time,ctime,type');
                 if(!empty($noticeList)){
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0]  ]);
-                    $ListPort = swoole_get_local_ip (); //获取监听ip
-                    //推送消息
-                    $idArr=[];
-                    $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0] ]);
 
                     if(!empty($noticeList)){
                         //修改标记
                         $idArr=array_column($noticeList, 'id');
-                        $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
-                        $noticeObj->getLastQuery();
+                        $noticeObj->update($noticeObj->tableName,['is_send'=>1],['id'=>$idArr]);
                     }
+                    //推送消息
+                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+
                 }
             }
-
             return [
                 'data' => $idArr,
                 'path' => $path
@@ -213,153 +340,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
-        }
-
-    }
-
-    //直播结束  8
-    public function pushEnd($taskId, $fromWorkerId,$data,$path){
-
-        try {
-            $live_id=$data['live_info_id'];
-
-
-            $liveObj=new LiveInfo();
-            $UserServiceObj = new UserService();
-
-            $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,end_at,is_begin');
-
-            $live_info =[];
-            if(!empty($liveInfo)){
-                $live_info=[
-                    'id'  => $live_id,
-                    'is_begin'=>$liveInfo['is_begin'],
-                ];
-            }
-            if(!empty($liveInfo)) {
-                //推送记录
-                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
-                $ListPort = swoole_get_local_ip(); //获取监听ip
-                //推送消息
-                $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
-
-            }
-
-
-
-            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
-
-            $Redis = new Redis();
-            //获取所有在线直播id
-//            keys live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
-            if(empty($listRst)) return '';
-            $is_end=0;
-            foreach($listRst as $key => $val){
-                $arr = explode ('_', $val);
-
-            }
-            return [
-                'data' => $is_end,
-                'path' => $path
-            ];
-
-        }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
-        }
-
-    }
-
-    //禁言  9
-    public function pushForbiddenWords($taskId, $fromWorkerId,$data,$path){
-
-        try {
-            $live_id = $data['live_info_id'];
-            $forbiddenObj = new LiveForbiddenWordsModel();
-            $UserServiceObj = new UserService();
-
-            $time=time();
-
-            //是否全场禁言
-            //发送两次公告   一个是全员的禁言推送   另一个是个人发送情况
-//                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1,'user_id'=>0],'*');
-            $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'user_id'=>0],'*');
-            if(!empty($forbidden)){
-                $forbidden['forbid_at'] = strtotime($forbidden['forbid_at']);
-                //推送禁言状态
-                $all_res= [
-                    'user_id'       => 0,
-                    'is_forbid'     => $forbidden['is_forbid'],
-                    'forbid_at'     => $forbidden['forbid_at'],
-                    'length'        => $forbidden['length'],
-                ];
-                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$all_res,'ios_content' => $all_res ]);
-                $ListPort = swoole_get_local_ip(); //获取监听ip
-                //推送消息
-                $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id);
-
-                //如果为全员禁言  直接返回
-                $length = ($forbidden['forbid_at'] + $forbidden['length']) - $time;
-                if ($length > 0  && $forbidden['is_forbid'] == 1) {
-                    return [
-                        'data' => [],
-                        'path' => $path
-                    ];
-                }
-            }
-            //如果是解禁的情况下 返回个人的禁言状态
-
-            //个人禁言
-            $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'*');
-            $idArr=[];
-            if(!empty($forbidden) ) {
-
-                foreach ($forbidden as $key=>$val) {
-                    //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
-                    $val['forbid_at'] = strtotime($val['forbid_at']);
-                    $length = ($val['forbid_at'] + $val['length']) - $time;
-                    if ($length <=0) {
-                        $idArr[]=$val['id']; //记录已解除禁言用户
-                    }else{
-                        $forbid_at=$val['forbid_at']; //开始时间
-                        $is_forbid = 1;    //禁言
-                        $length=$val['length']; //时长
-
-                        $res= [
-                            'user_id' => $val['user_id'],
-                            'is_forbid' => $is_forbid,
-                            'forbid_at' => $forbid_at,
-                            'length' => $length,
-                        ];
-                        //推送记录
-                        $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
-                        $ListPort = swoole_get_local_ip(); //获取监听ip
-                        //推送消息
-                        $UserServiceObj->pushMessage(0, $data, $ListPort, $live_id,[],$val['user_id']);
-
-                    }
-
-                }
-                //修改标记
-                if(!empty($idArr)){
-                    $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_at'=>0,'length'=>0],['id'=>$idArr]);
-                }
-            }
-
-            return [
-                'data' => $idArr,
-                'path' => $path
-            ];
-//            $live_id=Config::getInstance()->getConf('web.live_id_now');
-
-
-        }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
@@ -370,46 +351,50 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function PushProduct($taskId, $fromWorkerId,$data,$path){
 
         try {
-            $live_id = $data['live_info_id'];
 
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $Redis = new Redis();
             $pushObj = new LivePush();
-            $UserServiceObj=new UserService();
-            $now = date('Y-m-d H:i:s',time());
-            $where = [
-                'live_info_id' => $live_id,
-                '(push_at < ?)'=>[$now],
-                'is_push' => 1,
-                'is_del' => 0,
-                'is_done' => 0,
-            ];
-            $push_info = $pushObj->get($pushObj->tableName,$where,'id,push_type,push_gid');
-            
-            if(!empty($push_info)){
-                //多个
-                $res = self::getLivePushDetail($push_info);
+            $PushServiceObj=new PushService();
 
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
+            //获取所有在线直播id
+//            keys live_key_*
+            $listRst=$Redis->keys($live_id_key.'*');
+            $now = time();
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            foreach($listRst as $key => $val) {
+                $arr = explode('_', $val);
+                $live_id = $arr[2];
+                $where = [
+                    'live_id' => $live_id,
+                    '(push_time < ?)'=>[$now],
+                    'is_push' => 0,
+                    'is_del' => 0,
+                ];
+                $push_info = $pushObj->get($pushObj->tableName,$where,'*');
+                if(!empty($push_info)){
+                    //多个
+                    $res = self::getLivePushDetail($push_info);
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
+                    //推送消息
+                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
 
-                $ListPort = swoole_get_local_ip (); //获取监听ip
-                //推送消息
-                $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
+                }
             }
             return [
                 'data' => 1,
                 'path' => $path
             ];
 
-
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
 
-
-    //产品推送
+    //产品推送扩展
     public static function getLivePushDetail($push_info){
 
         //获取产品信息
@@ -421,31 +406,29 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         foreach($push_info as $key=>$val){
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
-            if(($val['push_type'] == 1 || $val['push_type'] == 7) && !empty($val['push_gid']) ){
+            if($val['push_type'] == 1 && !empty($val['push_gid']) ){
                 $fields = 'id,name,price,subtitle,cover_pic img,user_id';
-                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
-            }elseif( ($val['push_type'] == 2 || $val['push_type'] == 8) && !empty($val['push_gid']) ){
+                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
+            }elseif($val['push_type'] == 2 && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
-                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
+                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`order`'=>0]);
                 $Info['workinfo_id']=$WorkInfoData['id'];
-
             }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
                 $fields = 'id,name,price,subtitle,picture img';
                 $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
-            }else if($val['push_type'] == 4){
-
-                $fields = 'id,title name,price,subtitle,cover_img img';
+            }else if($val['push_type'] == 4){ //线下门票
+                $fields = 'id,title name,price,subtitle,cover_img img,image';
                 $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
             }else if($val['push_type'] == 6){
                 $Info=[
-                        'name'=>'幸福360会员',
-                        'price'=>360,
-                        'subtitle'=>'',
-                        'img'=>'/nlsg/poster_img/1581599882211_.pic.jpg'
-                    ];
+                    'name'=>'幸福360会员',
+                    'price'=>360,
+                    'subtitle'=>'',
+                    'image'=>'/nlsg/works/20201124144228445466.png', //大图
+                    'img'=>'/nlsg/works/20201124144228445465.png'
+                ];
             }
-
 
             $res[]= [
                 'push_info' => $val,
@@ -456,8 +439,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //修改标记
             $idArr=array_column($push_info, 'id');
             $LivePushObj=new LivePush();
-            $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
+            $LivePushObj->update($LivePushObj->tableName,['is_push'=>1],['id'=>$idArr]);
         }
+
         return $res;
     }
 
@@ -469,39 +453,45 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         try {
 
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
-            $UserServiceObj=new UserService();
-            $OrderObj = new Order();
+            $PushServiceObj=new PushService();
+            $OrderObj =new Order();
             $UserObj = new User();
             $Redis = new Redis();
             //获取所有在线直播id
 //            keys live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
             if(empty($listRst)) return '';
-
-            foreach($listRst as $key => $val) {
-                $arr = explode('_', $val);
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            foreach($listRst as $k => $v) {
+                $arr = explode('_', $v);
                 $live_id = $arr[2];
 
                 $OrderInfo=$OrderObj->db
                     ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
-                    ->where('o.type', 14)->where('o.live_id',$live_id)->where('o.status',1)
-                    ->where('o.product_id',0,'>')->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
+                    ->where('o.live_id',$live_id)->where('o.type', [14,16],'in')->where('o.status',1)
+                    ->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
                     ->orderBy('o.id','ASC')
-                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price');
+                    ->get($OrderObj->tableName .' o',null,'o.id,u.nick_name,o.product_id,o.live_num,o.pay_price');
 
                 if(!empty($OrderInfo)){
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
-                        $val['nickname']=Common::textDecode($val['nickname']);
+                        $val['nick_name']=Common::textDecode($val['nick_name']);
                         switch ($val['product_id']){
+                            case 0://360
+                                $res[]=$val['nick_name'].':您已成功购买幸福360会员';
+                                break;
                             case 1: //经营能量
-                                $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
+                                $res[]=$val['nick_name'].':您已成功购买'.$val['live_num'].'张经营能量门票';
                                 break;
                             case 2: //一代天骄
-                                $res[]=$val['nickname'].':您已支付成功一代天骄定金';
+                                $res[]=$val['nick_name'].':您已支付成功一代天骄定金';
                                 break;
                             case 3: //演说能量
-                                $res[]=$val['nickname'].':您已支付成功演说能量定金';
+                                $res[]=$val['nick_name'].':您已支付成功演说能量定金';
+                                break;
+                            case 4: //幸福套餐
+                                $res[]=$val['nick_name'].':您已支付成功幸福套餐';
                                 break;
                         }
                     }
@@ -513,11 +503,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content' =>$res,'content_one_array' =>$res]);
 
-                    $ListPort = swoole_get_local_ip (); //获取监听ip
                     //推送消息
-                    $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
-
-
+                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
 
                 }
 
@@ -526,161 +513,160 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 'data' => 1,
                 'path' => $path
             ];
-//            $live_id = Config::getInstance()->getConf('web.live_id_now');
-
-
-
-
 
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
 
+    //直播开始|结束
+    public function pushEnd($taskId, $fromWorkerId,$data,$path){
 
-    /**
-     * 排行榜  11
-     */
-    public static function getLiveOrderRanking($taskId, $fromWorkerId,$data,$path){
+        try {
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $liveObj=new LiveInfo();
+            $PushServiceObj = new PushService();
+            $Redis = new Redis();
+            //获取所有在线直播id
+//            keys live_key_*
+            $listRst=$Redis->keys($live_id_key.'*');
+            if(empty($listRst)) return '';
+            $ListPort = swoole_get_local_ip(); //获取监听ip
+            $time=time();
+            foreach($listRst as $key => $val){
+                $arr = explode ('_', $val);
+                $live_id=$arr[2];
+                $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_time,is_begin,is_begin_time,is_end_time');
+                //echo $liveObj->getLastQuery();
+                if(!empty($liveInfo)){
+                    $is_push=0;
+                    if($liveInfo['is_begin']==1 && empty($liveInfo['is_begin_time'])){ //开始直播
+                        $is_push=1;
+                        $liveObj->update($liveObj->tableName,['is_begin_time'=>$time],['id'=>$live_id]);
+                    }else if($liveInfo['is_begin']==0 && $liveInfo['status']==2 && empty($liveInfo['is_end_time'])){
+                        $is_push=1;
+                        $liveObj->update($liveObj->tableName,['is_end_time'=>$time],['id'=>$live_id]);
+                    }
+                    if($is_push) {
+                        $live_info = [
+                            'id' => $live_id,
+                            'is_begin' => $liveInfo['is_begin'], //is_begin=0  status=2  直播结束      is_begin=1
+                            'status' => $liveInfo['status'],
+                        ];
+                        //推送记录
+                        $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
+                        $PushServiceObj->pushMessage($ListPort['eth0'], $live_id, $data);
+                    }
+
+                }
+            }
+            return [
+                'data' => 0,
+                'path' => $path
+            ];
+
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
+    //禁言  9
+    public function pushForbiddenWords($taskId, $fromWorkerId,$data,$path){
 
         try {
 
-            return;
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
-            $UserServiceObj=new UserService();
-            $OrderObj = new Order();
-            $UserObj = new User();
+            $forbiddenObj = new LiveForbiddenWordsModel();
+            $PushServiceObj = new PushService();
             $Redis = new Redis();
             //获取所有在线直播id
 //            keys live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
 
             if(empty($listRst)) return '';
-
+            $ListPort = swoole_get_local_ip(); //获取监听ip
             foreach($listRst as $key => $val) {
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
+                $time=time();
 
-                $OrderInfo=$OrderObj->db
-                    ->join($UserObj->tableName . ' u', 'o.twitter_id=u.id', 'left')
-                    ->where('o.type', 10)->where('o.live_id',$live_id)->where('o.status',1)->where('o.twitter_id != ?',[0])
-                    ->groupBy('twitter_id')
-                    ->orderBy('u_num','DESC')
-                    ->get($OrderObj->tableName .' o',[0,10],'count(*) u_num,u.id user_id,u.nickname,u.phone username,u.headimg');
+                //是否全场禁言  有且仅有一条
+                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'id,user_id,is_forbid,forbid_ctime,forbid_time');
+                if(!empty($forbidden)){ //操作的是一条记录
+                    if($forbidden['is_forbid']==2){//user_id  0时 为直播间全员控制 is_forbid 1 禁言 2解禁 forbid_ctime 开始禁言时间 forbid_time 禁言时长
+                        $forbiddenObj->getDb()->where('id',$forbidden['id'])->delete($forbiddenObj::$table); //防止一直推送
+                        $all_res = [
+                            'user_id' => 0,
+                            'is_forbid' => 2,
+                            'forbid_ctime' => 0,
+                            'forbid_time' => 0
+                        ];
+                    }else {
+                        //推送禁言状态
+                        $all_res = [
+                            'user_id' => 0,
+                            'is_forbid' => $forbidden['is_forbid'],
+                            'forbid_ctime' => $forbidden['forbid_ctime'],
+                            'forbid_time' => $forbidden['forbid_time']
+                        ];
+                    }
+                    $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$all_res,'ios_content' => $all_res ]);
+                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+                    continue;
 
-                foreach($OrderInfo as $key=>$val){
-                    $OrderInfo[$key]['nickname']=Common::textDecode($val['nickname']);
                 }
 
-                //根据用户不同 获取邀请名次
-                $listUser=$Redis->sMembers($live_id_key.$live_id);
-                $num = 0;
-                $user_ranking = 0;
-                foreach ($listUser as $key=>$item){
-                    $arr = explode(',', $item);
-                    $uid = $arr[3];
-                    //获取当前用户的邀请人数
-                    $user_num=$OrderObj->db
-                        ->where('o.type', 10)->where('o.live_id',$live_id)->where('o.status',1)->where('o.twitter_id ',$uid)
-                        ->getOne($OrderObj->tableName .' o','count(*) u_num');
-                    $num = $user_num['u_num']?$user_num['u_num']:0;
-                    if( $num > 0 ){
-                        $sql = "select count(*) c from 
-                            (SELECT  count(*) u_num FROM nlsg_order o 
-                             WHERE  o.type = '10'  AND o.live_id = ?  AND o.status = '1'  AND o.twitter_id != '0'  
-                            GROUP BY twitter_id ) d 
-                            where u_num >= ?";
-                        $UserInfo = $OrderObj->query($sql,[$live_id,$num]);
-                        $user_ranking = $UserInfo[0]['c'] ? $UserInfo[0]['c']  : 0;
-                    }
-                    $content = ['ranking_data'=>$OrderInfo,
-                        'ranking' => [
-                            "user_ranking" => $user_ranking,
-                            "user_num" => $num,
-                            "user_id" => $uid,
-                            "live_id" => $live_id,
-                        ]
-                    ];
-                    if(!empty($content)){
-                        $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 11, 'content' =>[$content] ]);
-                        $ListPort = swoole_get_local_ip (); //获取监听ip
+                //个人禁言
+                $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_ctime,forbid_time');
+                $idArr=[];
+                if(!empty($forbidden) ) {
+                    foreach ($forbidden as $k=>$v) {
+                        //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
+                        $forbid_time = ($v['forbid_ctime'] + $v['forbid_time']) - $time;
+                        if ($forbid_time <=0) {
+                            //记录已解除禁言用户
+                            $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_ctime'=>0,'forbid_time'=>0],['id'=>$v['id']]);
+                            $res = [
+                                'user_id' => $v['user_id'],
+                                'is_forbid' => 2,   //禁言
+                                'forbid_ctime' => 0, //开始时间
+                                'forbid_time' => 0, //时长
+                            ];
+                        }else {
+                            $res = [
+                                'user_id' => $v['user_id'],
+                                'is_forbid' => $v['is_forbid'],   //禁言
+                                'forbid_ctime' => $v['forbid_ctime'], //开始时间
+                                'forbid_time' => $v['forbid_time'], //时长
+                            ];
+                        }
+                        //推送记录
+                        $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
                         //推送消息
-                        $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id,'',$uid);
+                        $PushServiceObj->PushForbid($live_id,$v['user_id'],$data);
+
                     }
                 }
 
-
             }
             return [
-                'data' => 1,
+                'data' => $idArr,
                 'path' => $path
             ];
-//            $live_id = Config::getInstance()->getConf('web.live_id_now');
-
         }catch (\Exception $e){
             $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
             //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
         }
 
     }
 
 
-
-    /**
-     * 打赏礼物订单推送  12
-     */
-    public static function getLiveGiftOrder($taskId, $fromWorkerId,$data,$path){
-
-        try {
-            $live_id = $data['live_info_id'];
-            $UserServiceObj=new UserService();
-            $OrderObj = new Order();
-            $UserObj = new User();
-            $time = date("Y-m-d H:i:s",time()-600);
-            $OrderInfo=$OrderObj->db
-                ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
-                ->where('o.type', 5)->where('o.relation_id',$live_id)->where('o.status',1)
-                ->where('o.reward_type', 5)->where('o.reward_num',0,'>')->where('is_live_order_send',0)
-                ->where('o.pay_time',$time,'>')    //查询前面十分钟的，避免历史数据推送
-                ->orderBy('o.id','ASC')
-                ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.relation_id,o.live_id,o.pay_price,reward,reward_num');
-            echo $OrderObj->getLastQuery();
-            if(!empty($OrderInfo)){
-                $res=[];
-                foreach($OrderInfo as &$v){
-                    $v['nickname']=Common::textDecode($v['nickname']);
-                }
-                if(!empty($OrderInfo)){
-                    //修改标记
-                    $idArr=array_column($OrderInfo, 'id');
-                    $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
-                }
-
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content' =>$OrderInfo,'ios_content' =>$OrderInfo]);
-
-                $ListPort = swoole_get_local_ip (); //获取监听ip
-                //推送消息
-                $UserServiceObj->pushMessage(0,$data,$ListPort,$live_id);
-            }
-
-            return [
-                'data' => 1,
-                'path' => $path
-            ];
-//            $live_id = Config::getInstance()->getConf('web.live_id_now');
-
-
-
-        }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live-V4','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
-        }
-
-    }
 
 }

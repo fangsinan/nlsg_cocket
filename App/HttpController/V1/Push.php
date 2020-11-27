@@ -4,14 +4,14 @@ namespace App\HttpController\V1;
 use App\Lib\Message\Status;
 use App\Lib\Redis\Redis;
 use App\Model\V1\LiveCommentModel;
-use App\Model\V1\LiveForbiddenWordsModel;
+use App\Model\V1\LiveInfo;
 use App\Model\V1\LiveLoginModel;
-use App\Model\V1\LiveUserPrivilege;
 use App\Services\V1\UserService;
 use App\Lib\Common;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
 use EasySwoole\Socket\AbstractInterface\Controller;
+use EasySwoole\EasySwoole\Config;
 
 /**
  * 推送消息
@@ -58,39 +58,39 @@ class Push extends Controller
     }
      * */
 
-
     //进入直播间
     public function Joinlive()
     {
         $client = $this->caller ()->getClient ();
-
         $message = $this->caller ()->getArgs ();//获取所有参数
+
         $user_id = $message['user_id'];
         $live_id = $message['live_id'];
+
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
-        if ( $UserInfo['statusCode'] == 200 or $UserInfo['statusCode'] == Status::CODE_FORBIDDEN ) { //获取成功
-            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
-            $IMAGES_URL = \EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.IMAGES_URL');
-            if(strpos($UserInfo['result']['headimg'],'http') == false){
-                $headimg = $IMAGES_URL.$UserInfo['result']['headimg'];
-            }else{
-                $headimg = $UserInfo['result']['headimg'];
-            }
-            //$headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : '';
-            $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5,'content_text' => '进入直播间',
+        if ( $UserInfo['statusCode'] == 200 ) { //获取成功
+            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
+            $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
+            //$data = json_encode(['type' => 5, 'content' => '进入直播间','content_text' => '进入直播间',
+            //    'userinfo' => ['level' => $UserInfo['result']['level'], 'nick_name' => $UserInfo['result']['nick_name'],'headimg'=> $headimg]]);
+            $data = json_encode([
+                'type' => 5,
+                'content_text' => '进入直播间',
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
-            $ListPort = swoole_get_local_ip (); //获取监听ip
-            //print_r($data);
+
+            $live_join=Config::getInstance()->getConf('web.live_join');
+            $infoObj = new LiveInfo();
+            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
+
             // 异步推送
-            TaskManager::async (function () use ($client, $data, $ListPort,$user_id,$live_id) {
+            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info) {
 
-                //当前连接
-                $getfd = $client->getFd ();
-                $UserServiceObj=new UserService();
-
-                $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
-
+                if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
+                    $RedisObj = new Redis();
+                    $RedisObj->rpush($live_join . $live_id, $data);
+                }
                 $LiveLogin=new LiveLoginModel();
                 $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'ctime'=>time()]);
 
@@ -99,7 +99,6 @@ class Push extends Controller
             $server = ServerManager::getInstance()->getSwooleServer();
             $getfd = $client->getFd ();
             $data = Common::ReturnJson (Status::CODE_FAIL,$UserInfo['msg'],['type'=>5]);
-
             $server->push ($getfd, $data);
         }
     }
@@ -107,6 +106,7 @@ class Push extends Controller
     //评论消息
     public function Comment()
     {
+
         $client = $this->caller()->getClient();
         $message=$this->caller()->getArgs();//获取所有参数
 
@@ -117,31 +117,36 @@ class Push extends Controller
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
 
+        $infoObj = new LiveInfo();
+        $lupInfo = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'is_forb,Helper');
+        $admin_arr=explode('-',$lupInfo['Helper']);
+        if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
+            return ;
+        }
+
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
-            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
+            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
 
             $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
 
-            $data = Common::ReturnJson (Status::CODE_OK,'发送成功',
-                ['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
-//                ['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
-                    'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
+//            $data = json_encode(['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
+//                    'level' => $UserInfo['result']['level'],'nick_name' => $UserInfo['result']['nick_name']]]);
+            $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
+                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
-            $ListPort = swoole_get_local_ip (); //获取监听ip
             $user_id=$UserInfo['result']['id'];
 
+            $live_comment=Config::getInstance()->getConf('web.live_comment');
             // 异步推送
-            TaskManager::async (function () use ($client, $data, $ListPort,$user_id,$content,$live_id) {
+            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment) {
 
-                //当前连接
-                $getfd = $client->getFd ();
-                $UserServiceObj=new UserService();
-                $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
+                $RedisObj=new Redis();
+                $RedisObj->rpush($live_comment.$live_id,$data);
 
                 $LiveComment=new LiveCommentModel();
-                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]);
+                $LiveComment->add(LiveCommentModel::$table,['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'ctime'=>time()]);
             });
 
         }else{
@@ -156,39 +161,37 @@ class Push extends Controller
     public function Gift()
     {
         $client = $this->caller()->getClient();
-
         $message=$this->caller()->getArgs();//获取所有参数
+
         $user_id=$message['user_id']+0;
         $live_id=$message['live_id']+0;
         $gift_num=$message['gift_num']+0;
         $gift_class=$message['gift_class']+0;
+        $gift_price=$message['gift_price']+0;
 
         if(empty($message['user_id'])){$message['user_id']=0;};
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
-            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
-            $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'nickname' => $UserInfo['result']['nickname']]);
+            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'gift_price'=>$gift_price,'nick_name' => $UserInfo['result']['nick_name']]);
 
-            $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 4, 'content' => $content,'content_gift' => $content,
-                'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname']]]);
+            $data = json_encode(['type' => 12, 'content' => $content,'content_gift' => $content,
+                'userinfo' => ['level' => $UserInfo['result']['level'], 'nick_name' => $UserInfo['result']['nick_name'],'user_id'=>$user_id]]);
 
-            $ListPort = swoole_get_local_ip (); //获取监听ip
-
+            $live_gift=Config::getInstance()->getConf('web.live_gift');
             // 异步推送
-            TaskManager::async (function () use ($client, $data, $ListPort,$live_id,$user_id,$content) {
+            TaskManager::async (function () use ($client, $data,$live_id,$user_id,$content,$live_gift) {
 
-                //当前连接
-                $getfd = $client->getFd ();
-                $UserServiceObj=new UserService();
-                $UserServiceObj->pushMessage($getfd,$data,$ListPort,$live_id);
-
+                $RedisObj=new Redis();
+                $RedisObj->rpush($live_gift.$live_id,$data);
                 //送礼物
                 $LiveCommentObj=new LiveCommentModel();
                 $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'ctime'=>time()]);
 
             });
+
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
             $getfd = $client->getFd ();

@@ -4,31 +4,21 @@
 </head>
 <body>
 <div>
-    <div id="line">
-
-    </div>
     <div>
-        <!--<input type="" id="says">-->
         <textarea id="says" name="says" value=""  rows="10" cols='50'>
         </textarea>
         <button onclick="comment()">评论</button>
-        <button onclick="barrage()">弹幕</button>
     </div>
-    <div id="tm">
 
-    </div>
-    <div id="num">
-
-    </div>
 </div>
 </body>
-<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script>
 
-   var live_id=13;
+   var live_id=23;
    var user_id=211370;
 //    var wsServer = 'ws://localhost:9530';
-    var wsServer = 'wss://live.api.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
+   var wsServer = 'wss://live.api.v3load.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
     var websocket = null;
     var lockReconnect = false;  //避免ws重复连接
 
@@ -50,35 +40,37 @@
             heartCheck.start();
         };
         websocket.onclose = function (evt) {
-            console.log("连接断开--重连");
+            console.log("连接断开--重连 "+evt.code+' ' + evt.reason + ' ' + evt.wasClean);
             reconnect(wsServer);
         };
         websocket.onmessage = function (evt) {
-            var obj = JSON.parse(evt.data);
-            if(obj.status==200){
-                if(obj.data['type']==1){ //检测心跳
-                    console.log('心跳返回'+obj.data['fd']+' 直播人数 '+obj.data['num']);
-                    heartCheck.reset();
-                }else if(obj.data['type']==2){//评论
-                    addLine(obj.data['content'],obj.data['type'],obj.data['userinfo']);
-                }else if(obj.data['type']==3){//弹幕
-                    addLine(obj.data['content']+'弹幕',obj.data['type'],'');
-                }else if(obj.data['type']==4){ //礼物
-                    alert(obj.data['content']);
-                }else if(obj.data['type']==5){ //进入直播间
-                    console.log(obj.data);
-                }else if(obj.data['type']==6){ //产品
-                    console.log(obj.data);
-                }else if(obj.data['type']==7){ //公告
-                    console.log(obj.data);
-                }else if(obj.data['type']==8){ //直播结束
-                    console.log(obj.data);
-                }else if(obj.data['type']==9){ //禁言
-                    console.log(obj.data);
+            console.log(evt.data);
+            // var obj = JSON.parse(evt.data);
+            /*if(obj.status==200){
+                if(1){
+                }else {
+                    if (obj.data['type'] == 1) { //检测心跳
+                        console.log('心跳返回' + obj.data['fd'] + ' 直播人数 ' + obj.data['num']);
+                        heartCheck.reset();
+                    } else if (obj.data['type'] == 2) {//评论
+                        addLine(obj.data['content'], obj.data['type'], obj.data['userinfo']);
+                    } else if (obj.data['type'] == 4) { //礼物
+                        alert(obj.data['content']);
+                    } else if (obj.data['type'] == 5) { //进入直播间
+                        console.log(obj.data);
+                    } else if (obj.data['type'] == 6) { //产品
+                        console.log(obj.data);
+                    } else if (obj.data['type'] == 7) { //公告
+                        console.log(obj.data);
+                    } else if (obj.data['type'] == 8) { //直播结束
+                        console.log(obj.data);
+                    } else if (obj.data['type'] == 9) { //禁言
+                        console.log(obj.data);
+                    }
                 }
             }else{
                 alert(obj.message +' '+obj.data['type']);
-            }
+            }*/
 
         };
         websocket.onerror = function (evt, e) {
@@ -108,17 +100,17 @@
         },
         start: function(){
             var self = this;
-            this.timeoutObj = setTimeout(function(){
+            this.timeoutObj = setInterval(function(){
                 websocket.send(JSON.stringify({
                     controller:'Index',
                     action:'Ping',
                     data:{
-                        "accessUserToken":'a2RoK2hPQWp6U0NkcTNLVkFpUGRaTDlxM1czWGxQeUtVam9kbjI1OGJXb0NCdHBJSldIWU82dk9CSTN6R0ZwRmhJWjJjdXpEWEFlNXJYc2MzVkoyelE9PQ==',
+                        // "accessUserToken":'a2RoK2hPQWp6U0NkcTNLVkFpUGRaTDlxM1czWGxQeUtVam9kbjI1OGJXb0NCdHBJSldIWU82dk9CSTN6R0ZwRmhJWjJjdXpEWEFlNXJYc2MzVkoyelE9PQ==',
                         'live_id':live_id
                     }
                 }));
                 self.serverTimeoutObj = setTimeout(function(){
-                    websocket.close();//如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
+                    // websocket.close();//如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
                 }, self.timeout)
             }, this.timeout)
         },
@@ -126,37 +118,16 @@
 
     function comment() {
         var content = $("#says").val();
-        $("#says").val('');
         websocket.send(JSON.stringify({
             controller:'Push',
-            action:'Joinlive',
+            action:'Comment',
             data:{"content":content,
                 "accessUserToken":'a2RoK2hPQWp6U0NkcTNLVkFpUGRaTDlxM1czWGxQeUtVam9kbjI1OGJXb0NCdHBJSldIWU82dk9CSTN6R0ZwRmhJWjJjdXpEWEFlNXJYc2MzVkoyelE9PQ==',
                 'user_id':user_id,
                 'live_id':live_id
             }
         }));
-    }
-    function barrage() {
-        var content = $("#says").val();
         $("#says").val('');
-        websocket.send(JSON.stringify({
-            class:'Push',
-            action:'Barrage',
-            data:{"content":content,
-                "accessUserToken":'a2RoK2hPQWp6U0NkcTNLVkFpUGRaTDlxM1czWGxQeUtVam9kbjI1OGJXb0NCdHBJSldIWU82dk9CSTN6R0ZwRmhJWjJjdXpEWEFlNXJYc2MzVkoyelE9PQ==',
-                'user_id':user_id,
-                'live_id':live_id
-            }
-        }));
-    }
-
-    function addLine(data,type,user) {
-        if(type==2){
-            $("#line").append("<li>"+user.level+' '+user.nickname+' '+data+"</li>");
-        }else if(type==3){
-            $("#tm").append("<li>"+data+"</li>");
-        }
     }
 
 

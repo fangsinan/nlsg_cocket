@@ -102,6 +102,15 @@ class Redis{
         return  $this->redis->lrange($key,$start,$end);
     }
 
+    //删除队列数据
+    public function ltrim($key,$start,$end){
+        if(empty($key)){
+            return '';
+        }
+
+        return  $this->redis->ltrim($key,$start,$end);
+    }
+
     //有序集合
     public function sAdd($key,$value){
         return $this->redis->sAdd($key,$value);

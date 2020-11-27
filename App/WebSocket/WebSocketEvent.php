@@ -13,6 +13,7 @@ use App\Lib\Redis\Redis;
 use App\Model\V1\LiveOnlineDuration;
 use App\Utility\Tools\Io;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
+use EasySwoole\EasySwoole\Config;
 
 class WebSocketEvent
 {
@@ -126,17 +127,13 @@ class WebSocketEvent
         $user_id=$params['user_id']+0;
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-
-        //echo $ListPort['eth0'].PHP_EOL;
-        //处理负载均衡
         $Redis = new Redis();
-        $live_redis_key=\EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.live_redis_key');
-        $Redis->sAdd ($live_redis_key.$live_id, $ListPort['eth0'].','.$request->fd.','.$live_id.','.$user_id); //ip,fd,live_id,user_id
-        //记录关闭列表  因为关闭只有一个fd值此队列用于方便关闭对应直播间记录
-        $live_colse_list=\EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.live_colse_list');
-//        $Redis->sAdd($live_colse_list.$live_id,$ListPort['en0'].','.$request->fd.','.$live_id.','.$user_id); // ip,fd,live_id,user_id
-        $Redis->sAdd($live_colse_list,$ListPort['eth0'].','.$request->fd.','.$live_id.','.$user_id); // ip,fd,live_id,user_id
-
+        $live_redis_key=Config::getInstance ()->getConf ('web.live_redis_key');
+        $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
+        $Redis->sAdd ($live_redis_key.$live_id, $ListPort['eth0'].','.$user_id.','.$request->fd);//加入直播间    11live_key_28=ip,user_id,fd
+        $Redis->sAdd ($live_id.':'.$ListPort['eth0'], $request->fd); //当前服务器直播间对应fd用于遍历发送     live_id:ip=fd
+        //记录关闭连接标记  因为关闭只有一个fd值用于方便关闭对应直播间记录
+        $Redis->set($live_id_list.':'.$ListPort['eth0'].'_'.$request->fd,$live_id.','.$user_id,18000); //5小时  live_id_list:ip_fd=live_id,user_id
     }
     /**
      * 关闭事件
@@ -148,39 +145,26 @@ class WebSocketEvent
     {
         /** @var array $info */
         $info = $server->getClientInfo($fd); //获取链接信息
-        /**
-         * 判断此fd 是否是一个有效的 websocket 连接
-         * 参见 https://wiki.swoole.com/wiki/page/490.html
-         */
+        //判断此fd 是否是一个有效的 websocket 连接  参见 https://wiki.swoole.com/wiki/page/490.html
         if ($info && $info['websocket_status'] === WEBSOCKET_STATUS_FRAME) { //已握手成功等待浏览器发送数据帧
-            /**
-             * 判断连接是否是 server 主动关闭
-             * 参见 https://wiki.swoole.com/wiki/page/p-event/onClose.html
-             */
+            //判断连接是否是 server 主动关闭 参见 https://wiki.swoole.com/wiki/page/p-event/onClose.html
             if ($reactorId < 0) {  //服务端关闭
                 echo "server close ".PHP_EOL;
             }
         }
-
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        $live_colse_list=\EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.live_colse_list');
-        $live_redis_key=\EasySwoole\EasySwoole\Config::getInstance ()->getConf ('web.live_redis_key');
-
-        // 异步推送
-        TaskManager::async (function () use ($ListPort,$fd,$live_colse_list,$live_redis_key) {
+        $live_redis_key=Config::getInstance ()->getConf ('web.live_redis_key');
+        $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
+        TaskManager::async (function () use ($ListPort,$fd,$live_redis_key,$live_id_list) { //异步处理
             $Redis = new Redis();
-            $clients = $Redis->sMembers ($live_colse_list); //获取集合
-            //ip,fd,live_id,user_id
-            $str=$ListPort['eth0'].','.$fd.',';
-            foreach($clients as $key => $val ){ //删除数据
-                if(strpos($val,$str) !== false){
-                    $arr=explode(',',$val);
-                    $Redis->srem($live_colse_list,$val); //删除记录表
-                    $Redis->srem($live_redis_key.$arr[2],$val); //删除直播间记录
-                    break;
-                }
+            $delkey_flag=$live_id_list.':'.$ListPort['eth0'].'_'.$fd;
+            $resultData = $Redis->get($delkey_flag); //获取连接标记对应信息
+            if(!empty($resultData)){
+                $liveArr=explode(',',$resultData);  $live_id=$liveArr[0];$user_id=$liveArr[1]; // live_id,user_id
+                $Redis->srem($live_id.':'.$ListPort['eth0'],$fd); //删除遍历直播间
+                $Redis->srem($live_redis_key.$live_id,$ListPort['eth0'].','.$user_id.','.$fd); //删除直播间记录
+                $Redis->del($delkey_flag);
             }
-
         });
 
 
