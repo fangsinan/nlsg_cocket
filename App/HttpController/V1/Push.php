@@ -118,8 +118,9 @@ class Push extends Controller
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
 
         $infoObj = new LiveInfo();
-        $lupInfo = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'is_forb,Helper');
-        $admin_arr=explode('-',$lupInfo['Helper']);
+        $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper');
+        $admin_arr=explode('-',$lupInfo['helper']);
         if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
             return ;
         }
