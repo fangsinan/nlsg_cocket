@@ -186,7 +186,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $arr[]=$val;
                         }
                         $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
-                        $list=$data = Common::ReturnJson(Status::CODE_OK,'进入直播间',$arr);;
+
+                        $list=$data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
                         $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
                     }
                 }
