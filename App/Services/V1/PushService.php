@@ -73,7 +73,7 @@ class PushService
 
         if(is_array($data)){
             //安卓返回格式必须统一
-            $data_str=json_encode(['live_id'=>$live_id,'data'=>$data]);
+            $data_str=json_encode(['data'=>[['live_id'=>$live_id,'data'=>$data]]]);
 //            $data_str=json_encode($data);
         }else{
             $data_str=$data;
