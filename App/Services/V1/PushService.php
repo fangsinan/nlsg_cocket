@@ -77,7 +77,7 @@ class PushService
         $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
-            $url = "http://$val:9520/index/broadcast";
+            $url = "http://$val:9530/index/broadcast";
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
             $sendArr[]=$val.'#'.$info;
         }
