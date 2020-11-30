@@ -34,7 +34,7 @@ class PushService
             }
         }
         if(!empty($server_ip)) {
-            $url = "http://$server_ip:9580/index/forbid";
+            $url = "http://$server_ip:9530/index/forbid";
             $info = self::CurlPost($url, ['fd'=>$fd, 'data' => $data]);
             Io::WriteFile('', 'forbid_send', $server_ip . '#' . $info, 2);
         }
@@ -47,7 +47,8 @@ class PushService
             $info = $server->getClientInfo($data['fd']);
             //判断此fd 是否是一个有效的 websocket 连接
             if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
-                  $server->push($data['fd'], $data['data']);
+//                  $server->push($data['fd'], $data['data']);
+                  $server->push($data['fd'], $data);
             } else {
 //                  $Redis->srem($data['live_id'].':'.$ip,$fd); //删除遍历直播间
 //                  $delkey_flag=$live_id_list.':'.$ip.'_'.$fd;
@@ -98,7 +99,8 @@ class PushService
                 $info = $server->getClientInfo($fd);
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
-                    $server->push($fd, $data['data']);
+                    //$server->push($fd, $data['data']);
+                    $server->push($fd, $data);
                 } else {
 //                    $Redis->srem($data['live_id'].':'.$ip,$fd); //删除遍历直播间
 //                    $delkey_flag=$live_id_list.':'.$ip.'_'.$fd;
