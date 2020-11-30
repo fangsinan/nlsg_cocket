@@ -70,11 +70,11 @@ print_r($message);
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nick_name']);
+            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
             //$data = json_encode(['type' => 5, 'content' => '进入直播间','content_text' => '进入直播间',
-            //    'userinfo' => ['level' => $UserInfo['result']['level'], 'nick_name' => $UserInfo['result']['nick_name'],'headimg'=> $headimg]]);
+            //    'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
             $data = json_encode([
                 'type' => 5,
                 'content_text' => '进入直播间',
@@ -130,12 +130,12 @@ print_r($message);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nickname']);
+            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
 
             $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
 
 //            $data = json_encode(['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
-//                    'level' => $UserInfo['result']['level'],'nick_name' => $UserInfo['result']['nick_name']]]);
+//                    'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
             $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
@@ -179,11 +179,11 @@ print_r($message);
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
-            $UserInfo['result']['nick_name']=Common::textDecode($UserInfo['result']['nickname']);
-            $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'gift_price'=>$gift_price,'nick_name' => $UserInfo['result']['nick_name']]);
+            $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
+            $content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'gift_price'=>$gift_price,'nickname' => $UserInfo['result']['nickname']]);
 
             $data = json_encode(['type' => 12, 'content' => $content,'content_gift' => $content,
-                'userinfo' => ['level' => $UserInfo['result']['level'], 'nick_name' => $UserInfo['result']['nick_name'],'user_id'=>$user_id]]);
+                'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'user_id'=>$user_id]]);
 
             $live_gift=Config::getInstance()->getConf('web.live_gift');
             // 异步推送
