@@ -183,7 +183,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $arr=[];
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            $arr[]=$val;
+//                            $arr[]=$val;
+                            $arr[]=json_decode($val,true);
                         }
                         $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
                         $list=$data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
@@ -229,7 +230,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $start=0;
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            $arr[]=$val;
+                            //$arr[]=$val;
+                            $arr[]=json_decode($val,true);
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
                         $Redis->ltrim($live_comment.$live_id,$start+1,-1);//删除已取出数据
@@ -278,7 +280,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $start=0;
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            $arr[]=$val;
+//                            $arr[]=$val;
+                            $arr[]=json_decode($val,true);
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content_arr' => $arr,]);
                         $Redis->ltrim($live_gift.$live_id,$start+1,-1);//删除已取出数据
