@@ -50,8 +50,6 @@ class PushService
             //判断此fd 是否是一个有效的 websocket 连接
             if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
                   $server->push($data['fd'], $data['data']);
-//                $data = Common::ReturnJson(Status::CODE_OK, '发送成功', $data);
-//                $server->push($data['fd'], $data);
             } else {
 //                  $Redis->srem($data['live_id'].':'.$ip,$fd); //删除遍历直播间
 //                  $delkey_flag=$live_id_list.':'.$ip.'_'.$fd;

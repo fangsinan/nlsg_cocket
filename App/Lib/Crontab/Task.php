@@ -186,7 +186,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $arr[]=$val;
                         }
                         $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
-
                         $list=$data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
                         $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
                     }
@@ -232,7 +231,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $start=$key;
                             $arr[]=$val;
                         }
-                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',$arr);
+                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
                         $Redis->ltrim($live_comment.$live_id,$start+1,-1);//删除已取出数据
                         $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
                     }
@@ -281,7 +280,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $start=$key;
                             $arr[]=$val;
                         }
-                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',$arr);
+                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content_arr' => $arr,]);
                         $Redis->ltrim($live_gift.$live_id,$start+1,-1);//删除已取出数据
                         $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
                     }
