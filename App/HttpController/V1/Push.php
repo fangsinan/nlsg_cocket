@@ -82,7 +82,9 @@ class Push extends Controller
 
             $live_join=Config::getInstance()->getConf('web.live_join');
             $infoObj = new LiveInfo();
-            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
+            $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+            $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
+//            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
 
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info) {
