@@ -63,7 +63,7 @@ class Push extends Controller
     {
         $client = $this->caller ()->getClient ();
         $message = $this->caller ()->getArgs ();//获取所有参数
-
+print_r($message);
         $user_id = $message['user_id'];
         $live_id = $message['live_id'];
 
