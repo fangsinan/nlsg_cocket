@@ -214,101 +214,101 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
-            //推送打赏礼物
-            $TaskObj = new Task([
-                'method' => 'getLiveGiftOrder',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'GiftOrder_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
+//            //推送打赏礼物
+//            $TaskObj = new Task([
+//                'method' => 'getLiveGiftOrder',
+//                'path' => [
+//                    'dir' => '/Crontab',
+//                    'name' => 'GiftOrder_',
+//                ],
+//                'data' => [
+//                ]
+//            ]);
+//            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//                if ($workerId == 0) {
+//                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+//                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                        TaskManager::async($TaskObj);
+//                    });
+//                }
+//            });
 
-            //公告推送
-            $TaskObj = new Task([
-                'method' => 'pushNotice',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'notice_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //10s 发送公告
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::sync($TaskObj);
-                    });
-                }
-            });
-            //订单推送
-            $TaskObj = new Task([
-                'method' => 'getLivePushOrder',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'order_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
+//            //公告推送
+//            $TaskObj = new Task([
+//                'method' => 'pushNotice',
+//                'path' => [
+//                    'dir' => '/Crontab',
+//                    'name' => 'notice_',
+//                ],
+//                'data' => [
+//                ]
+//            ]);
+//            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//                if ($workerId == 0) {
+//                    Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //10s 发送公告
+//                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                        TaskManager::sync($TaskObj);
+//                    });
+//                }
+//            });
+//            //订单推送
+//            $TaskObj = new Task([
+//                'method' => 'getLivePushOrder',
+//                'path' => [
+//                    'dir' => '/Crontab',
+//                    'name' => 'order_',
+//                ],
+//                'data' => [
+//                ]
+//            ]);
+//            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//                if ($workerId == 0) {
+//                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
+//                        TaskManager::async($TaskObj);
+//                    });
+//                }
+//            });
 
         }
 
         if($ListPort['eth0']=='172.17.111.140' || $ListPort['eth0']=='172.17.176.246' ){
 
-            //开始|结束直播
-            $TaskObj = new Task([
-                'method' => 'pushEnd',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'startEnd_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
+//            //开始|结束直播
+//            $TaskObj = new Task([
+//                'method' => 'pushEnd',
+//                'path' => [
+//                    'dir' => '/Crontab',
+//                    'name' => 'startEnd_',
+//                ],
+//                'data' => [
+//                ]
+//            ]);
+//            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//                if ($workerId == 0) {
+//                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+//                        TaskManager::async($TaskObj);
+//                    });
+//                }
+//            });
 
-            //禁言
-            $TaskObj = new Task([
-                'method' => 'pushForbiddenWords',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'forbid_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //30s
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
+//            //禁言
+//            $TaskObj = new Task([
+//                'method' => 'pushForbiddenWords',
+//                'path' => [
+//                    'dir' => '/Crontab',
+//                    'name' => 'forbid_',
+//                ],
+//                'data' => [
+//                ]
+//            ]);
+//            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+//                if ($workerId == 0) {
+//                    Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //30s
+//                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                        TaskManager::async($TaskObj);
+//                    });
+//                }
+//            });
 
         }
 
