@@ -634,6 +634,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 echo $forbiddenObj->getLastQuery();
                 $idArr=[];
                 if(!empty($forbidden) ) {
+                    echo 1;
                     foreach ($forbidden as $k=>$v) {
                         //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
                         $forbid_time = (strtotime($v['forbid_at']) + $v['length']) - $time;
@@ -662,7 +663,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                     }
                 }
-
+                echo 5;
             }
             return [
                 'data' => $idArr,
