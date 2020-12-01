@@ -600,23 +600,23 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $time=time();
 
                 //是否全场禁言  有且仅有一条
-                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'id,user_id,is_forbid,forbid_ctime,forbid_time');
+                $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'id,user_id,is_forbid,forbid_at,length');
                 if(!empty($forbidden)){ //操作的是一条记录
                     if($forbidden['is_forbid']==2){//user_id  0时 为直播间全员控制 is_forbid 1 禁言 2解禁 forbid_ctime 开始禁言时间 forbid_time 禁言时长
                         $forbiddenObj->getDb()->where('id',$forbidden['id'])->delete($forbiddenObj::$table); //防止一直推送
                         $all_res = [
                             'user_id' => 0,
                             'is_forbid' => 2,
-                            'forbid_ctime' => 0,
-                            'forbid_time' => 0
+                            'forbid_at' => '',
+                            'length' => 0
                         ];
                     }else {
                         //推送禁言状态
                         $all_res = [
                             'user_id' => 0,
                             'is_forbid' => $forbidden['is_forbid'],
-                            'forbid_ctime' => $forbidden['forbid_ctime'],
-                            'forbid_time' => $forbidden['forbid_time']
+                            'forbid_at' => date('Y-m-d H:i:s',$forbidden['forbid_ctime']),
+                            'length' => $forbidden['length']
                         ];
                     }
                     $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$all_res,'ios_content' => $all_res ]);
@@ -631,22 +631,22 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 if(!empty($forbidden) ) {
                     foreach ($forbidden as $k=>$v) {
                         //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
-                        $forbid_time = ($v['forbid_ctime'] + $v['forbid_time']) - $time;
+                        $forbid_time = (strtotime($v['forbid_at']) + $v['length']) - $time;
                         if ($forbid_time <=0) {
                             //记录已解除禁言用户
-                            $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_ctime'=>0,'forbid_time'=>0],['id'=>$v['id']]);
+                            $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_at'=>'','length'=>0],['id'=>$v['id']]);
                             $res = [
                                 'user_id' => $v['user_id'],
                                 'is_forbid' => 2,   //禁言
-                                'forbid_ctime' => 0, //开始时间
-                                'forbid_time' => 0, //时长
+                                'forbid_at' => '', //开始时间
+                                'length' => 0, //时长
                             ];
                         }else {
                             $res = [
                                 'user_id' => $v['user_id'],
                                 'is_forbid' => $v['is_forbid'],   //禁言
-                                'forbid_ctime' => $v['forbid_ctime'], //开始时间
-                                'forbid_time' => $v['forbid_time'], //时长
+                                'forbid_at' => $v['forbid_at'], //开始时间
+                                'length' => $v['length'], //时长
                             ];
                         }
                         //推送记录
