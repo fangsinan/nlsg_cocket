@@ -321,15 +321,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_id'=>$live_id,'is_send'=>1,'is_del'=>0,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_send'=>1,'is_del'=>0,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type');
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0] ]);
+                    //修改标记
+                    $idArr=array_column($noticeList, 'id');
+                    $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
 
-                    if(!empty($noticeList)){
-                        //修改标记
-                        $idArr=array_column($noticeList, 'id');
-                        $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
-                    }
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
 
