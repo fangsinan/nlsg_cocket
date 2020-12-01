@@ -477,12 +477,12 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ->where('o.live_id',$info['live_pid'])->where('o.type', [14,16],'in')->where('o.status',1)
                     ->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
                     ->orderBy('o.id','ASC')
-                    ->get($OrderObj->tableName .' o',null,'o.id,u.nick_name,o.product_id,o.live_num,o.pay_price');
+                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price');
 
                 if(!empty($OrderInfo)){
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
-                        $val['nick_name']=Common::textDecode($val['nick_name']);
+                        $val['nickname']=Common::textDecode($val['nickname']);
                         switch ($val['product_id']){
                             case 0://360
                                 $res[]=$val['nick_name'].':您已成功购买幸福360会员';
