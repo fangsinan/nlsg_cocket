@@ -582,7 +582,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public function pushForbiddenWords($taskId, $fromWorkerId,$data,$path){
 
         try {
-
+echo 1111;
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $forbiddenObj = new LiveForbiddenWordsModel();
             $PushServiceObj = new PushService();
@@ -593,6 +593,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             if(empty($listRst)) return '';
             $ListPort = swoole_get_local_ip(); //获取监听ip
+            $idArr=[];
             foreach($listRst as $key => $val) {
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
@@ -625,7 +626,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                 //个人禁言
                 $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_at,length');
-                $idArr=[];
                 if(!empty($forbidden) ) {
                     foreach ($forbidden as $k=>$v) {
                         //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
@@ -655,6 +655,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     }
                 }
             }
+            echo 2222;
             return [
                 'data' => $idArr,
                 'path' => $path
