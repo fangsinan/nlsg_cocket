@@ -273,23 +273,23 @@ class EasySwooleEvent implements Event
 
         if($ListPort['eth0']=='172.17.111.140' || $ListPort['eth0']=='172.17.176.246' ){
 
-//            //开始|结束直播
-//            $TaskObj = new Task([
-//                'method' => 'pushEnd',
-//                'path' => [
-//                    'dir' => '/Crontab',
-//                    'name' => 'startEnd_',
-//                ],
-//                'data' => [
-//                ]
-//            ]);
-//            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-//                if ($workerId == 0) {
-//                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
-//                        TaskManager::async($TaskObj);
-//                    });
-//                }
-//            });
+            //开始|结束直播
+            $TaskObj = new Task([
+                'method' => 'pushEnd',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'startEnd_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
 
 //            //禁言
 //            $TaskObj = new Task([
