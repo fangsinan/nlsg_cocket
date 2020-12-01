@@ -540,16 +540,17 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_time,is_begin,is_begin_time,is_end_time');
+                //$liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_time,is_begin,is_begin_time,is_end_time');
+                $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_at,is_begin,begin_at');
                 //echo $liveObj->getLastQuery();
                 if(!empty($liveInfo)){
                     $is_push=0;
-                    if($liveInfo['is_begin']==1 && empty($liveInfo['is_begin_time'])){ //开始直播
+                    if($liveInfo['is_begin']==1 && empty($liveInfo['begin_at'])){ //开始直播
                         $is_push=1;
-                        $liveObj->update($liveObj->tableName,['is_begin_time'=>$time],['id'=>$live_id]);
-                    }else if($liveInfo['is_begin']==0 && $liveInfo['status']==2 && empty($liveInfo['is_end_time'])){
+                        $liveObj->update($liveObj->tableName,['begin_at'=>date("Y-m-d H:i:s",$time)],['id'=>$live_id]);
+                    }else if($liveInfo['is_begin']==0 && $liveInfo['status']==2 && empty($liveInfo['end_at'])){
                         $is_push=1;
-                        $liveObj->update($liveObj->tableName,['is_end_time'=>$time],['id'=>$live_id]);
+                        $liveObj->update($liveObj->tableName,['end_at'=>date("Y-m-d H:i:s",$time)],['id'=>$live_id]);
                     }
                     if($is_push) {
                         $live_info = [
