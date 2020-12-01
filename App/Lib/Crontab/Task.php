@@ -353,7 +353,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function PushProduct($taskId, $fromWorkerId,$data,$path){
 
         try {
-            echo 'push';
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $Redis = new Redis();
             $pushObj = new LivePush();
@@ -364,19 +363,16 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*');
             $now = time();
             $ListPort = swoole_get_local_ip (); //获取监听ip
-            print_r($listRst);
             foreach($listRst as $key => $val) {
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
                 $where = [
-                    'live_id' => $live_id,
+                    'live_info_id' => $live_id,
                     '(push_at < ?)'=>[date('Y-m-d H:i:s',$now)],
                     'is_push' => 0,
                     'is_del' => 0,
                 ];
-                print_r($where);
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
-                echo $pushObj->getLastQuery();
                 if(!empty($push_info)){
                     //多个
                     $res = self::getLivePushDetail($push_info);
