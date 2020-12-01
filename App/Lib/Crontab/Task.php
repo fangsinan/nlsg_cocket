@@ -487,19 +487,19 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $val['nickname']=Common::textDecode($val['nickname']);
                         switch ($val['product_id']){
                             case 0://360
-                                $res[]=$val['nick_name'].':您已成功购买幸福360会员';
+                                $res[]=$val['nickname'].':您已成功购买幸福360会员';
                                 break;
                             case 1: //经营能量
-                                $res[]=$val['nick_name'].':您已成功购买'.$val['live_num'].'张经营能量门票';
+                                $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
                                 break;
                             case 2: //一代天骄
-                                $res[]=$val['nick_name'].':您已支付成功一代天骄定金';
+                                $res[]=$val['nickname'].':您已支付成功一代天骄定金';
                                 break;
                             case 3: //演说能量
-                                $res[]=$val['nick_name'].':您已支付成功演说能量定金';
+                                $res[]=$val['nickname'].':您已支付成功演说能量定金';
                                 break;
                             case 4: //幸福套餐
-                                $res[]=$val['nick_name'].':您已支付成功幸福套餐';
+                                $res[]=$val['nickname'].':您已支付成功幸福套餐';
                                 break;
                         }
                     }
