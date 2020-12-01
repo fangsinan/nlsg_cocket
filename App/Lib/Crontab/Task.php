@@ -544,7 +544,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $live_id=$arr[2];
                 //$liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_time,is_begin,is_begin_time,is_end_time');
                 $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_at,is_begin,begin_at');
-                //echo $liveObj->getLastQuery();
+                echo $liveObj->getLastQuery();
                 if(!empty($liveInfo)){
                     $is_push=0;
                     if($liveInfo['is_begin']==1 && empty($liveInfo['begin_at'])){ //开始直播
