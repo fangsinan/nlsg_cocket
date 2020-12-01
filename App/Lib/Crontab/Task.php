@@ -623,6 +623,7 @@ echo 1111;
                     continue;
 
                 }
+                echo 33333;
 
                 //个人禁言
                 $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_at,length');
@@ -647,6 +648,8 @@ echo 1111;
                                 'length' => $v['length'], //时长
                             ];
                         }
+                        echo 44444;
+
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
                         //推送消息
