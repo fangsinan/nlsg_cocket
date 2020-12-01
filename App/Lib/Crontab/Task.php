@@ -469,12 +469,12 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $k => $v) {
                 $arr = explode('_', $v);
                 $live_id = $arr[2];
-                $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'pid');
+                $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
 
 
                 $OrderInfo=$OrderObj->db
                     ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
-                    ->where('o.live_id',$info['pid'])->where('o.type', [14,16],'in')->where('o.status',1)
+                    ->where('o.live_id',$info['live_pid'])->where('o.type', [14,16],'in')->where('o.status',1)
                     ->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
                     ->orderBy('o.id','ASC')
                     ->get($OrderObj->tableName .' o',null,'o.id,u.nick_name,o.product_id,o.live_num,o.pay_price');
