@@ -582,7 +582,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public function pushForbiddenWords($taskId, $fromWorkerId,$data,$path){
 
         try {
-echo 1111;
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $forbiddenObj = new LiveForbiddenWordsModel();
             $PushServiceObj = new PushService();
@@ -623,8 +622,6 @@ echo 1111;
                     continue;
 
                 }
-                echo 33333;
-
                 //个人禁言
                 $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_at,length');
                 if(!empty($forbidden) ) {
@@ -648,7 +645,6 @@ echo 1111;
                                 'length' => $v['length'], //时长
                             ];
                         }
-                        echo 44444;
 
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
@@ -658,7 +654,6 @@ echo 1111;
                     }
                 }
             }
-            echo 2222;
             return [
                 'data' => $idArr,
                 'path' => $path
