@@ -369,7 +369,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $where = [
                     'live_info_id' => $live_id,
                     '(push_at < ?)'=>[date('Y-m-d H:i:s',$now)],
-                    'is_push' => 0,
+                    'is_push' => 1,
+                    'is_done' => 0,
                     'is_del' => 0,
                 ];
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
@@ -440,7 +441,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //修改标记
             $idArr=array_column($push_info, 'id');
             $LivePushObj=new LivePush();
-            $LivePushObj->update($LivePushObj->tableName,['is_push'=>1],['id'=>$idArr]);
+            $LivePushObj->update($LivePushObj->tableName,['is_done'=>0,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
         }
 
         return $res;
