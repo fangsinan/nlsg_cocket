@@ -453,7 +453,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function getLivePushOrder($taskId, $fromWorkerId,$data,$path){
 
         try {
-echo 'push';
+
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $PushServiceObj=new PushService();
             $OrderObj =new Order();
@@ -464,13 +464,13 @@ echo 'push';
             //获取所有在线直播id
 //            keys live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
-            print_r($listRst);
             if(empty($listRst)) return '';
             $ListPort = swoole_get_local_ip (); //获取监听ip
             foreach($listRst as $k => $v) {
                 $arr = explode('_', $v);
                 $live_id = $arr[2];
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
+                echo $infoObj->getLastQuery();
 
 
                 $OrderInfo=$OrderObj->db
