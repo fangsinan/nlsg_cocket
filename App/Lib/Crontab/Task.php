@@ -478,7 +478,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
                     ->orderBy('o.id','ASC')
                     ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price');
-
+                echo $OrderObj->getLastQuery();
                 if(!empty($OrderInfo)){
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
