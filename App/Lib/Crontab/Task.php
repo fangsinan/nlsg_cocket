@@ -527,7 +527,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     //直播开始|结束
     public function pushEnd($taskId, $fromWorkerId,$data,$path){
-
         try {
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $liveObj=new LiveInfo();
@@ -544,7 +543,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $live_id=$arr[2];
                 //$liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_time,is_begin,is_begin_time,is_end_time');
                 $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_at,is_begin,begin_at');
-                echo $liveObj->getLastQuery();
                 if(!empty($liveInfo)){
                     $is_push=0;
                     if($liveInfo['is_begin']==1 && empty($liveInfo['begin_at'])){ //开始直播
@@ -602,9 +600,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                 //是否全场禁言  有且仅有一条
                 $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'user_id'=>0],'id,user_id,is_forbid,forbid_at,length');
+                echo '====';
+                echo $forbiddenObj->getLastQuery();
                 if(!empty($forbidden)){ //操作的是一条记录
                     if($forbidden['is_forbid']==2){//user_id  0时 为直播间全员控制 is_forbid 1 禁言 2解禁 forbid_ctime 开始禁言时间 forbid_time 禁言时长
-                        $forbiddenObj->getDb()->where('id',$forbidden['id'])->delete($forbiddenObj::$table); //防止一直推送
+                        $re = $forbiddenObj->getDb()->where('id',$forbidden['id'])->delete($forbiddenObj::$table); //防止一直推送
+                        var_dump('re');
+                        var_dump($re);
                         $all_res = [
                             'user_id' => 0,
                             'is_forbid' => 2,
@@ -628,6 +630,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                 //个人禁言
                 $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_ctime,forbid_time');
+                echo '222';
+                echo $forbiddenObj->getLastQuery();
                 $idArr=[];
                 if(!empty($forbidden) ) {
                     foreach ($forbidden as $k=>$v) {
@@ -636,7 +640,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         if ($forbid_time <=0) {
                             //记录已解除禁言用户
                             $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_at'=>'','length'=>0],['id'=>$v['id']]);
-                            $res = [
+                            echo '333';
+                            echo $forbiddenObj->getLastQuery();$res = [
                                 'user_id' => $v['user_id'],
                                 'is_forbid' => 2,   //禁言
                                 'forbid_at' => '', //开始时间
