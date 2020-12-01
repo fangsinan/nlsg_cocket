@@ -464,6 +464,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //获取所有在线直播id
 //            keys live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
+            print_r($listRst);
             if(empty($listRst)) return '';
             $ListPort = swoole_get_local_ip (); //获取监听ip
             foreach($listRst as $k => $v) {
@@ -472,7 +473,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
                 echo $infoObj->getLastQuery();
 
-
                 $OrderInfo=$OrderObj->db
                     ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
                     ->where('o.live_id',$info['live_pid'])->where('o.type', [14,16],'in')->where('o.status',1)
@@ -480,6 +480,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     ->orderBy('o.id','ASC')
                     ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.product_id,o.live_num,o.pay_price');
                 echo $OrderObj->getLastQuery();
+                echo '----';
                 if(!empty($OrderInfo)){
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
