@@ -369,7 +369,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $live_id = $arr[2];
                 $where = [
                     'live_id' => $live_id,
-                    '(push_time < ?)'=>[$now],
+                    '(push_at < ?)'=>[date('Y-m-d H:i:s',$now)],
                     'is_push' => 0,
                     'is_del' => 0,
                 ];
