@@ -441,7 +441,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //修改标记
             $idArr=array_column($push_info, 'id');
             $LivePushObj=new LivePush();
-            $LivePushObj->update($LivePushObj->tableName,['is_done'=>0,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
+            $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
         }
 
         return $res;
