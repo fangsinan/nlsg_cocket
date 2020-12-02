@@ -183,7 +183,7 @@ class Push extends Controller
             //$content=json_encode(['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'gift_price'=>$gift_price,'nickname' => $UserInfo['result']['nickname']]);
             $content=['giftChoose'=>$gift_class,'giftNumber'=>$gift_num,'gift_price'=>$gift_price,'nickname' => $UserInfo['result']['nickname']];
 
-            $data = json_encode(['type' => 12, 'content' => $content,'content_obj' => $content,
+            $data = json_encode(['type' => 12, 'ios_content' => $content,'content_obj' => $content,
                 'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'user_id'=>$user_id]]);
 
             $live_gift=Config::getInstance()->getConf('web.live_gift');
