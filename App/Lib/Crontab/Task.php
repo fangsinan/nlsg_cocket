@@ -374,7 +374,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_del' => 0,
                 ];
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
-                print_r(!empty($push_info));
                 if(!empty($push_info)){
                     //多个
                     $res = self::getLivePushDetail($push_info);
@@ -411,6 +410,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         $WorkInfoObj=new WorksInfo();
         $goodsObj = new Goods();
         foreach($push_info as $key=>$val){
+            print_r($val);
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
             if(($val['push_type'] == 1 or $val['push_type'] == 7) && !empty($val['push_gid']) ){
@@ -419,7 +419,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
-                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`order`'=>0]);
+                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
                 $Info['workinfo_id']=$WorkInfoData['id'];
             }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
                 $fields = 'id,name,price,subtitle,picture img';
@@ -436,13 +436,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'img'=>'/nlsg/works/20201124144228445465.png'
                 ];
             }
-            echo $key.'||||'.$colObj->getLastQuery();
             $res[]= [
                 'push_info' => $val,
                 'son_info' => $Info,
             ];
         }
-        print_r(2222);
 
         if(!empty($push_info)){
             print_r(111);
