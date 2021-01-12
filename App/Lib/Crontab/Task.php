@@ -411,10 +411,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         foreach($push_info as $key=>$val){
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
-            if($val['push_type'] == 1 && !empty($val['push_gid']) ){
+            if(($val['push_type'] == 1 or $val['push_type'] == 7) && !empty($val['push_gid']) ){
                 $fields = 'id,name,price,subtitle,cover_pic img,user_id';
                 $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
-            }elseif($val['push_type'] == 2 && !empty($val['push_gid']) ){
+            }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
                 $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`order`'=>0]);
