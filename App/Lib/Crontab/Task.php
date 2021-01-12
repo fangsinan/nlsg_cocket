@@ -401,7 +401,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     //产品推送扩展
     public static function getLivePushDetail($push_info){
 
-        print_r(88888);
+        if($push_info){
+            print_r($push_info);
+        }
         //获取产品信息
         $res=[];
         $colObj   = new Column();
@@ -434,7 +436,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'img'=>'/nlsg/works/20201124144228445465.png'
                 ];
             }
-
+            echo $key.'||||'.$colObj->getLastQuery();
             $res[]= [
                 'push_info' => $val,
                 'son_info' => $Info,
