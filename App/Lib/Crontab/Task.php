@@ -349,6 +349,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
      * 产品推送  6
      */
     public static function PushProduct($taskId, $fromWorkerId,$data,$path){
+        print_r(66666);
 
         try {
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
@@ -361,6 +362,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*');
             $now = time();
             $ListPort = swoole_get_local_ip (); //获取监听ip
+            print_r($live_id);
+
             foreach($listRst as $key => $val) {
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
@@ -372,6 +375,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_del' => 0,
                 ];
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
+                print_r($push_info);
                 if(!empty($push_info)){
                     //多个
                     $res = self::getLivePushDetail($push_info);
