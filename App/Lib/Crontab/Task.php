@@ -374,7 +374,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_del' => 0,
                 ];
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
-                print_r($push_info);
+                print_r(!empty($push_info));
                 if(!empty($push_info)){
                     //多个
                     $res = self::getLivePushDetail($push_info);
@@ -401,6 +401,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     //产品推送扩展
     public static function getLivePushDetail($push_info){
 
+        print_r(88888);
         //获取产品信息
         $res=[];
         $colObj   = new Column();
@@ -439,7 +440,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 'son_info' => $Info,
             ];
         }
+        print_r(2222);
+
         if(!empty($push_info)){
+            print_r(111);
+
             //修改标记
             $idArr=array_column($push_info, 'id');
             $LivePushObj=new LivePush();
