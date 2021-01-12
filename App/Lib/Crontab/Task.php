@@ -480,7 +480,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
                         $val['nickname']=Common::textDecode($val['nickname']);
-                        switch ($val['product_id']){
+                        switch ($val['relation_id']){
                             case 0://360
                                 $res[]=$val['nickname'].':您已成功购买幸福360会员';
                                 break;
