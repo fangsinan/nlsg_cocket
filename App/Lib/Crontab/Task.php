@@ -419,7 +419,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
+                echo $workObj->getLastQuery();
                 $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
+                echo $workObj->getLastQuery();
                 $Info['workinfo_id']=$WorkInfoData['id'];
             }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
                 $fields = 'id,name,price,subtitle,picture img';
