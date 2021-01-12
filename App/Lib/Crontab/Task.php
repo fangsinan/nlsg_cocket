@@ -349,7 +349,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
      * 产品推送  6
      */
     public static function PushProduct($taskId, $fromWorkerId,$data,$path){
-        print_r(66666);
 
         try {
             $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
@@ -366,7 +365,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val) {
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
-                print_r($live_id);
 
                 $where = [
                     'live_info_id' => $live_id,
@@ -376,10 +374,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_del' => 0,
                 ];
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
-                print_r($push_info);
                 if(!empty($push_info)){
                     //多个
                     $res = self::getLivePushDetail($push_info);
+                    print_r($res);
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
