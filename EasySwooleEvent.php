@@ -191,6 +191,7 @@ class EasySwooleEvent implements Event
                 if ($workerId == 0) {
                     Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        print_r(111);
                         TaskManager::async($TaskObj);
                     });
                 }

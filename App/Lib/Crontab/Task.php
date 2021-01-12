@@ -362,11 +362,12 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*');
             $now = time();
             $ListPort = swoole_get_local_ip (); //获取监听ip
-            print_r($live_id);
 
             foreach($listRst as $key => $val) {
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
+                print_r($live_id);
+
                 $where = [
                     'live_info_id' => $live_id,
                     '(push_at < ?)'=>[date('Y-m-d H:i:s',$now)],
