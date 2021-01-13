@@ -409,7 +409,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //push_gid 推送产品id，专栏id  精品课id  商品id
             if(($val['push_type'] == 1 or $val['push_type'] == 7) && !empty($val['push_gid']) ){
                 $fields = 'id,name,price,subtitle,cover_pic img,user_id';
-                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
+                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
             }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
                 $fields = 'id,title name,type,price,cover_img img';
                 $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
@@ -430,10 +430,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'img'=>'/nlsg/works/20201124144228445465.png'
                 ];
             }
-            $res[]= [
-                'push_info' => $val,
-                'son_info' => $Info,
-            ];
+            if($Info){
+                $res[]= [
+                    'push_info' => $val,
+                    'son_info' => $Info,
+                ];
+            }
+
         }
 
         if(!empty($push_info)){
