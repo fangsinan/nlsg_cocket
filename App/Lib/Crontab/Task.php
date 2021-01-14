@@ -483,23 +483,28 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $res=[];
                     foreach($OrderInfo as $key=>$val){
                         $val['nickname']=Common::textDecode($val['nickname']);
-                        switch ($val['relation_id']){
-                            case 0://360
-                                $res[]=$val['nickname'].':您已成功购买幸福360会员';
-                                break;
-                            case 1: //经营能量
-                                $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
-                                break;
-                            case 2: //一代天骄
-                                $res[]=$val['nickname'].':您已支付成功一代天骄定金';
-                                break;
-                            case 3: //演说能量
-                                $res[]=$val['nickname'].':您已支付成功演说能量定金';
-                                break;
-                            case 4: //幸福套餐
-                                $res[]=$val['nickname'].':您已支付成功幸福套餐';
-                                break;
+                        if($val['type'] == 16){
+                            $res[]=$val['nickname'].':您已成功购买幸福360会员';
+                        }else{
+                            switch ($val['relation_id']){
+                                case 0://360
+                                    $res[]=$val['nickname'].':您已成功购买幸福360会员';
+                                    break;
+                                case 1: //经营能量
+                                    $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
+                                    break;
+                                case 2: //一代天骄
+                                    $res[]=$val['nickname'].':您已支付成功一代天骄定金';
+                                    break;
+                                case 3: //演说能量
+                                    $res[]=$val['nickname'].':您已支付成功演说能量定金';
+                                    break;
+                                case 4: //幸福套餐
+                                    $res[]=$val['nickname'].':您已支付成功幸福套餐';
+                                    break;
+                            }
                         }
+
                     }
                     if(!empty($OrderInfo)){
                         //修改标记
