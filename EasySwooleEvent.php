@@ -82,15 +82,15 @@ class EasySwooleEvent implements Event
 
         //创建队列消费进程
         $allNum = 3;
-        for ($i = 0 ;$i < $allNum;$i++){
+        for ($i = 0; $i < $allNum; $i++) {
             ServerManager::getInstance()->getSwooleServer()->addProcess((new Consumer("consumer_{$i}"))->getProcess());
         }
 
         //预创建链接
         $register->add($register::onWorkerStart, function (\swoole_server $server, int $workerId) {
-            if ( $server->taskworker == false ) {
-                PoolManager::getInstance ()->getPool (MysqlPool::class)->preLoad (5);
-                PoolManager::getInstance ()->getPool (RedisPool::class)->preLoad (5);
+            if ($server->taskworker == false) {
+                PoolManager::getInstance()->getPool(MysqlPool::class)->preLoad(5);
+                PoolManager::getInstance()->getPool(RedisPool::class)->preLoad(5);
             }
         });
 
@@ -137,7 +137,7 @@ class EasySwooleEvent implements Event
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
 
-        if( $ListPort['eth0']=='172.17.212.112' || $ListPort['eth0']=='172.17.176.246' ) {  //200主服务器
+        if ($ListPort['eth0'] == '172.17.212.118' || $ListPort['eth0'] == '172.17.176.246') {  //30主服务器
 
             //更新在线人数
             $TaskObj = new Task([
@@ -177,25 +177,28 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
-            //商品推送
+            //推送打赏礼物
             $TaskObj = new Task([
-                'method' => 'PushProduct',
+                'method' => 'getLiveGiftOrder',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'pro_',
+                    'name' => 'GiftOrder_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
+                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
                 }
             });
 
+
+        }
+        if ($ListPort['eth0'] == '172.17.212.112' || $ListPort['eth0'] == '172.17.176.246') {
             //进入直播间
             $TaskObj = new Task([
                 'method' => 'Joinlive',
@@ -214,19 +217,19 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
-            //推送打赏礼物
+            //商品推送
             $TaskObj = new Task([
-                'method' => 'getLiveGiftOrder',
+                'method' => 'PushProduct',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'GiftOrder_',
+                    'name' => 'pro_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
