@@ -36,7 +36,7 @@ class PushService
             }
         }
         if(!empty($server_ip)) {
-            $url = "http://$server_ip:9530/index/forbid";
+            $url = "http://$server_ip:9581/index/forbid";
             $info = self::CurlPost($url, ['fd'=>$fd, 'data' => $data]);
             Io::WriteFile('', 'forbid_send', $server_ip . '#' . $info, 2);
         }
@@ -80,7 +80,7 @@ class PushService
         $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
-            $url = "http://$val:9530/index/broadcast";
+            $url = "http://$val:9581/index/broadcast";
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
             $sendArr[]=$val.'#'.$info;
         }
