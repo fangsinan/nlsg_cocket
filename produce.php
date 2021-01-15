@@ -7,18 +7,18 @@
  */
 
 return [
-    'SERVER_NAME'=>"live_swoole_load",
+    'SERVER_NAME'=>"live_swoole_v4",
     'MAIN_SERVER'=>[
         'LISTEN_ADDRESS'=>'0.0.0.0',
-        'PORT'=>9580,
+        'PORT'=>9581,
         'SERVER_TYPE'=>EASYSWOOLE_WEB_SOCKET_SERVER, //可选为 EASYSWOOLE_SERVER  EASYSWOOLE_WEB_SERVER EASYSWOOLE_WEB_SOCKET_SERVER
         'SOCK_TYPE'=>SWOOLE_TCP, //该配置项当为SERVER_TYPE值为TYPE_SERVER时有效
         'RUN_MODEL'=>SWOOLE_PROCESS,//默认Server的运行模式
         'SETTING'=>[ //https://wiki.swoole.com/wiki/page/274.html
-            'worker_num'=>32,//运行的  worker进程数量  CPU核 1-4倍
+            'worker_num'=>32,//运行的  worker进程数量
             'max_request'=>5000,// worker 完成该数量的请求后将退出，防止内存溢出
             'task_worker_num'=>32,//运行的 task_worker 进程数量
-            'task_max_request'=>5000,// task_worker 完成该数量的请求后将退出，防止内存溢出
+            'task_max_request'=>1000,// task_worker 完成该数量的请求后将退出，防止内存溢出
             'task_enable_coroutine' => true, //开启后自动在onTask回调中创建协程
             'reload_async' => true,//设置异步重启开关。设置为true时，将启用异步安全重启特性，Worker进程会等待异步事件完成后再退出。
             'package_max_length' =>4*1024*1024, //处理大文件上线
@@ -41,30 +41,27 @@ return [
         'AUTH'=>null,
         'PUSH_LOG'=>true
     ],
-    'DISPLAY_ERROR'=>true,//是否开启错误显示
+    'DISPLAY_ERROR'=>false,//是否开启错误显示
     //easyswoole 缓存
     'FAST_CACHE'    => [//fastCache组件
         'PROCESS_NUM' => 0,//进程数,大于0才开启
         'BACKLOG'     => 256,//数据队列缓冲区大小
     ],
 
-    //内网
-   'MYSQL'=>[
-       'host'          => 'rm-2ze0owc97gckfqz8q.mysql.rds.aliyuncs.com',
-       'port'          => '3306',
-       'user'          => 'bj_nlsg3',
-       'timeout'       => '5',
-       'charset'       => 'utf8',
-       'password'      => 'Rds_&0331$NLSG^v3@',
-       'database'      => 'nlsg_v3',
-       'POOL_MAX_NUM'  => '20',
-       'POOL_TIME_OUT' => '0.1',
-   ],
+    'MYSQL'=>[
+        'host'          => 'rm-2ze0owc97gckfqz8q.mysql.rds.aliyuncs.com',
+        'port'          => '3306',
+        'user'          => 'bj_nlsg_v4',
+        'timeout'       => '5',
+        'charset'       => 'utf8',
+        'password'      => 'Rds_&0331$NLSG^v3@_V4',
+        'database'      => 'nlsg_v4',
+        'POOL_MAX_NUM'  => '20',
+        'POOL_TIME_OUT' => '0.1',
+    ],
 
-    //能量时光也用的这个 方便获取直播人数
     'REDIS'=>[
-//        'host'          => '127.0.0.1',
-        'host'          => '172.17.212.112', //200
+        'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
         'port'          => '6379',
         'auth'          => 'NLSG2020*beijin*0906BJ',
         'POOL_MAX_NUM'  => '20',
