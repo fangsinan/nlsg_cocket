@@ -512,7 +512,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
                     }
 
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content' =>$res,'content_one_array' =>$res]);
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
 
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
