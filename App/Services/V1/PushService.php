@@ -81,6 +81,7 @@ class PushService
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
+            var_dump($url);
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
 //            var_dump($live_id);
 //            var_dump($data_str);
