@@ -66,6 +66,7 @@ class Index extends  Controller
     public function index()
     {
         $url = "http://182.92.56.200:9581/index/broadcast";
+        $url = "http://39.105.214.152:9581/index/broadcast";
         $data_str = '{"controller":"Push","action":"Comment","data":{"content":"快看，11111~","user_id":254378,"live_id":645}}';
         $info = PushService::CurlPost($url,['live_id'=>3,'data'=>$data_str]);
         var_dump($info);
