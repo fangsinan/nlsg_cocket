@@ -82,6 +82,8 @@ class PushService
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+//            var_dump($live_id);
+//            var_dump($data_str);
             $sendArr[]=$val.'#'.$info;
         }
         Io::WriteFile('','load_send',$sendArr,2);
