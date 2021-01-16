@@ -78,11 +78,11 @@ class PushService
 
         //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
         $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
-        var_dump($IpLoadArr);
 
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
+                    var_dump($url);
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
 //            var_dump($live_id);
 //            var_dump($data_str);
