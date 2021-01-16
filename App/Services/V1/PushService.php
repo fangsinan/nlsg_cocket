@@ -100,9 +100,14 @@ class PushService
         $Redis = new Redis();
         $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
         $clients = $Redis->sMembers ($data['live_id'].':'.$ip); //获取有序集合
+
+        var_dump(222);
+        var_dump($clients);
         if(!empty($clients)) {
             foreach ($clients as $key => $fd) {
+                var_dump(333);
                 var_dump($fd);
+
                 $info = $server->getClientInfo($fd);
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
