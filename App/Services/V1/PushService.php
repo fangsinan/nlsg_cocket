@@ -75,26 +75,26 @@ class PushService
         }else{
             $data_str=$data;
         }
-echo $data_str;
+
         //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
         $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
-print_r($IpLoadArr);
+
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
-//            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-
-            for ($i = 0; $i <= 3 ;$i++){
-                $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-                $res = json_decode($info,true);
-                var_dump($res);
-                var_dump($res['msg']);
-                var_dump($res['msg'] == 1);
-                if($res['msg'] == 1){
-                    break;
-                }
-                echo 'for  for';
-            }
+            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+//
+//            for ($i = 0; $i <= 3 ;$i++){
+//                $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+//                $res = json_decode($info,true);
+//                var_dump($res);
+//                var_dump($res['msg']);
+//                var_dump($res['msg'] == 1);
+//                if($res['msg'] == 1){
+//                    break;
+//                }
+//                echo 'for  for';
+//            }
 
 
 
