@@ -82,6 +82,7 @@ class PushService
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
+            print_r(['live_id'=>$live_id,'data'=>$data_str]);
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
 //
 //            for ($i = 0; $i <= 3 ;$i++){
