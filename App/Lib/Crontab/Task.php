@@ -557,13 +557,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if($liveInfo['is_begin']==1 && $liveInfo['begin_status'] != $liveInfo['is_begin'] ){ //开始直播
                         $is_push=1;
                         $liveObj->update($liveObj->tableName,['begin_status'=>$liveInfo['is_begin']],['id'=>$live_id]);
-                        echo $liveObj->getLastQuery();
                         echo '+++++ '.$is_push.'\n';
+                        echo $liveObj->getLastQuery();
                     }else if($liveInfo['is_begin']==0 && $liveInfo['is_finish']==1 && $liveInfo['begin_status'] != $liveInfo['is_begin'] ){
                         $is_push=1;
                         $liveObj->update($liveObj->tableName,['begin_status'=>$liveInfo['is_begin']],['id'=>$live_id]);
-                        echo $liveObj->getLastQuery();
                         echo '------'.$is_push.' \n ';
+                        echo $liveObj->getLastQuery();
                     }
                     if($is_push) {
                         $live_info = [
