@@ -64,6 +64,11 @@ class Index extends  Controller
 
     public function index()
     {
+//        $url = "http://182.92.56.200:9581/index/broadcast";
+//        $url = "http://39.105.214.152:9581/index/broadcast";
+//        $data_str = '{"controller":"Push","action":"Comment","data":{"content":"快看，11111~","user_id":254378,"live_id":645}}';
+//        $info = PushService::CurlPost($url,['live_id'=>3,'data'=>$data_str]);
+//        var_dump($info);
 //        echo (new Aes())->encrypt('bbab2ae18acc51354c1f438d70a3636933d7b368||1222233232');
         //注意此处如果继承了基类base 数据和提示消息互换
         return $this->writeJson(Status::CODE_OK,[],'success');
@@ -77,14 +82,17 @@ class Index extends  Controller
 
         $params  = $this->request()->getRequestParam();
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        var_dump(111111);
-        var_dump($ListPort);
+
+        print_r('params');
+        print_r($params);
         $PushService=new PushService();
         $rst=$PushService->Broadcast($ListPort['eth0'],$params);
 
         Io::WriteFile('','load_receive',$rst,2);
 
     }
+
+
 
     /**
      * 负载  禁言

@@ -234,6 +234,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $arr[]=json_decode($val,true);
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
+                        print_r('comment_list');
+                        print_r($list);
                         $Redis->ltrim($live_comment.$live_id,$start+1,-1);//删除已取出数据
                         $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
                     }
