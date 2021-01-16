@@ -107,11 +107,14 @@ class PushService
             foreach ($clients as $key => $fd) {
                 var_dump(333);
                 var_dump($fd);
-
+                var_dump(444);
+                var_dump($data);
                 $info = $server->getClientInfo($fd);
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
+                    var_dump(555);
                     $server->push($fd, $data['data']);
+
                 } else {
 //                    $Redis->srem($data['live_id'].':'.$ip,$fd); //删除遍历直播间
 //                    $delkey_flag=$live_id_list.':'.$ip.'_'.$fd;
