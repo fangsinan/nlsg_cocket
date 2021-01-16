@@ -569,6 +569,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         ];
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
+
+
+                        echo   "Task";
                         $PushServiceObj->pushMessage($ListPort['eth0'], $live_id, $data);
                     }
 

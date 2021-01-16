@@ -75,10 +75,10 @@ class PushService
         }else{
             $data_str=$data;
         }
-
+echo $data_str;
         //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
         $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
-
+print_r($IpLoadArr);
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
