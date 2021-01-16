@@ -45,18 +45,18 @@ return [
     'msg_Log'=>'/Log/msg',
 
     //直播key
-    'live_redis_key'=>'livev4_key_', //主要用于存储负载时各个服务器的fd链接  172.17.212.112,51,23,211370  ip,fd,live_id,user_id
+    'live_redis_key'=>'live_key_', //主要用于存储负载时各个服务器的fd链接  172.17.212.112,51,23,211370  ip,fd,live_id,user_id
     //直播人数
-    'live_redis_number'=>'livev4_number_',
-    'live_id_list'=>'livev4_id_list', //记录服务器 fd下对应的直播间和用户信息
-    'live_comment'=>'livev4_comment_',//评论
-    'live_join'=>'livev4_join_',//加入直播间
-    'live_gift'=>'livev4_gift_',//送礼物
+    'live_redis_number'=>'live_number_',
+    'live_id_list'=>'live_id_list', //记录服务器 fd下对应的直播间和用户信息
+    'live_comment'=>'live_comment_',//评论
+    'live_join'=>'live_join_',//加入直播间
+    'live_gift'=>'live_gift_',//送礼物
     'load_ip_arr'=>[ //负载服务器
 //         '172.17.212.118',//182.92.160.30    32 64G
-//         '172.17.212.112',//182.92.56.200    32 64G
+         '172.17.212.112',//182.92.56.200    32 64G
 //         '172.17.111.140',//47.94.35.76      8 16G
-        '172.17.176.246',
+//        '172.17.176.246',
 
     ],
 
