@@ -87,6 +87,7 @@ class Index extends  Controller
         $rst=$PushService->Broadcast($ListPort['eth0'],$params);
 
         Io::WriteFile('','load_receive',$rst,2);
+        return $this->writeJson(Status::CODE_OK,[],$rst);
 
     }
 

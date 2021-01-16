@@ -83,6 +83,7 @@ class PushService
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+            print_r($info);
 //            var_dump($live_id);
 //            var_dump($data_str);
             $sendArr[]=$val.'#'.$info;
@@ -103,7 +104,6 @@ class PushService
         if(!empty($clients)) {
             foreach ($clients as $key => $fd) {
                 $info = $server->getClientInfo($fd);
-                print_r($info);
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
                     $server->push($fd, $data['data']);
