@@ -83,14 +83,20 @@ class PushService
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
 //            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-            for ($i = 0; $i <= 3 ;$i++){
-                $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-                $res = json_decode($info,true);
-                if($res['msg'] == 1){
-                    echo 'for  for';
-                    break;
-                }
-            }
+
+            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+            $res = json_decode($info,true);
+
+            print_r($res);die;
+
+//            for ($i = 0; $i <= 3 ;$i++){
+//                $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+//                $res = json_decode($info,true);
+//                if($res['msg'] == 1){
+//                    echo 'for  for';
+//                    break;
+//                }
+//            }
 
 
 
