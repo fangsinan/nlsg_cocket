@@ -88,6 +88,8 @@ class PushService
                 $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
                 $res = json_decode($info,true);
                 var_dump($res);
+                var_dump($res['msg']);
+                var_dump($res['msg'] == 1);
                 if($res['msg'] == 1){
                     break;
                 }
