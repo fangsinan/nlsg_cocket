@@ -82,8 +82,17 @@ class PushService
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
-            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-            print_r($info);
+//            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+            for ($i = 0; $i <= 3 ;$i++){
+                $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
+                if($info['msg'] == 1){
+                    echo 'for  for';
+                    break;
+                }
+            }
+
+
+
 //            var_dump($live_id);
 //            var_dump($data_str);
             $sendArr[]=$val.'#'.$info;
@@ -107,7 +116,7 @@ class PushService
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
                     $server->push($fd, $data['data']);
-
+                    return 1;
                 } else {
 //                    $Redis->srem($data['live_id'].':'.$ip,$fd); //删除遍历直播间
 //                    $delkey_flag=$live_id_list.':'.$ip.'_'.$fd;
@@ -116,7 +125,7 @@ class PushService
             }
         }
 
-        return 1;
+        return 0;
 
     }
 
