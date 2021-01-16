@@ -65,6 +65,10 @@ class Index extends  Controller
 
     public function index()
     {
+        $url = "http://182.92.56.200:9581/index/broadcast";
+        $data_str = '{"controller":"Push","action":"Comment","data":{"content":"快看，11111~","user_id":254378,"live_id":645}}';
+        $info = PushService::CurlPost($url,['live_id'=>3,'data'=>$data_str]);
+        var_dump($info);
 //        echo (new Aes())->encrypt('bbab2ae18acc51354c1f438d70a3636933d7b368||1222233232');
         //注意此处如果继承了基类base 数据和提示消息互换
         return $this->writeJson(Status::CODE_OK,[],'success');
@@ -88,17 +92,6 @@ class Index extends  Controller
     }
 
 
-
-    public function test(){
-
-        $url = "http://182.92.56.200:9581/index/broadcast";
-        $data_str = '{"controller":"Push","action":"Comment","data":{"content":"快看，11111~","user_id":254378,"live_id":645}}';
-        $info = PushService::CurlPost($url,['live_id'=>3,'data'=>$data_str]);
-        var_dump($info);
-
-
-
-    }
 
     /**
      * 负载  禁言
