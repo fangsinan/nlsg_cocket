@@ -103,6 +103,7 @@ class PushService
         if(!empty($clients)) {
             foreach ($clients as $key => $fd) {
                 $info = $server->getClientInfo($fd);
+                print_r($info);
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
                     $server->push($fd, $data['data']);
