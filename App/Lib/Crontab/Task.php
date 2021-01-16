@@ -553,6 +553,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 //$liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id],'id,status,end_time,is_begin,is_begin_time,is_end_time');
                 $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id,'status'=>1],'id,end_at,is_begin,begin_at,begin_status,is_finish');
                 if(!empty($liveInfo)){
+                    echo $live_id.'\n';
                     $is_push=0;
                     if($liveInfo['is_begin']==1 && $liveInfo['begin_status'] != $liveInfo['is_begin'] ){ //开始直播
                         $is_push=1;
@@ -564,6 +565,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $liveObj->update($liveObj->tableName,['begin_status'=>$liveInfo['is_begin']],['id'=>$live_id]);
                         echo $liveObj->getLastQuery();
                         echo '------'.$is_push.' \n ';
+                    }else{
+                        print_r($liveInfo);
                     }
                     if($is_push) {
                         $live_info = [
@@ -571,6 +574,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             'is_begin' => $liveInfo['is_begin'], //is_begin=0  is_finish=1  直播结束      is_begin=1
                             'is_finish' => $liveInfo['is_finish'],
                         ];
+
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 8, 'content_obj' => $live_info,'ios_content' => $live_info ]);
 
@@ -579,8 +583,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $PushServiceObj->pushMessage($ListPort['eth0'], $live_id, $data);
                     }
 
-
-                    echo "lllllllllll \n";
+                    echo $live_id.'lllllllllll \n';
+                    echo " \n";
 
                 }
             }
