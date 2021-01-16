@@ -85,7 +85,8 @@ class PushService
 //            $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
             for ($i = 0; $i <= 3 ;$i++){
                 $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-                if($info['msg'] == 1){
+                $res = json_decode($info,true);
+                if($res['msg'] == 1){
                     echo 'for  for';
                     break;
                 }
