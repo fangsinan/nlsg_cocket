@@ -79,12 +79,9 @@ class PushService
         //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
         $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
 
-        print_r('data_str');
-        print_r($data_str);
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
-                    var_dump($url);
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
 //            var_dump($live_id);
 //            var_dump($data_str);
@@ -103,21 +100,11 @@ class PushService
         $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
         $clients = $Redis->sMembers ($data['live_id'].':'.$ip); //获取有序集合
 
-
-        print_r('clients');
-        print_r($clients);
         if(!empty($clients)) {
             foreach ($clients as $key => $fd) {
-
                 $info = $server->getClientInfo($fd);
-                var_dump('info');
-                var_dump($info);
-
-
-
                 //判断此fd 是否是一个有效的 websocket 连接
                 if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
-                    var_dump(555);
                     $server->push($fd, $data['data']);
 
                 } else {
