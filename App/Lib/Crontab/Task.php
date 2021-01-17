@@ -235,7 +235,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
 
-                        $Redis->ltrim($live_comment.$live_id,$start+1,-1);//删除已取出数据
+                        $Redis->ltrim($live_comment.$live_id,$start+1,-1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
                         $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$list);
                     }
                 }
@@ -376,7 +376,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 ];
                 $push_info = $pushObj->get($pushObj->tableName,$where,'*');
                 if(!empty($push_info)){
-                    //多个
+                    //每次只取一个
                     $res = self::getLivePushDetail($push_info);
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
                     //推送消息
