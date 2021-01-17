@@ -137,7 +137,7 @@ class EasySwooleEvent implements Event
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
 
-        if ($ListPort['eth0'] == '172.17.212.118' || $ListPort['eth0'] == '172.17.176.246') {  //30服务器
+        if ($ListPort['eth0'] == '172.17.212.118' || $ListPort['eth0'] == '172.17.176.246') {  //30服务器  从redis取出数据
 
             //更新在线人数
             $TaskObj = new Task([
@@ -152,6 +152,25 @@ class EasySwooleEvent implements Event
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
                     Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {  //5s 更新在线人数
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
+            //进入直播间
+            $TaskObj = new Task([
+                'method' => 'Joinlive',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'Join_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {  //2s 扫码评论
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
@@ -198,43 +217,7 @@ class EasySwooleEvent implements Event
 
 
         }
-        if ($ListPort['eth0'] == '172.17.212.112' || $ListPort['eth0'] == '172.17.176.246') { //200服务器
-            //进入直播间
-            $TaskObj = new Task([
-                'method' => 'Joinlive',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'Join_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {  //2s 扫码评论
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
-            //商品推送
-            $TaskObj = new Task([
-                'method' => 'PushProduct',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'pro_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
+        if ($ListPort['eth0'] == '172.17.212.112' || $ListPort['eth0'] == '172.17.176.246') { //200服务器   数据库查询
 
             //公告推送
             $TaskObj = new Task([
@@ -254,6 +237,27 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
+
+            //商品推送
+            $TaskObj = new Task([
+                'method' => 'PushProduct',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'pro_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
+
             //订单推送
             $TaskObj = new Task([
                 'method' => 'getLivePushOrder',
