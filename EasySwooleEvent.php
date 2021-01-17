@@ -137,7 +137,7 @@ class EasySwooleEvent implements Event
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
 
-        if ($ListPort['eth0'] == '172.17.212.118' || $ListPort['eth0'] == '172.17.176.246') {  //30主服务器
+        if ($ListPort['eth0'] == '172.17.212.118' || $ListPort['eth0'] == '172.17.176.246') {  //30服务器
 
             //更新在线人数
             $TaskObj = new Task([
@@ -198,7 +198,7 @@ class EasySwooleEvent implements Event
 
 
         }
-        if ($ListPort['eth0'] == '172.17.212.112' || $ListPort['eth0'] == '172.17.176.246') {
+        if ($ListPort['eth0'] == '172.17.212.112' || $ListPort['eth0'] == '172.17.176.246') { //200服务器
             //进入直播间
             $TaskObj = new Task([
                 'method' => 'Joinlive',
@@ -274,7 +274,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.111.140' || $ListPort['eth0']=='172.17.176.246' ){
+        if($ListPort['eth0']=='172.17.111.140' || $ListPort['eth0']=='172.17.176.246' ){ //76服务器
 
             //开始|结束直播
             $TaskObj = new Task([

@@ -85,20 +85,11 @@ class PushService
             //print_r(['live_id'=>$live_id,'data'=>$data_str]);
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
 //
-//            for ($i = 0; $i <= 3 ;$i++){
-//                $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
-//                $res = json_decode($info,true);
-//                var_dump($res);
-//                var_dump($res['msg']);
-//                var_dump($res['msg'] == 1);
-//                if($res['msg'] == 1){
-//                    break;
-//                }
-//                echo 'for  for';
-//            }
+            /*$res = json_decode($info,true);
+            var_dump($res['msg'] == 1);
+            if($res['msg'] == 1){ //发送成功
 
-
-
+            }*/
 //            var_dump($live_id);
 //            var_dump($data_str);
             $sendArr[]=$val.'#'.$info;
