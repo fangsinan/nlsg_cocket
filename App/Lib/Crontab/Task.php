@@ -476,6 +476,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $live_id = $arr[2];
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
                 $key = 'laravel_database_live_PushOrder_'.$info['live_pid'];
+                echo $key;
                 $res=$Redis->lrange($key,0,-1);// 获取所有数据
                 print_r($res);
                 $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
