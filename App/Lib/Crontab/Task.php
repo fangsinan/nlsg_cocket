@@ -478,11 +478,14 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $key = 'laravel_database_live_PushOrder_'.$info['live_pid'];
 
                 $res=$Redis->lrange($key,0,-1);// 获取所有数据
-                $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
-                $Redis->ltrim($key,count($res),-1);//删除已取出数据
+                if($res){
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
+                    $Redis->ltrim($key,count($res),-1);//删除已取出数据
 
-                //推送消息
-                $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+                    //推送消息
+                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+                }
+
 
 
 
