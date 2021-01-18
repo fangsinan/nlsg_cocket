@@ -136,8 +136,6 @@ class Push extends Controller
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
 
 
-//            $data = json_encode(['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
-//                    'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
             $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
@@ -154,7 +152,6 @@ class Push extends Controller
                 $LiveComment->add(LiveCommentModel::$table,
                     ['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
-                echo $LiveComment->getLastQuery();
             });
 
         }else{
