@@ -475,51 +475,67 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $arr = explode('_', $v);
                 $live_id = $arr[2];
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
-                $OrderInfo=$OrderObj->db
-                    ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
-                    ->where('o.live_id',$info['live_pid'])->where('o.type', [14,16],'in')->where('o.status',1)
-                    ->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
-                    ->orderBy('o.id','ASC')
-                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.relation_id,o.live_num,o.pay_price,o.type');
-                if(!empty($OrderInfo)){
-                    $res=[];
-                    foreach($OrderInfo as $key=>$val){
-                        $val['nickname']=Common::textDecode($val['nickname']);
-                        if($val['type'] == 16){
-                            $res[]=$val['nickname'].':您已成功购买幸福360会员';
-                        }else{
-                            switch ($val['relation_id']){
-                                case 0://360
-                                    $res[]=$val['nickname'].':您已成功购买幸福360会员';
-                                    break;
-                                case 1: //经营能量
-                                    $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
-                                    break;
-                                case 2: //一代天骄
-                                    $res[]=$val['nickname'].':您已支付成功一代天骄定金';
-                                    break;
-                                case 3: //演说能量
-                                    $res[]=$val['nickname'].':您已支付成功演说能量定金';
-                                    break;
-                                case 4: //幸福套餐
-                                    $res[]=$val['nickname'].':您已支付成功幸福套餐';
-                                    break;
-                            }
-                        }
+                $key = 'laravel_database_live_PushOrder_'.$info['live_pid'];
 
-                    }
-                    if(!empty($OrderInfo)){
-                        //修改标记
-                        $idArr=array_column($OrderInfo, 'id');
-                        $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
-                    }
-
+                $res=$Redis->lrange($key,0,-1);// 获取所有数据
+                if($res){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
+                    $Redis->ltrim($key,count($res),-1);//删除已取出数据
 
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
-
                 }
+
+
+
+
+//                $OrderInfo=$OrderObj->db
+//                    ->join($UserObj->tableName . ' u', 'o.user_id=u.id', 'left')
+//                    ->where('o.live_id',$info['live_pid'])->where('o.type', [14,16],'in')->where('o.status',1)
+//                    ->where('is_live_order_send',0) //->where('o.pay_price',1,'>')
+//                    ->orderBy('o.id','ASC')
+//                    ->get($OrderObj->tableName .' o',null,'o.id,u.nickname,o.relation_id,o.live_num,o.pay_price,o.type');
+//                if(!empty($OrderInfo)){
+//                    $res=[];
+//                    foreach($OrderInfo as $key=>$val){
+//                        $val['nickname']=Common::textDecode($val['nickname']);
+//                        if($val['type'] == 16){
+//                            $res[]=$val['nickname'].':您已成功购买幸福360会员';
+//                        }else{
+//                            switch ($val['relation_id']){
+//                                case 0://360
+//                                    $res[]=$val['nickname'].':您已成功购买幸福360会员';
+//                                    break;
+//                                case 1: //经营能量
+//                                    $res[]=$val['nickname'].':您已成功购买'.$val['live_num'].'张经营能量门票';
+//                                    break;
+//                                case 2: //一代天骄
+//                                    $res[]=$val['nickname'].':您已支付成功一代天骄定金';
+//                                    break;
+//                                case 3: //演说能量
+//                                    $res[]=$val['nickname'].':您已支付成功演说能量定金';
+//                                    break;
+//                                case 4: //幸福套餐
+//                                    $res[]=$val['nickname'].':您已支付成功幸福套餐';
+//                                    break;
+//                            }
+//                        }
+//
+//                    }
+//                    print_r($res);
+//
+//                    if(!empty($OrderInfo)){
+//                        //修改标记
+//                        $idArr=array_column($OrderInfo, 'id');
+//                        $OrderObj->update($OrderObj->tableName,['is_live_order_send'=>1],['id'=>$idArr]);
+//                    }
+//
+//                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
+//
+//                    //推送消息
+//                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+//
+//                }
 
             }
             return [
