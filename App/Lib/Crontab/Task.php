@@ -374,11 +374,14 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_done' => 0,
                     'is_del' => 0,
                 ];
-                $field = 'live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done';
+                $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done';
                 $push_info = $pushObj->getOne($pushObj->tableName,$where,$field);
+                print_r($push_info);
                 if(!empty($push_info)){
                     //多个
                     $res = self::getLivePushDetail([$push_info]);
+                    print_r($res);
+
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
