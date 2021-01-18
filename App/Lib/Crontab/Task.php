@@ -480,6 +480,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $res=$Redis->lrange($key,0,-1);// 获取所有数据
                 print_r($res);
                 $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
+                print_r($data);
                 $Redis->ltrim($key,count($res),-1);//删除已取出数据
 
                 //推送消息
