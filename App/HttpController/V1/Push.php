@@ -133,7 +133,8 @@ class Push extends Controller
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
 
 //            $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
-            $content = $UserInfo['result']['content'];
+            $content = $UserInfo['result']['content']; //入库内容信息 处理表情
+
 
 //            $data = json_encode(['type' => 2, 'content' =>Common::textDecode($content),'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
 //                    'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);

@@ -86,7 +86,8 @@ class UserService
             if(!empty($lupInfo)){ //管理员不过滤
                 $UserInfo['content']=$content;
             }else {
-                $UserInfo['content'] = Common::filterStr($content);
+//                $UserInfo['content'] = Common::filterStr($content);
+                $UserInfo['content'] = $content;
             }
         }
 
