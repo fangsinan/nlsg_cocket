@@ -36,7 +36,7 @@ class Common
         $UserInfo['content'] = mysql_escape_string ($content);
         $UserInfo['content'] ="'" . mysql_real_escape_string(stripslashes($content)) . "'";*/
 
-        $reg = '/([a-zA-Z0-5]|7|8|9|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
+        $reg = '/([a-zA-Z2-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
 //        $reg = '/([a-zA-Z]|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
         $replace = Common::textDecode('\ud83c\udf39');  // 替换成此字符串
         $str = preg_replace($reg, $replace, $str);  // 进行替换
