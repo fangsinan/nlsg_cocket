@@ -374,7 +374,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'is_done' => 0,
                     'is_del' => 0,
                 ];
-                $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done';
+                $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done,length';
                 $push_info = $pushObj->getOne($pushObj->tableName,$where,$field);
                 if(!empty($push_info)){
                     //多个
