@@ -13,6 +13,7 @@ use App\Lib\Message\Status;
 use App\Lib\Redis\Redis;
 use App\Model\V1\Column;
 use App\Model\V1\Goods;
+use App\Model\V1\Live;
 use App\Model\V1\LiveCommentModel;
 use App\Model\V1\LiveForbiddenWordsModel;
 use App\Model\V1\LiveInfo;
@@ -134,10 +135,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*');
             if(!empty($listRst)){
                 $LiveModel=new LiveNumberModel();
+                $LiveObj=new Live();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
                     $num=$Redis->scard($live_id_key.$live_id); //获取成员数据
+                    $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
+                    $num=$num+$Liveinfo['virtual_online_num'];
                     $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
                     if($num>100) {
                         //实时数据入库
