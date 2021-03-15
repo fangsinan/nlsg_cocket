@@ -410,6 +410,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         $workObj  = new Works();
         $WorkInfoObj=new WorksInfo();
         $goodsObj = new Goods();
+        $liveObj = new Live();
         foreach($push_info as $key=>$val){
             //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量
             //push_gid 推送产品id，专栏id  精品课id  商品id
@@ -435,6 +436,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'image'=>'/nlsg/works/20201124144228445466.png', //大图
                     'img'=>'/nlsg/works/20201124144228445465.png'
                 ];
+            }else if($val['push_type'] == 9){
+                $fields = 'id, title, describe, cover_img,begin_at, end_at, user_id, price';
+                $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
             }
             if($Info){
                 $res[]= [
