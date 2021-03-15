@@ -437,7 +437,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'img'=>'/nlsg/works/20201124144228445465.png'
                 ];
             }else if($val['push_type'] == 9){
-                $fields = 'id, title, describe, cover_img,begin_at, end_at, user_id, price';
+                $fields = 'id, title, describe, cover_img,begin_at, end_at, user_id, price, is_free';
                 $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
             }
             if($Info){
