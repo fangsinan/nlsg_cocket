@@ -381,11 +381,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done,length';
                 $push_info = $pushObj->getOne($pushObj->tableName,$where,$field);
                 if(!empty($push_info)){
-                    echo 111;
-                    print_r($push_info);
                     //多个
                     $res = self::getLivePushDetail([$push_info]);
-                    print_r($res);
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
@@ -442,11 +439,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }else if($val['push_type'] == 9){
                 $fields = 'id, title name, `describe` subtitle, cover_img img,cover_img image,begin_at, end_at, user_id, price, is_free';
                 $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
-                print_r($Info);
                 $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid']],"id");
                 $Info['live_info_id'] = $live_Info['id'];
-                print_r($Info);
-
             }
             if($Info){
                 $res[]= [
