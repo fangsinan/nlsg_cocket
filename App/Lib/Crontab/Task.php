@@ -381,6 +381,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done,length';
                 $push_info = $pushObj->getOne($pushObj->tableName,$where,$field);
                 if(!empty($push_info)){
+                    echo 111;
+                    print_r($push_info);
                     //多个
                     $res = self::getLivePushDetail([$push_info]);
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
