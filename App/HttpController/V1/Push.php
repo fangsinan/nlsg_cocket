@@ -94,7 +94,7 @@ class Push extends Controller
                     $RedisObj->rpush($live_join . $live_id, $data);
                 }
                 $LiveLogin=new LiveLoginModel();
-                $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'ctime'=>time()]);
+                $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'live_id'=>$live_id,'ctime'=>time()]);
 
             });
         }else{
