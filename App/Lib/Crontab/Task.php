@@ -433,8 +433,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     'name'=>'幸福360会员',
                     'price'=>360,
                     'subtitle'=>'',
-                    'image'=>'/nlsg/works/20201124144228445466.png', //大图
-                    'img'=>'/nlsg/works/20201124144228445465.png'
+                    'image'=>'/nlsg/works/20201124144228445465.png', //方图
+                    'img'=>'/nlsg/works/20201124144228445466.png'  //长图
                 ];
             }else if($val['push_type'] == 9){
                 $fields = 'id, title name, `describe` subtitle, cover_img img,cover_img image,begin_at, end_at, user_id, price, is_free';
