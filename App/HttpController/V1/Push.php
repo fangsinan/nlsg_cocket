@@ -146,12 +146,16 @@ class Push extends Controller
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid) {
 
+                echo $live_id;
+                echo $live_pid;
+
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_comment.$live_id,$data);
 
                 $LiveComment=new LiveCommentModel();
+                //此时的live_Id 用的是直播间id
                 $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_id,'live_info_id'=>$live_pid,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
+                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
             });
 
