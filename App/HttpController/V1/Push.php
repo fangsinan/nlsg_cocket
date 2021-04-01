@@ -130,6 +130,7 @@ class Push extends Controller
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
+            $live_pid=$infoPid['live_pid'];
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
 
             $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
@@ -143,14 +144,14 @@ class Push extends Controller
 
             $live_comment=Config::getInstance()->getConf('web.live_comment');
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment) {
+            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid) {
 
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_comment.$live_id,$data);
 
                 $LiveComment=new LiveCommentModel();
                 $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
+                    ['live_id'=>$live_pid,'live_info_id'=>$live_pid,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
             });
 
