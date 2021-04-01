@@ -151,7 +151,7 @@ class Push extends Controller
 
                 $LiveComment=new LiveCommentModel();
                 $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_pid,'live_info_id'=>$live_pid,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
+                    ['live_id'=>$live_id,'live_info_id'=>$live_pid,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
             });
 
