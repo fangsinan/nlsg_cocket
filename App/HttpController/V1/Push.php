@@ -158,6 +158,7 @@ class Push extends Controller
                 $LiveComment->add(LiveCommentModel::$table,
                     ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
+                echo $LiveComment->getLastQuery();
             });
 
         }else{
