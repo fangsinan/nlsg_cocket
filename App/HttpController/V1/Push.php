@@ -148,9 +148,7 @@ class Push extends Controller
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid) {
 
-                echo $live_id;
-                echo $live_pid;
-
+                echo $content."--";
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_comment.$live_id,$data);
 
