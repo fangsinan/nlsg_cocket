@@ -370,10 +370,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                //$noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_send'=>1,'is_del'=>0,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type');
                 $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>2, 'is_send'=>1,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type,is_del');
                 if(!empty($noticeList)){
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 13,'ios_content' =>$noticeList, 'content' =>$noticeList,'content_obj' =>$noticeList ]);
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 13,'ios_content' =>$noticeList, 'content' =>$noticeList, ]);
                     //修改标记
                     $idArr=array_column($noticeList, 'id');
                     $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
