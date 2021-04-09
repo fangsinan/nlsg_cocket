@@ -238,6 +238,26 @@ class EasySwooleEvent implements Event
                 }
             });
 
+
+            //笔记推送
+            $TaskObj = new Task([
+                'method' => 'pushNoticeType',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'notice_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //10s 发送公告
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        TaskManager::sync($TaskObj);
+                    });
+                }
+            });
+
             //商品推送
             $TaskObj = new Task([
                 'method' => 'PushProduct',

@@ -143,10 +143,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
                     $num=$num+$Liveinfo['virtual_online_num'];
                     $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
-
+                    if($num>10) {
                         //实时数据入库
                         $LiveModel->add(LiveNumberModel::$table,['live_id'=>$live_id,'count'=>$num,'time'=>time()]);
-                    if($num>10) { }
+                    }
                 }
             }
             return [
@@ -326,9 +326,53 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'is_send'=>1,'is_del'=>0,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>1, 'is_send'=>1,'is_del'=>0,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type');
                 if(!empty($noticeList)){
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0] ]);
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content' =>$noticeList[0],'content_obj' =>$noticeList[0]]);
+                    //修改标记
+                    $idArr=array_column($noticeList, 'id');
+                    $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
+
+                    //推送消息
+                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+
+                }
+            }
+            return [
+                'data' => $idArr,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
+
+
+    //发送笔记 13
+    public function pushNoticeType($taskId, $fromWorkerId,$data,$path){
+
+        try {
+
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $noticeObj  = new LiveNotice();
+            $PushServiceObj=new PushService();
+            $Redis = new Redis();
+            //获取所有在线直播id
+//            keys live_key_*
+            $listRst=$Redis->keys($live_id_key.'*');
+            if(empty($listRst)) return '';
+            $idArr=[];
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            foreach($listRst as $key => $val){
+                $arr = explode ('_', $val);
+                $live_id=$arr[2];
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>2, 'is_send'=>1,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type,is_del');
+                if(!empty($noticeList)){
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 13,'ios_content' =>$noticeList, 'content' =>$noticeList, ]);
                     //修改标记
                     $idArr=array_column($noticeList, 'id');
                     $noticeObj->update($noticeObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
