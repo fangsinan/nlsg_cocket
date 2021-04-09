@@ -486,7 +486,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid']],"id");
                 $Info['live_info_id'] = $live_Info['id'];
             }else if($val['push_type'] == 10){ //外链
-                $fields = 'id, name, content, `url`,image,img';
+                $fields = 'id, name, `describe`, `url`,image,img';
                 $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid']],$fields);
                 
             }
