@@ -488,7 +488,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }else if($val['push_type'] == 10){ //外链
                 $fields = 'id, name, `describe`, `url`,image,img';
                 $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid']],$fields);
-                
+                echo $liveObj->getLastQuery();
             }
             if($Info){
                 $res[]= [
