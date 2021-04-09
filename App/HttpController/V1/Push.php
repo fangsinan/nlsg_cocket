@@ -146,8 +146,9 @@ class Push extends Controller
             $user_id=$UserInfo['result']['id'];
 
             $live_comment=Config::getInstance()->getConf('web.live_comment');
+            $rk_comment=$message['content']; //入库信息不转义
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid) {
+            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment) {
 
                 echo $content."--";
                 $RedisObj=new Redis();
@@ -156,7 +157,7 @@ class Push extends Controller
                 $LiveComment=new LiveCommentModel();
                 //此时的live_Id 用的是直播间id
                 $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$content,'created_at'=>date('Y-m-d H:i:s',time())]
+                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
                 echo $LiveComment->getLastQuery();
             });
