@@ -136,8 +136,6 @@ class Push extends Controller
 //            $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
 
-            echo $content.'==<br>';
-
 //            $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
 //                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
             $data = json_encode(['type' => 2, 'content_text'=>$content, 'userinfo' => ['user_id'=>$message['user_id'],
@@ -150,7 +148,6 @@ class Push extends Controller
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment) {
 
-                echo $content."--";
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_comment.$live_id,$data);
 
@@ -159,7 +156,6 @@ class Push extends Controller
                 $LiveComment->add(LiveCommentModel::$table,
                     ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
-                echo $LiveComment->getLastQuery();
             });
 
         }else{
