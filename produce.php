@@ -49,7 +49,8 @@ return [
     ],
 
     'MYSQL'=>[
-        'host'          => 'rm-2ze0owc97gckfqz8q.mysql.rds.aliyuncs.com',
+        'host'          => 'pc-2ze52g145e143cs50.rwlb.rds.aliyuncs.com',
+        #'host'          => 'eoy62ktxmkua664nxx9c-rw4rm.rwlb.rds.aliyuncs.com',
         'port'          => '3306',
         'user'          => 'bj_nlsg_v4',
         'timeout'       => '5',
@@ -61,7 +62,8 @@ return [
     ],
 
     'REDIS'=>[
-        'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
+        #'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
+        'host'          => '172.17.212.131',
         'port'          => '6379',
         'auth'          => 'NLSG2020*beijin*0906BJ',
         'POOL_MAX_NUM'  => '20',
