@@ -76,12 +76,14 @@ class PushService
             $data_str=$data;
         }
 
-        //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
-        $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
-
         $Redis = new Redis();
         $resultData = $Redis->get('live_serverload_iplist'); //服务器ip列表
-        $IpLoadArr=explode(',',$resultData);
+        if(!empty($resultData)){
+            $IpLoadArr=explode(',',$resultData);
+        }else{
+            //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
+            $IpLoadArr=Config::getInstance ()->getConf ('web.load_ip_arr');
+        }
 
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
