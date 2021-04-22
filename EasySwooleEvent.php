@@ -137,7 +137,7 @@ class EasySwooleEvent implements Event
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
 
-        if ($ListPort['eth0'] == '172.17.212.112' || $ListPort['eth0'] == '172.17.176.246') {  //30服务器  从redis取出数据
+        if ($ListPort['eth0'] == '172.17.212.131' || $ListPort['eth0'] == '172.17.176.246') {  //30服务器  从redis取出数据
 
             //更新在线人数
             $TaskObj = new Task([
@@ -215,10 +215,6 @@ class EasySwooleEvent implements Event
                 }
             });
 
-
-        }
-        if ($ListPort['eth0'] == '172.17.212.131' || $ListPort['eth0'] == '172.17.176.246') { //200服务器   数据库查询
-
             //公告推送
             $TaskObj = new Task([
                 'method' => 'pushNotice',
@@ -237,7 +233,6 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
-
 
             //笔记推送
             $TaskObj = new Task([
