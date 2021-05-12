@@ -448,6 +448,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     //产品推送扩展
     public static function getLivePushDetail($push_info){
+        print_r($push_info);
         //获取产品信息
         $res=[];
         $colObj   = new Column();
@@ -497,7 +498,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             }
 
         }
-
+        print_r($fields);
         if(!empty($push_info)){
 
             //修改标记
