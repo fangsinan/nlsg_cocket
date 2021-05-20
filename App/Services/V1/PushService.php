@@ -78,7 +78,6 @@ class PushService
 
         $Redis = new Redis();
         $resultData = $Redis->get('live_serverload_iplist'); //服务器ip列表
-        print_r($resultData);
         if(!empty($resultData)){
             $IpLoadArr=explode(',',$resultData);
         }else{
@@ -89,7 +88,6 @@ class PushService
         $sendArr=[];
         foreach ($IpLoadArr as $key=>$val){
             $url = "http://$val:9581/index/broadcast";
-            echo $url;
             //print_r(['live_id'=>$live_id,'data'=>$data_str]);
             $info = self::CurlPost($url,['live_id'=>$live_id,'data'=>$data_str]);
 //

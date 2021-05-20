@@ -82,12 +82,6 @@ class Index extends  Controller
 
         $params  = $this->request()->getRequestParam();
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        print_r("------");
-        print_r($ListPort);
-
-        print_r($params);
-        print_r($ListPort['eth0']);
-        print_r("+++++++");
         $PushService=new PushService();
         $rst=$PushService->Broadcast($ListPort['eth0'],$params);
 
