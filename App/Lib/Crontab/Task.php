@@ -470,7 +470,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $fields = 'id,name,price,subtitle,picture img';
                 $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
             }else if($val['push_type'] == 4){ //线下门票
-                $fields = 'id,title name,price,subtitle,image img,cover_img image,off_line_pay_type';
+                $fields = 'id,title name,price,subtitle,image img,cover_img image';
                 $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
             }else if($val['push_type'] == 6){
                 $Info=[
