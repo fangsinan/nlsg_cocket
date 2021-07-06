@@ -132,13 +132,14 @@ class Push extends Controller
             $live_id=$message['live_id'];
             $live_pid=$infoPid['live_pid'];
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
+            $live_son_flag=$message['live_son_flag'];
 
 //            $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
 
 //            $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
 //                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
-            $data = json_encode(['type' => 2, 'content_text'=>$content, 'userinfo' => ['user_id'=>$message['user_id'],
+            $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
             $user_id=$UserInfo['result']['id'];
@@ -146,7 +147,7 @@ class Push extends Controller
             $live_comment=Config::getInstance()->getConf('web.live_comment');
             $rk_comment=$message['content']; //入库信息不转义
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment) {
+            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag) {
 
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_comment.$live_id,$data);
@@ -154,7 +155,7 @@ class Push extends Controller
                 $LiveComment=new LiveCommentModel();
                 //此时的live_Id 用的是直播间id
                 $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'created_at'=>date('Y-m-d H:i:s',time())]
+                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'live_son_flag' => $live_son_flag ,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
             });
 
