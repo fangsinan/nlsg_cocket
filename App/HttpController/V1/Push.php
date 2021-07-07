@@ -76,7 +76,7 @@ class Push extends Controller
             $RedisObj=new Redis();
             $RedisObj->incr($redis_flag_key);
             $live_son_flag_num = $RedisObj->get($redis_flag_key);
-            print_r($live_son_flag_num);
+            
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
