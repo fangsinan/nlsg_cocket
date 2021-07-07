@@ -67,10 +67,16 @@ class Push extends Controller
         $user_id = $message['user_id'];
         $live_id = $message['live_id'];
         $live_son_flag = $message['live_son_flag']?$message['live_son_flag']:0;
-        
+
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
+
+            $redis_flag_key = Config::getInstance()->getConf('web.live_son_flag').$live_id.'_'.$live_son_flag;
+            $RedisObj=new Redis();
+            $RedisObj->incr($redis_flag_key);
+            $live_son_flag_num = $RedisObj->get($redis_flag_key);
+            print_r($live_son_flag_num);
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
@@ -79,6 +85,7 @@ class Push extends Controller
             $data = json_encode([
                 'type' => 5,
                 'content_text' => '进入直播间',
+                'live_son_flag_num' => $live_son_flag_num,
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $live_join=Config::getInstance()->getConf('web.live_join');
@@ -96,7 +103,6 @@ class Push extends Controller
                 }
                 $LiveLogin=new LiveLoginModel();
                 $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'live_id'=>$live_id,'live_son_flag'=>$live_son_flag, 'ctime'=>time()]);
-
             });
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
