@@ -66,7 +66,8 @@ class Push extends Controller
 
         $user_id = $message['user_id'];
         $live_id = $message['live_id'];
-
+        $live_son_flag = $message['live_son_flag']?$message['live_son_flag']:0;
+        
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
@@ -87,14 +88,14 @@ class Push extends Controller
 //            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
 
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info) {
+            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
 
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
                     $RedisObj = new Redis();
                     $RedisObj->rpush($live_join . $live_id, $data);
                 }
                 $LiveLogin=new LiveLoginModel();
-                $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'live_id'=>$live_id,'ctime'=>time()]);
+                $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'live_id'=>$live_id,'live_son_flag'=>$live_son_flag, 'ctime'=>time()]);
 
             });
         }else{
