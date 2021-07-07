@@ -85,6 +85,7 @@ class Push extends Controller
             $data = json_encode([
                 'type' => 5,
                 'content_text' => '进入直播间',
+                'live_son_flag' => $live_son_flag,
                 'live_son_flag_num' => $live_son_flag_num,
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
