@@ -82,19 +82,23 @@ class Push extends Controller
 
             $live_join=Config::getInstance()->getConf('web.live_join');
             $infoObj = new LiveInfo();
-            $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+            $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
             $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
 //            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
 
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info) {
+            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$infoPid) {
 
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
                     $RedisObj = new Redis();
                     $RedisObj->rpush($live_join . $live_id, $data);
                 }
-                $LiveLogin=new LiveLoginModel();
-                $LiveLogin->add(LiveLoginModel::$table,['user_id'=>$user_id,'live_id'=>$live_id,'ctime'=>time()]);
+//                if(!empty($infoPid['is_begin'])) { //直播中
+                    $time=time();
+                    $created_at=date('Y-m-d H:i:s',$time);
+                    $LiveLogin = new LiveLoginModel();
+                    $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'created_at'=>$created_at]);
+//                }
 
             });
         }else{

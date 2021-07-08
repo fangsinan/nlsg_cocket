@@ -20,6 +20,7 @@ use App\Model\V1\LiveInfo;
 use App\Model\V1\LiveNotice;
 //use App\Model\User;
 use App\Model\V1\LiveNumberModel;
+use App\Model\V1\LiveOnlineUser;
 use App\Model\V1\LivePush;
 use App\Model\V1\User;
 use App\Model\V1\Order;
@@ -121,6 +122,59 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     12=>打赏推送到评论区                   1
      */
 
+    //抓取实时在线人数用户明细
+    public function onlineUser($taskId, $fromWorkerId,$data,$path){
+
+        try {
+            //获取redis
+            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
+            $Redis = new Redis();
+
+            //获取所有在线直播id
+//            keys  live_key_*
+            $listRst=$Redis->keys($live_id_key.'*'); //获取多个直播间
+            if(!empty($listRst)){
+                $LiveOnlineUserObj=new LiveOnlineUser();
+                $LiveInfoObj=new LiveInfo();
+                foreach ($listRst as $val){
+                    $arr = explode ('_', $val);
+                    $live_id=$arr[2];
+                    $now_time=date('Y-m-d H:i:s');
+                    //获取直播间信息
+                    $Liveinfo = $LiveInfoObj->db->where('id',$live_id)->getOne($LiveInfoObj->tableName, 'is_begin');
+                    if(!empty($Liveinfo['is_begin'])) { //直播中
+                        $clients = $Redis->sMembers($live_id_key . $live_id); //获取直播间有序集合
+                        if (!empty($clients)) {
+                            $map=[];
+                            foreach ($clients as $k => $v) {
+                                $user_arr = explode (',', $v); //ip,user_id,fd
+                                $map[]=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time];
+                                $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
+                                if(($k+1)%1000==0){
+                                    //数据入库
+                                    $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
+                                    $map=[]; //初始化
+                                }
+                            }
+                            if(!empty($map)){
+                                $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
+                            }
+                        }
+                    }
+                }
+            }
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
     //生成在线人数
     public function onlineNumber($taskId, $fromWorkerId,$data,$path){
 
@@ -136,6 +190,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             if(!empty($listRst)){
                 $LiveModel=new LiveNumberModel();
                 $LiveObj=new Live();
+                $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
@@ -143,10 +198,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
                     $num=$num+$Liveinfo['virtual_online_num'];
                     $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
-                    if($num>10) {
-                        //实时数据入库
-                        $LiveModel->add(LiveNumberModel::$table,['live_id'=>$live_id,'count'=>$num,'time'=>time()]);
+
+                    $Liveinfo = $LiveInfoObj->db->where('id',$live_id)->getOne($LiveInfoObj->tableName, 'is_begin');
+                    if(!empty($Liveinfo['is_begin'])) { //直播中
+                        //数据入库
+                        $LiveModel->add(LiveNumberModel::$table, ['live_id' => $live_id, 'count' => $num, 'time' => time()]);
                     }
+
                 }
             }
             return [

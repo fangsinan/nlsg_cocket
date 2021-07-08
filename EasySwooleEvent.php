@@ -313,6 +313,25 @@ class EasySwooleEvent implements Event
                 }
             });
 
+            //实时在线人数明细处理
+            $TaskObj = new Task([
+                'method' => 'onlineUser',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'onlineUser_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
             //禁言
             $TaskObj = new Task([
                 'method' => 'pushForbiddenWords',
