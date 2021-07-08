@@ -66,10 +66,17 @@ class Push extends Controller
 
         $user_id = $message['user_id'];
         $live_id = $message['live_id'];
+        $live_son_flag = $message['live_son_flag']?$message['live_son_flag']:0;
 
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
+
+            $redis_flag_key = Config::getInstance()->getConf('web.live_son_flag').$live_id.'_'.$live_son_flag;
+            $RedisObj=new Redis();
+            $RedisObj->incr($redis_flag_key);
+            $live_son_flag_num = $RedisObj->get($redis_flag_key);
+            
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
@@ -78,6 +85,8 @@ class Push extends Controller
             $data = json_encode([
                 'type' => 5,
                 'content_text' => '进入直播间',
+                'live_son_flag' => $live_son_flag,
+                'live_son_flag_num' => $live_son_flag_num,
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $live_join=Config::getInstance()->getConf('web.live_join');
@@ -87,19 +96,16 @@ class Push extends Controller
 //            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
 
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$infoPid) {
+            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
 
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
                     $RedisObj = new Redis();
                     $RedisObj->rpush($live_join . $live_id, $data);
                 }
-//                if(!empty($infoPid['is_begin'])) { //直播中
-                    $time=time();
-                    $created_at=date('Y-m-d H:i:s',$time);
-                    $LiveLogin = new LiveLoginModel();
-                    $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'created_at'=>$created_at]);
-//                }
-
+                $time=time();
+                $created_at=date('Y-m-d H:i:s',$time);
+                $LiveLogin = new LiveLoginModel();
+                $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
             });
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
@@ -136,13 +142,14 @@ class Push extends Controller
             $live_id=$message['live_id'];
             $live_pid=$infoPid['live_pid'];
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
+            $live_son_flag=$message['live_son_flag'];
 
 //            $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
 
 //            $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
 //                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
-            $data = json_encode(['type' => 2, 'content_text'=>$content, 'userinfo' => ['user_id'=>$message['user_id'],
+            $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
             $user_id=$UserInfo['result']['id'];
@@ -150,7 +157,7 @@ class Push extends Controller
             $live_comment=Config::getInstance()->getConf('web.live_comment');
             $rk_comment=$message['content']; //入库信息不转义
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment) {
+            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag) {
 
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_comment.$live_id,$data);
@@ -158,7 +165,7 @@ class Push extends Controller
                 $LiveComment=new LiveCommentModel();
                 //此时的live_Id 用的是直播间id
                 $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'created_at'=>date('Y-m-d H:i:s',time())]
+                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'live_son_flag' => $live_son_flag ,'created_at'=>date('Y-m-d H:i:s',time())]
                 );
             });
 
