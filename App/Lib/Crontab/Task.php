@@ -149,7 +149,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             foreach ($clients as $k => $v) {
                                 $user_arr = explode (',', $v); //ip,user_id,fd
                                 $map[]=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time];
-                                $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
                                 if(($k+1)%1000==0){
                                     //数据入库
                                     $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
@@ -198,7 +197,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
                     $num=$num+$Liveinfo['virtual_online_num'];
                     $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
-
+                    
                     $Liveinfo = $LiveInfoObj->db->where('id',$live_id)->getOne($LiveInfoObj->tableName, 'is_begin');
                     if(!empty($Liveinfo['is_begin'])) { //直播中
                         //数据入库
