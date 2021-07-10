@@ -145,19 +145,16 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if(!empty($Liveinfo['is_begin'])) { //直播中
                         $clients = $Redis->sMembers($live_id_key . $live_id); //获取直播间有序集合
                         if (!empty($clients)) {
-                            $map=[];
+//                            $map=[];
                             foreach ($clients as $k => $v) {
                                 $user_arr = explode (',', $v); //ip,user_id,fd
-                                $map[]=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time];
-                                if(($k+1)%1000==0){
-                                    //数据入库
-                                    $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
-                                    $map=[]; //初始化
-                                }
+                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time];
+//                                $map[]=$OnlineUserArr;
+                                $Redis->rpush ('online_user_'.$live_id, json_encode($OnlineUserArr)); //从队尾插入  先进先出
                             }
-                            if(!empty($map)){
-                                $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
-                            }
+//                            if(!empty($map)){
+//                                $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
+//                            }
                         }
                     }
                 }
