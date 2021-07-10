@@ -134,7 +134,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 //            keys  live_key_*
             $listRst=$Redis->keys($live_id_key.'*'); //获取多个直播间
             if(!empty($listRst)){
-                $LiveOnlineUserObj=new LiveOnlineUser();
+//                $LiveOnlineUserObj=new LiveOnlineUser();
                 $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
