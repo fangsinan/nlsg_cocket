@@ -123,14 +123,16 @@ class WebSocketEvent
         $params=$request->get;
         if(empty($params['live_id'])){$params['live_id']=0;}
         if(empty($params['user_id'])){$params['user_id']=0;}
+        if(empty($params['live_son_flag'])){$params['live_son_flag']=0;}
         $live_id=$params['live_id']+0;
         $user_id=$params['user_id']+0;
+        $live_son_flag=$params['live_son_flag']+0;
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
         $Redis = new Redis();
         $live_redis_key=Config::getInstance ()->getConf ('web.live_redis_key');
         $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
-        $Redis->sAdd ($live_redis_key.$live_id, $ListPort['eth0'].','.$user_id.','.$request->fd);//加入直播间    11live_key_28=ip,user_id,fd
+        $Redis->sAdd ($live_redis_key.$live_id, $ListPort['eth0'].','.$user_id.','.$request->fd.','.$live_son_flag);//加入直播间    11live_key_28=ip,user_id,fd
         $Redis->sAdd ($live_id.':'.$ListPort['eth0'], $request->fd); //当前服务器直播间对应fd用于遍历发送     live_id:ip=fd
         //记录关闭连接标记  因为关闭只有一个fd值用于方便关闭对应直播间记录
         $Redis->set($live_id_list.':'.$ListPort['eth0'].'_'.$request->fd,$live_id.','.$user_id,18000); //5小时  live_id_list:ip_fd=live_id,user_id

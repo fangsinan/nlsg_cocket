@@ -253,6 +253,25 @@ class EasySwooleEvent implements Event
                 }
             });
 
+            //处理redis在线用户数据入库
+            $TaskObj = new Task([
+                'method' => 'PushLiveUser',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'liveuser_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(30 * 1000, function () use ($TaskObj) {
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
         }
 
         if($ListPort['eth0']=='172.17.212.130' || $ListPort['eth0']=='172.17.176.246' ){ //76服务器

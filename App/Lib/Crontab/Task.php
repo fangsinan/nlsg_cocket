@@ -134,7 +134,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 //            keys  live_key_*
             $listRst=$Redis->keys($live_id_key.'*'); //获取多个直播间
             if(!empty($listRst)){
-//                $LiveOnlineUserObj=new LiveOnlineUser();
                 $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
@@ -145,20 +144,52 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if(!empty($Liveinfo['is_begin'])) { //直播中
                         $clients = $Redis->sMembers($live_id_key . $live_id); //获取直播间有序集合
                         if (!empty($clients)) {
-//                            $map=[];
                             foreach ($clients as $k => $v) {
-                                $user_arr = explode (',', $v); //ip,user_id,fd
-                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time];
-//                                $map[]=$OnlineUserArr;
-                                $Redis->rpush ('online_user_'.$live_id, json_encode($OnlineUserArr)); //从队尾插入  先进先出
+                                $user_arr = explode (',', $v); //ip,user_id,fd,live_son_flag
+                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time,'live_son_flag'=>$user_arr[3]];
+                                $Redis->rpush ('online_user_list', json_encode($OnlineUserArr)); //从队尾插入  先进先出   全写入一个队列
                             }
-//                            if(!empty($map)){
-//                                $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
-//                            }
                         }
                     }
                 }
             }
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
+    //入库在线用户数据
+    public function PushLiveUser($taskId, $fromWorkerId,$data,$path){
+
+        try {
+            $Redis = new Redis();
+            $LiveOnlineUserObj=new LiveOnlineUser();
+            $num=$Redis->llen('online_user_list');
+            if (!empty($num) && $num>0) {
+                $map=[];
+                $length=($num>=10000)?10000:$num;
+                for ($n=0;$n<$length;$n++){ //遍历10000条
+                    $val=$Redis->lPop('online_user_list');
+                    $map[]=json_decode($val,true);
+                }
+
+                if(!empty($map)){
+                    $rst=$LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map,0);
+                    if(!$rst){//执行失败，回写数据
+                        foreach ($map as $v) {
+                            $Redis->rpush('online_user_list', json_encode($v)); //从队尾插入  先进先出   全写入一个队列
+                        }
+                    }
+                }
+            }
+
             return [
                 'data' => 1,
                 'path' => $path
