@@ -54,7 +54,7 @@ return [
         'port'          => '3306',
         'user'          => 'bj_nlsg_v4',
         'timeout'       => '5',
-        'charset'       => 'utf8',
+        'charset'       => 'utf8mb4',//utf8mb4
         'password'      => 'Rds_&0331$NLSG^v3@_V4',
         'database'      => 'nlsg_v4',
         'POOL_MAX_NUM'  => '20',
