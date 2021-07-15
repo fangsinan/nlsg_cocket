@@ -139,6 +139,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
                     $now_time=date('Y-m-d H:i:s');
+                    $online_time_str=substr($now_time,0,16);
                     //获取直播间信息
                     $Liveinfo = $LiveInfoObj->db->where('id',$live_id)->getOne($LiveInfoObj->tableName, 'is_begin');
                     if(!empty($Liveinfo['is_begin'])) { //直播中
@@ -146,7 +147,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         if (!empty($clients)) {
                             foreach ($clients as $k => $v) {
                                 $user_arr = explode (',', $v); //ip,user_id,fd,live_son_flag
-                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time,'live_son_flag'=>$user_arr[3]];
+                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time,'live_son_flag'=>$user_arr[3],'online_time_str'=>$online_time_str];
                                 $Redis->rpush ('online_user_list', json_encode($OnlineUserArr)); //从队尾插入  先进先出   全写入一个队列
                             }
                         }
