@@ -132,10 +132,10 @@ class WebSocketEvent
         $Redis = new Redis();
         $live_redis_key=Config::getInstance ()->getConf ('web.live_redis_key');
         $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
-        $Redis->sAdd ($live_redis_key.$live_id, $ListPort['eth0'].','.$user_id.','.$request->fd.','.$live_son_flag);//加入直播间    11live_key_28=ip,user_id,fd
+        $Redis->sAdd ($live_redis_key.$live_id, $ListPort['eth0'].','.$user_id.','.$request->fd.','.$live_son_flag);//加入直播间    live_key_93=ip,user_id,fd,live_son_flag
         $Redis->sAdd ($live_id.':'.$ListPort['eth0'], $request->fd); //当前服务器直播间对应fd用于遍历发送     live_id:ip=fd
         //记录关闭连接标记  因为关闭只有一个fd值用于方便关闭对应直播间记录
-        $Redis->set($live_id_list.':'.$ListPort['eth0'].'_'.$request->fd,$live_id.','.$user_id,18000); //5小时  live_id_list:ip_fd=live_id,user_id
+        $Redis->set($live_id_list.':'.$ListPort['eth0'].'_'.$request->fd,$live_id.','.$user_id.','.$live_son_flag,18000); //5小时  live_id_list:ip_fd=live_id,user_id,live_son_flag
     }
     /**
      * 关闭事件
@@ -162,9 +162,9 @@ class WebSocketEvent
             $delkey_flag=$live_id_list.':'.$ListPort['eth0'].'_'.$fd;
             $resultData = $Redis->get($delkey_flag); //获取连接标记对应信息
             if(!empty($resultData)){
-                $liveArr=explode(',',$resultData);  $live_id=$liveArr[0];$user_id=$liveArr[1]; // live_id,user_id
+                $liveArr=explode(',',$resultData);  $live_id=$liveArr[0];$user_id=$liveArr[1]; $live_son_flag=$liveArr[2]; // live_id,user_id,live_son_flag
                 $Redis->srem($live_id.':'.$ListPort['eth0'],$fd); //删除遍历直播间
-                $Redis->srem($live_redis_key.$live_id,$ListPort['eth0'].','.$user_id.','.$fd); //删除直播间记录
+                $Redis->srem($live_redis_key.$live_id,$ListPort['eth0'].','.$user_id.','.$fd.','.$live_son_flag); //删除直播间记录
                 $Redis->del($delkey_flag);
             }
         });
