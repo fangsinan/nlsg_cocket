@@ -72,10 +72,14 @@ class Push extends Controller
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
-            $redis_flag_key = Config::getInstance()->getConf('web.live_son_flag').$live_id.'_'.$live_son_flag;
-            $RedisObj=new Redis();
-            $RedisObj->incr($redis_flag_key);
-            $live_son_flag_num = $RedisObj->get($redis_flag_key);
+            $live_son_flag_num=0;
+            if(!empty($live_son_flag)) {
+                $redis_flag_key = Config::getInstance()->getConf('web.live_son_flag') . $live_id . '_' . $live_son_flag;
+                $RedisObj = new Redis();
+                $RedisObj->incr($redis_flag_key);
+                $RedisObj->expire($redis_flag_key, 86400*10); //有效期10天
+                $live_son_flag_num = $RedisObj->get($redis_flag_key);
+            }
             
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
