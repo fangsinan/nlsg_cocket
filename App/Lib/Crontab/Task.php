@@ -17,6 +17,7 @@ use App\Model\V1\Live;
 use App\Model\V1\LiveCommentModel;
 use App\Model\V1\LiveForbiddenWordsModel;
 use App\Model\V1\LiveInfo;
+use App\Model\V1\LiveLoginModel;
 use App\Model\V1\LiveNotice;
 //use App\Model\User;
 use App\Model\V1\LiveNumberModel;
@@ -216,13 +217,25 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 //            keys 11_live_key_*
             $listRst=$Redis->keys($live_id_key.'*');
             if(!empty($listRst)){
-                $LiveModel=new LiveNumberModel();
+//                $LiveModel=new LiveNumberModel();
                 $LiveObj=new Live();
-                $LiveInfoObj=new LiveInfo();
+//                $LiveInfoObj=new LiveInfo();
+                $LiveLoginObj=new LiveLoginModel();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
-                    $num=$Redis->scard($live_id_key.$live_id); //获取成员数据
+
+                    //人气值改版
+                    $NumInfo=$LiveLoginObj->db->where('live_id',$live_id)->get($LiveLoginObj::$table,[0,1],'count(id) counts');
+                    if(!empty($NumInfo[0])){
+                        $num=($NumInfo[0]['counts']);
+                        $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
+                        $num=$num+$Liveinfo['virtual_online_num'];
+                        $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
+                    }
+
+                    //实时在线人数socket->fd
+                    /*$num=$Redis->scard($live_id_key.$live_id); //获取成员数据
                     $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
                     $num=$num+$Liveinfo['virtual_online_num'];
                     $Redis->set($live_id_num.$live_id,$num,3600); //设置在线人数
@@ -231,7 +244,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if(!empty($Liveinfo['is_begin'])) { //直播中
                         //数据入库
                         $LiveModel->add(LiveNumberModel::$table, ['live_id' => $live_id, 'count' => $num, 'time' => time()]);
-                    }
+                    }*/
 
                 }
             }

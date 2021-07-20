@@ -288,7 +288,7 @@ class EasySwooleEvent implements Event
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {  //5s 更新在线人数
+                    Timer::getInstance()->loop(15 * 1000, function () use ($TaskObj) {  //5s 更新在线人数
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
