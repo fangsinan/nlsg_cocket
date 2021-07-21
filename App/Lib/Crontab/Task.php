@@ -631,6 +631,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $live_id = $arr[2];
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
                 $key = 'laravel_database_live_PushOrder_'.$info['live_pid'];
+                $key = 'live_PushOrder_'.$info['live_pid'];
 
                 $res=$Redis->lrange($key,0,-1);// 获取所有数据
                 if($res){
