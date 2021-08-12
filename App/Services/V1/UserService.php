@@ -90,7 +90,7 @@ class UserService
 //                $UserInfo['content'] = $content;
             }
         }
-
+        $UserInfo['level'] = 0;//不返钻石等级
         return Status::Success('获取成功',$UserInfo);
 
 
