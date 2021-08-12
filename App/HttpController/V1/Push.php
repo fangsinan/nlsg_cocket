@@ -153,7 +153,6 @@ class Push extends Controller
 
 //            $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
 //                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
-            $UserInfo['result']['level'] = 0;//不返钻石等级
             $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
