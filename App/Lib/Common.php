@@ -10,6 +10,8 @@ namespace App\Lib;
 
 
 use App\Lib\Message\Status;
+use App\Lib\Redis\Redis;
+use App\Model\V1\ShieldKey;
 use EasySwoole\Http\Response;
 use EasySwoole\Utility\SnowFlake;
 
@@ -39,6 +41,31 @@ class Common
         $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
         $replace = Common::textDecode('\ud83c\udf39');  // 替换成此字符串
         $str = preg_replace($reg, $replace, $str);  // 进行替换
+
+        //读取缓存
+        $redis_shield_key='111_ShieldKey';
+        $Redis = new Redis();
+        $pattern = $Redis->get($redis_shield_key);
+        if(empty($pattern)) {
+            $ShieldKeyObj = new ShieldKey();
+            $list = $ShieldKeyObj->db->where('status', 1)->get($ShieldKeyObj->tableName,null, 'name');
+            $listArr= array_column($list, 'name');
+            $pattern = "/" . implode("|", $listArr) . "/i"; //定义正则表达式
+            $Redis->set($redis_shield_key, $pattern, 60*2); //设置对应屏蔽词库
+        }
+        $flag = 0; //违规词的个数
+        if(preg_match_all($pattern, $str, $matches)){ //匹配到了结果
+            $patternList = $matches[0];  //匹配到的数组
+            $count = count($patternList);  //匹配到需过滤数量
+            if($count>0){
+                $flag=1;
+            }
+        }
+
+        return [
+            'content'=>$str,
+            'flag'=>$flag
+        ];
 
         //定义敏感词数组
         $list = ['结婚','传销','习大大','美国','武汉','华为','最','第一','首','性','色情','疫情','赌博','退款','李文亮','骗','投诉','垃圾','新冠状肺炎','操','亚洲超级演说家','傻','卖课',

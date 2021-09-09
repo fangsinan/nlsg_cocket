@@ -85,12 +85,14 @@ class UserService
             $lupInfo=$LUPObj->getOne($LUPObj->tableName,['user_id'=>$UserInfo['id']],'id');
             if(!empty($lupInfo)){ //管理员不过滤
                 $UserInfo['content']=$content;
+                $UserInfo['ShieldKeyFlag'] = 0; // 没有违规词
             }else {
-                $UserInfo['content'] = Common::filterStr($content);
-//                $UserInfo['content'] = $content;
+                $ShieldKeyArr=Common::filterStr($content);
+                $UserInfo['content'] = $ShieldKeyArr['content'];
+                $UserInfo['ShieldKeyFlag'] = $ShieldKeyArr['flag']; //1 有违规词
             }
         }
-        $UserInfo['level'] = 0;//不返钻石等级
+        $UserInfo['level'] = 0;//不返用户等级
         return Status::Success('获取成功',$UserInfo);
 
 

@@ -160,11 +160,18 @@ class Push extends Controller
 
             $live_comment=Config::getInstance()->getConf('web.live_comment');
             $rk_comment=$message['content']; //入库信息不转义
-            // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag) {
 
-                $RedisObj=new Redis();
-                $RedisObj->rpush($live_comment.$live_id,$data);
+            $ShieldKeyFlag=0;
+            if(isset($UserInfo['result']['ShieldKeyFlag'])){
+                $ShieldKeyFlag=$UserInfo['result']['ShieldKeyFlag'];
+            }
+            // 异步推送
+            TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag,$ShieldKeyFlag) {
+
+                if($ShieldKeyFlag==0) { //1是有敏感词不发送
+                    $RedisObj = new Redis();
+                    $RedisObj->rpush($live_comment . $live_id, $data);
+                }
 
                 $LiveComment=new LiveCommentModel();
                 //此时的live_Id 用的是直播间id
