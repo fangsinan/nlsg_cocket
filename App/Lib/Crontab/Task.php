@@ -231,7 +231,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $num=($NumInfo[0]['counts']);
                         $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
                         $num=$num+$Liveinfo['virtual_online_num'];
-                        $Redis->set($live_id_num.$live_id,$num,86400*10); //设置在线人数
+                        $Redis->set($live_id_num.$live_id,$num,86400*5); //设置在线人数
                     }
 
                     //实时在线人数socket->fd
