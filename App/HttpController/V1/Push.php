@@ -6,6 +6,7 @@ use App\Lib\Redis\Redis;
 use App\Model\V1\LiveCommentModel;
 use App\Model\V1\LiveInfo;
 use App\Model\V1\LiveLoginModel;
+use App\Model\V1\ShieldUser;
 use App\Services\V1\UserService;
 use App\Lib\Common;
 use EasySwoole\EasySwoole\ServerManager;
@@ -140,6 +141,13 @@ class Push extends Controller
         if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
             return ;
         }
+        //处理屏蔽一次，则相同直播间不推送评论
+        $ShieldUserObj=new ShieldUser();
+        $ShieldUserInfo=$ShieldUserObj->db->where('live_id',$message['live_id'])->where('user_id',$message['user_id']+0)->getOne($ShieldUserObj->tableName, 'id');
+        if(!empty($ShieldUserInfo)){
+            //已屏蔽过一次，直接终止
+            return ;
+        }
 
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
@@ -148,11 +156,7 @@ class Push extends Controller
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $live_son_flag=$message['live_son_flag'];
 
-//            $content = Common::textEncode($UserInfo['result']['content']); //入库内容信息 处理表情
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
-
-//            $data = json_encode(['type' => 2, 'content_text'=>Common::textDecode($content), 'userinfo' => ['user_id'=>$message['user_id'],
-//                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
             $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
 
@@ -164,20 +168,30 @@ class Push extends Controller
             $ShieldKeyFlag=0;
             if(isset($UserInfo['result']['ShieldKeyFlag'])){
                 $ShieldKeyFlag=$UserInfo['result']['ShieldKeyFlag'];
+                if($ShieldKeyFlag==1){
+                    //添加屏蔽记录
+                    $ShieldUserObj->add($ShieldUserObj->tableName,[
+                        'live_id'=>$message['live_id']+0,
+                        'user_id'=>$message['user_id']+0,
+                        'created_at'=>date('Y-m-d H:i:s')
+                    ]);
+                    return ;
+                }
             }
+
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag,$ShieldKeyFlag) {
 
                 if($ShieldKeyFlag==0) { //1是有敏感词不发送
                     $RedisObj = new Redis();
                     $RedisObj->rpush($live_comment . $live_id, $data);
-                }
 
-                $LiveComment=new LiveCommentModel();
-                //此时的live_Id 用的是直播间id
-                $LiveComment->add(LiveCommentModel::$table,
-                    ['live_id'=>$live_pid,'live_info_id'=>$live_id,'user_id'=>$user_id,'content'=>$rk_comment,'live_son_flag' => $live_son_flag ,'created_at'=>date('Y-m-d H:i:s',time())]
-                );
+                    $LiveComment = new LiveCommentModel();
+                    //此时的live_Id 用的是直播间id
+                    $LiveComment->add(LiveCommentModel::$table,
+                        ['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => date('Y-m-d H:i:s', time())]
+                    );
+                }
             });
 
         }else{
