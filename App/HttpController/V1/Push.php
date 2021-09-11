@@ -65,9 +65,9 @@ class Push extends Controller
         $client = $this->caller ()->getClient ();
         $message = $this->caller ()->getArgs ();//获取所有参数
 
-        $user_id = $message['user_id'];
-        $live_id = $message['live_id'];
-        $live_son_flag = $message['live_son_flag']?$message['live_son_flag']:0;
+        $user_id = intval($message['user_id']);
+        $live_id = intval($message['live_id']);
+        $live_son_flag = $message['live_son_flag']?intval($message['live_son_flag']):0;
 
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
