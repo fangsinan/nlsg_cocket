@@ -131,6 +131,9 @@ class Push extends Controller
         if(empty($message['user_id'])){$message['user_id']=0;};
         if(empty($message['live_id'])){$message['live_id']=0;};
 
+        $message['live_id']=intval($message['live_id']);
+        $message['user_id']=intval($message['user_id']);
+
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
 
@@ -173,6 +176,7 @@ class Push extends Controller
                     $ShieldUserObj->add($ShieldUserObj->tableName,[
                         'live_id'=>$message['live_id']+0,
                         'user_id'=>$message['user_id']+0,
+                        'content'=>$rk_comment,
                         'created_at'=>date('Y-m-d H:i:s')
                     ]);
                     return ;
