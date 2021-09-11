@@ -45,20 +45,32 @@ class Common
         //读取缓存
         $redis_shield_key='111_ShieldKey';
         $Redis = new Redis();
-        $pattern = $Redis->get($redis_shield_key);
-        if(empty($pattern)) {
+        $ShieldingWords = $Redis->get($redis_shield_key);
+        if(empty($ShieldingWords)) {
             $ShieldKeyObj = new ShieldKey();
             $list = $ShieldKeyObj->db->where('status', 1)->get($ShieldKeyObj->tableName,null, 'name');
             $listArr= array_column($list, 'name');
-            $pattern = "/" . implode("|", $listArr) . "/i"; //定义正则表达式
-            $Redis->set($redis_shield_key, $pattern, 60*2); //设置对应屏蔽词库
+            $ShieldingWords = implode("|", $listArr); //字符串分隔
+            $Redis->set($redis_shield_key, $ShieldingWords, 60*2); //设置对应屏蔽词库
         }
         $flag = 0; //违规词的个数
-        if(preg_match_all($pattern, $str, $matches)){ //匹配到了结果
+        //第一种
+        $RegExp="/".$ShieldingWords."/i";
+        if(preg_match_all($RegExp, $str, $matches)){ //匹配到了结果
             $patternList = $matches[0];  //匹配到的数组
             $count = count($patternList);  //匹配到需过滤数量
             if($count>0){
                 $flag=1;
+            }
+        }
+        //第二种
+        $dataArr=explode('|',$ShieldingWords);
+        foreach ($dataArr as $key=>$val){
+            $val=trim($val);//去掉两端空格
+            $rst=strpos($str,$val);//函数对大小写敏感。  找到返回位置(int)  找不到返回false
+            if(!empty($rst) && $rst!==false){
+                $flag=1;
+                break;
             }
         }
 
