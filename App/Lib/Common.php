@@ -50,10 +50,12 @@ class Common
             $ShieldKeyObj = new ShieldKey();
             $list = $ShieldKeyObj->db->where('status', 1)->get($ShieldKeyObj->tableName,null, 'name');
             $listArr= array_column($list, 'name');
+//            $ShieldingWords=serialize($listArr);
             $ShieldingWords = implode("|", $listArr); //字符串分隔
             $Redis->set($redis_shield_key, $ShieldingWords, 60*2); //设置对应屏蔽词库
         }
         $flag = 0; //违规词的个数
+        //serialize（）explode（）json_deocde()   经测算serialize（）更优
         //第一种
         $RegExp="/".$ShieldingWords."/i";
         if(preg_match_all($RegExp, $str, $matches)){ //匹配到了结果
@@ -64,7 +66,8 @@ class Common
             }
         }
         //第二种
-        $dataArr=explode('|',$ShieldingWords);
+//        $dataArr=unserialize($ShieldingWords);
+        /*$dataArr=explode('|',$ShieldingWords);
         foreach ($dataArr as $key=>$val){
             $val=trim($val);//去掉两端空格
             $rst=strpos($str,$val);//函数对大小写敏感。  找到返回位置(int)  找不到返回false
@@ -72,7 +75,7 @@ class Common
                 $flag=1;
                 break;
             }
-        }
+        }*/
 
         return [
             'content'=>$str,
