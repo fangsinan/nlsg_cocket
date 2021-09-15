@@ -77,9 +77,21 @@ class Push extends Controller
             if(!empty($live_son_flag)) {
                 $redis_flag_key = Config::getInstance()->getConf('web.live_son_flag') . $live_id . '_' . $live_son_flag;
                 $RedisObj = new Redis();
-                $RedisObj->incr($redis_flag_key);
-                $RedisObj->expire($redis_flag_key, 86400*10); //有效期10天
-                $live_son_flag_num = $RedisObj->get($redis_flag_key);
+//                $RedisObj->incr($redis_flag_key);
+//                $RedisObj->expire($redis_flag_key, 86400*10); //有效期10天
+                $live_son_flag_num = intval($RedisObj->get($redis_flag_key));
+                if(empty($live_son_flag_num)){
+                    $LiveLogin = new LiveLoginModel();
+                    $NumInfo=$LiveLogin->db->where('live_id',$live_id)->where('live_son_flag',$live_son_flag)->get(LiveLoginModel::$table,[0,1],'count(id) counts');
+                    if(!empty($NumInfo[0]['counts'])) {
+                        $live_son_flag_num = intval($NumInfo[0]['counts']);
+                        $RedisObj->set($redis_flag_key,$live_son_flag_num+1,86400*5);
+                    }
+                }else {
+                    $RedisObj->incr($redis_flag_key);
+                    $RedisObj->expire($redis_flag_key, 86400 * 5); //有效期5天
+                }
+                $live_son_flag_num++;
             }
             
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
