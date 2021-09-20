@@ -110,10 +110,11 @@ class PushService
     public static function Broadcast($ip,$data){
         $server = ServerManager::getInstance()->getSwooleServer();
         $Redis = new Redis();
-        $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
+//        $live_id_list=Config::getInstance ()->getConf ('web.live_id_list');
         $clients = $Redis->sMembers ($data['live_id'].':'.$ip); //获取有序集合
 
         if(!empty($clients)) {
+            //遍历当前服务器fd
             foreach ($clients as $key => $fd) {
                 $info = $server->getClientInfo($fd);
                 //判断此fd 是否是一个有效的 websocket 连接
