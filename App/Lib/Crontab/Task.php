@@ -175,8 +175,23 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $LiveOnlineUserObj=new LiveOnlineUser();
             $num=$Redis->llen('online_user_list');
             if (!empty($num) && $num>0) {
+                $map=[];
                 $length=($num>=10000)?10000:$num;
                 for ($n=0;$n<$length;$n++){ //遍历10000条
+                    $val=$Redis->lPop('online_user_list');
+                    $map[]=json_decode($val,true);
+                }
+
+                if(!empty($map)) {
+                    $rst = $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map, 0);
+                    if (!$rst) {//执行失败，回写数据
+                        foreach ($map as $v) {
+                            $Redis->rpush('online_user_list', json_encode($v)); //从队尾插入  先进先出   全写入一个队列
+                        }
+                    }
+                }
+
+                /*for ($n=0;$n<$length;$n++){ //遍历10000条
                     $val=$Redis->lPop('online_user_list'); //取出数据
                     $data=json_decode($val, true);
                     $flag=$LiveOnlineUserObj->db->where('online_time_str',$data['online_time_str'])->where('user_id',$data['user_id'])->where('live_id',$data['live_id'])
@@ -187,7 +202,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $Redis->rpush('online_user_list', $val); //从队尾插入  先进先出   全写入一个队列
                         }
                     }
-                }
+                }*/
+
             }
 
             return [
