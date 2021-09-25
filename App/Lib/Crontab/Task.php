@@ -135,10 +135,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 //            keys  live_key_*
             $listRst=$Redis->keys($live_id_key.'*'); //获取多个直播间
             if(!empty($listRst)){
-                $key_name='online_user_list_'.date('YmdHi');
+                $key_name='111online_user_list_'.date('YmdHi');
                 $now_time=date('Y-m-d H:i:s');
                 $online_time_str=substr($now_time,0,16);
-
+                if($Redis->EXISTS($key_name)){
+                    $Redis->del($key_name); //防止多次执行，导致set集合和执行队列重复添加
+                }
+                $flag=0;
                 $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
@@ -148,6 +151,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if(!empty($Liveinfo['is_begin'])) { //直播中
                         $clients = $Redis->sMembers($live_id_key . $live_id); //获取直播间有序集合
                         if (!empty($clients)) {
+                            $flag=1;
                             foreach ($clients as $k => $v) {
                                 $user_arr = explode (',', $v); //ip,user_id,fd,live_son_flag
                                 $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time,'live_son_flag'=>$user_arr[3],'online_time_str'=>$online_time_str];
@@ -157,8 +161,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         }
                     }
                 }
-                //可执行入库列表
-                $Redis->rpush ('online_user_list_in', $key_name); //从队尾插入  先进先出
+                if($flag==1) {
+                    //可执行入库列表   没直播间开播也会插入
+                    $Redis->rpush('111online_user_list_in', $key_name); //从队尾插入  先进先出
+                }
             }
             Io::WriteFile ('/onlineuser', 'online_user_pull_', 1,2);
             return [
@@ -177,11 +183,12 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public function PushLiveUser($taskId, $fromWorkerId,$data,$path){
 
         try {
+            $key_name='111online_user_list_in';
             $Redis = new Redis();
-            $num=$Redis->llen('online_user_list_in');
+            $num=$Redis->llen($key_name);
             if($num>0) {
                 $LiveOnlineUserObj = new LiveOnlineUser();
-                $key=$Redis->lPop('online_user_list_in'); //获取可执行key
+                $key=$Redis->lPop($key_name); //获取可执行key
                 $list = $Redis->sMembers($key);// 获取有序集合
                 if (!empty($list)) {
                     $map = [];
@@ -194,9 +201,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     if (!empty($map)) {
                         $rst = $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map, 0);
                         if (!$rst) {//执行失败，加入执行队列
-                            $Redis->rpush ('online_user_list_in', $key); //可执行队列
+                            $Redis->rpush ($key_name, $key); //可执行队列
+                            Io::WriteFile ('/onlineuser', 'online_user_', $rst,2);
                         }else{
                             $Redis->del($key); //执行成功删除
+                            Io::WriteFile ('/onlineuser', 'online_user_', 1,2);
                         }
                     }
                 }
@@ -234,7 +243,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 }*/
 
 //            }
-            Io::WriteFile ('/onlineuser', 'online_user_', 1,2);
             return [
                 'data' => 1,
                 'path' => $path

@@ -140,19 +140,19 @@ class EasySwooleEvent implements Event
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
             Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
 
-            //进入直播间   扫描redis记录
+            //商品推送
             $TaskObj = new Task([
-                'method' => 'Joinlive',
+                'method' => 'PushProduct',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'Join_',
+                    'name' => 'pro_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
@@ -178,6 +178,7 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
+
             //推送打赏礼物  扫描redis记录
             $TaskObj = new Task([
                 'method' => 'getLiveGiftOrder',
@@ -234,42 +235,43 @@ class EasySwooleEvent implements Event
                 }
             });
 
-            //商品推送
+            //进入直播间   扫描redis记录
             $TaskObj = new Task([
-                'method' => 'PushProduct',
+                'method' => 'Joinlive',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'pro_',
+                    'name' => 'Join_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 5) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
                 }
             });
 
+
         }
 
         if($ListPort['eth0']=='172.17.212.137' || $ListPort['eth0']=='172.17.176.246' ){ //229服务器 172.17.212.130
 
-            //更新在线人数
+            //实时在线人数明细处理
             $TaskObj = new Task([
-                'method' => 'onlineNumber',
+                'method' => 'onlineUser',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'onlineNum_',
+                    'name' => 'onlineUser_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
-                    Timer::getInstance()->loop(15 * 1000, function () use ($TaskObj) {  //15s 更新在线人数
+                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
@@ -313,19 +315,19 @@ class EasySwooleEvent implements Event
                 }
             });
 
-            //实时在线人数明细处理
+            //更新在线人数
             $TaskObj = new Task([
-                'method' => 'onlineUser',
+                'method' => 'onlineNumber',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'onlineUser_',
+                    'name' => 'onlineNum_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 3) {
-                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
+                    Timer::getInstance()->loop(15 * 1000, function () use ($TaskObj) {  //15s 更新在线人数
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
