@@ -134,7 +134,7 @@ class EasySwooleEvent implements Event
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
 
-        if ($ListPort['eth0'] == '172.17.212.131' || $ListPort['eth0'] == '172.17.176.246') {  //30服务器  从redis取出数据
+        if ($ListPort['eth0'] == '172.17.212.131' || $ListPort['eth0'] == '172.17.176.246') {  //113服务器
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
@@ -255,7 +255,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.130' || $ListPort['eth0']=='172.17.176.246' ){ //76服务器
+        if($ListPort['eth0']=='172.17.212.137' || $ListPort['eth0']=='172.17.176.246' ){ //229服务器 172.17.212.130
 
             //更新在线人数
             $TaskObj = new Task([
