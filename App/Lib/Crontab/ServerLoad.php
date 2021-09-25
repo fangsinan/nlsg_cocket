@@ -63,7 +63,7 @@ class ServerLoad extends AbstractCronTask
         self::ServerLoadIp();
     }
 
-    public static $CrontabError='crontab_error_';
+    public static $CrontabError='load_ip_error_';
 
     /**
      * 服务器负载ip更新
@@ -77,10 +77,10 @@ class ServerLoad extends AbstractCronTask
             $Redis->set('live_serverload_iplist',$IpInfo['value'],86400);
 
             //写入redis
-            Io::WriteFile ('/Crontab', 'serverload_', 1);
+            Io::WriteFile ('/serverLoad', 'load_ip_', 1,2);
 
         }catch (\Exception $e){
-            Io::WriteFile ('', self::$CrontabError,'ServerLoad：'.$e->getMessage());
+            Io::WriteFile ('/serverLoad', self::$CrontabError,'ServerLoad：'.$e->getMessage(),2);
         }
 
 

@@ -136,12 +136,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $listRst=$Redis->keys($live_id_key.'*'); //获取多个直播间
             if(!empty($listRst)){
                 $key_name='online_user_list_'.date('YmdHi');
+                $now_time=date('Y-m-d H:i:s');
+                $online_time_str=substr($now_time,0,16);
+
                 $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
-                    $now_time=date('Y-m-d H:i:s');
-                    $online_time_str=substr($now_time,0,16);
                     //获取直播间信息
                     $Liveinfo = $LiveInfoObj->db->where('id',$live_id)->getOne($LiveInfoObj->tableName, 'is_begin');
                     if(!empty($Liveinfo['is_begin'])) { //直播中
@@ -159,14 +160,15 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 //可执行入库列表
                 $Redis->rpush ('online_user_list_in', $key_name); //从队尾插入  先进先出
             }
+            Io::WriteFile ('/onlineuser', 'online_user_pull_', 1,2);
             return [
                 'data' => 1,
                 'path' => $path
             ];
         }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Io::WriteFile ('/onlineuser', 'online_user_pull_error',$e->getMessage(),2);
+//            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+//            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);//短信通知
         }
 
     }
@@ -182,22 +184,24 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $key=$Redis->lPop('online_user_list_in'); //获取可执行key
                 $list = $Redis->sMembers($key);// 获取有序集合
                 if (!empty($list)) {
-                    $Redis->del($key);
                     $map = [];
-                    foreach ($list as $key => $val) {
+                    foreach ($list as $k => $val) {
+//                        if(($k+1)/10000==0){
+//                            $Redis->srem($key,$val); //删除元素
+//                        }
                         $map[] = json_decode($val, true);
                     }
                     if (!empty($map)) {
                         $rst = $LiveOnlineUserObj->add($LiveOnlineUserObj->tableName, $map, 0);
-                        if (!$rst) {//执行失败，回写数据
-                            foreach ($map as $v) {
-                                $Redis->sAdd($key, json_encode($v));
-                            }
+                        if (!$rst) {//执行失败，加入执行队列
+                            $Redis->rpush ('online_user_list_in', $key); //可执行队列
+                        }else{
+                            $Redis->del($key); //执行成功删除
                         }
                     }
                 }
             }
-            
+
 //            $num=$Redis->llen('online_user_list');
 //            if (!empty($num) && $num>0) {
 //                $map=[];
@@ -230,15 +234,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 }*/
 
 //            }
-
+            Io::WriteFile ('/onlineuser', 'online_user_', 1,2);
             return [
                 'data' => 1,
                 'path' => $path
             ];
         }catch (\Exception $e){
-            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
-            //短信通知
-            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+            Io::WriteFile ('/onlineuser', 'online_user_error',$e->getMessage(),2);
         }
 
     }
@@ -325,7 +327,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $arr=[];
                         foreach ($list as $key=>$val){
                             $start=$key;
-//                            $arr[]=$val;
                             $arr[]=json_decode($val,true);
                         }
                         $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
