@@ -85,7 +85,7 @@ class Push extends Controller
                     $NumInfo=$LiveLogin->db->where('live_id',$live_id)->where('live_son_flag',$live_son_flag)->get(LiveLoginModel::$table,[0,1],'count(id) counts');
                     if(!empty($NumInfo[0]['counts'])) {
                         $live_son_flag_num = intval($NumInfo[0]['counts']);
-                        $RedisObj->set($redis_flag_key,$live_son_flag_num+1,86400*5);
+                        $RedisObj->set($redis_flag_key,$live_son_flag_num+1,86400);
                     }
                 }else {
                     $RedisObj->incr($redis_flag_key);
