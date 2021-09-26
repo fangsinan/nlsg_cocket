@@ -346,10 +346,10 @@ class EasySwooleEvent implements Event
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 4) {
-                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                    //暂停使用，改用Laravel定时任务
+                    /*Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
                         TaskManager::async($TaskObj);
-                    });
+                    });*/
                 }
             });
 
