@@ -138,9 +138,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $key_name='111online_user_list_'.date('YmdHi');
                 $now_time=date('Y-m-d H:i:s');
                 $online_time_str=substr($now_time,0,16);
-                if($Redis->EXISTS($key_name)){
-                    $Redis->del($key_name); //防止多次执行，导致set集合和执行队列重复添加
-                }
+//                if($Redis->EXISTS($key_name)){
+//                    $Redis->del($key_name); //防止多次执行，导致set集合和执行队列重复添加
+//                }
                 $flag=0;
                 $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
@@ -154,7 +154,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             $flag=1;
                             foreach ($clients as $k => $v) {
                                 $user_arr = explode (',', $v); //ip,user_id,fd,live_son_flag
-                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'online_time' => $now_time,'live_son_flag'=>$user_arr[3],'online_time_str'=>$online_time_str];
+                                $OnlineUserArr=['live_id' => $live_id, 'user_id' => $user_arr[1], 'live_son_flag'=>$user_arr[3],'online_time_str'=>$online_time_str]; //'online_time' => $now_time,
 //                                $Redis->rpush ('online_user_list', json_encode($OnlineUserArr)); //从队尾插入  先进先出   全写入一个队列
                                 $Redis->sAdd ($key_name, json_encode($OnlineUserArr));
                             }
@@ -193,7 +193,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 if (!empty($list)) {
                     $map = [];
                     foreach ($list as $k => $val) {
-//                        if(($k+1)/10000==0){
+//                        if(($k+1)%10000==0){
 //                            $Redis->srem($key,$val); //删除元素
 //                        }
                         $map[] = json_decode($val, true);
