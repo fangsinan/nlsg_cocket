@@ -235,6 +235,10 @@ class EasySwooleEvent implements Event
                 }
             });
 
+        }
+
+        if($ListPort['eth0']=='172.17.212.137' || $ListPort['eth0']=='172.17.176.246' ){ //229服务器 172.17.212.130
+
             //进入直播间   扫描redis记录
             $TaskObj = new Task([
                 'method' => 'Joinlive',
@@ -246,32 +250,8 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 5) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
-
-
-        }
-
-        if($ListPort['eth0']=='172.17.212.137' || $ListPort['eth0']=='172.17.176.246' ){ //229服务器 172.17.212.130
-
-            //实时在线人数明细处理
-            $TaskObj = new Task([
-                'method' => 'onlineUser',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'onlineUser_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 0) {
-                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
@@ -334,25 +314,6 @@ class EasySwooleEvent implements Event
                 }
             });
 
-            //处理redis在线用户数据入库
-            $TaskObj = new Task([
-                'method' => 'PushLiveUser',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'liveuser_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 4) {
-                    //暂停使用，改用Laravel定时任务
-                    /*Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
-                        TaskManager::async($TaskObj);
-                    });*/
-                }
-            });
-
             //禁言
             $TaskObj = new Task([
                 'method' => 'pushForbiddenWords',
@@ -364,11 +325,52 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 5) {
+                if ($workerId == 4) {
                     Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //30s
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
+                }
+            });
+
+
+
+            //实时在线人数明细处理
+            $TaskObj = new Task([
+                'method' => 'onlineUser',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'onlineUser_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 4) {
+                    //暂停使用，改用Laravel定时任务
+//                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
+//                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+//                        TaskManager::async($TaskObj);
+//                    });
+                }
+            });
+
+            //处理redis在线用户数据入库
+            $TaskObj = new Task([
+                'method' => 'PushLiveUser',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'liveuser_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 5) {
+                    //暂停使用，改用Laravel定时任务
+                    /*Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
+                        TaskManager::async($TaskObj);
+                    });*/
                 }
             });
 

@@ -123,7 +123,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     12=>打赏推送到评论区                   1
      */
 
-    //抓取实时在线人数用户明细
+    //抓取实时在线人数用户明细  暂时废弃，使用larvael定时任务，方便调试
     public function onlineUser($taskId, $fromWorkerId,$data,$path){
 
         try {
@@ -138,9 +138,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $key_name='111online_user_list_'.date('YmdHi');
                 $now_time=date('Y-m-d H:i:s');
                 $online_time_str=substr($now_time,0,16);
-//                if($Redis->EXISTS($key_name)){
-//                    $Redis->del($key_name); //防止多次执行，导致set集合和执行队列重复添加
-//                }
                 $flag=0;
                 $LiveInfoObj=new LiveInfo();
                 foreach ($listRst as $val){
@@ -179,7 +176,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     }
 
-    //入库在线用户数据
+    //入库在线用户数据  暂时废弃，使用larvael定时任务，方便调试
     public function PushLiveUser($taskId, $fromWorkerId,$data,$path){
 
         try {
@@ -335,6 +332,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $arr=[];
                         foreach ($list as $key=>$val){
                             $start=$key;
+                            $arr=[]; //此代码为防止高并发加入直播间，减轻服务器带宽压力，只返回最后一条进入即可
                             $arr[]=json_decode($val,true);
                         }
                         $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
