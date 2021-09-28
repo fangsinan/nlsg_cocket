@@ -140,7 +140,7 @@ class EasySwooleEvent implements Event
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
             Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
 
-            //商品推送
+            //购物车商品推送
             $TaskObj = new Task([
                 'method' => 'PushProduct',
                 'path' => [
@@ -179,25 +179,6 @@ class EasySwooleEvent implements Event
                 }
             });
 
-            //推送打赏礼物  扫描redis记录
-            $TaskObj = new Task([
-                'method' => 'getLiveGiftOrder',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'GiftOrder_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 2) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
-
             //订单推送  扫描redis记录
             $TaskObj = new Task([
                 'method' => 'getLivePushOrder',
@@ -209,8 +190,30 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 3) {
+                if ($workerId == 2) {
                     Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
+        }
+        if($ListPort['eth0']=='172.17.212.138' || $ListPort['eth0']=='172.17.176.246' ) { //0927
+
+            //推送打赏礼物  扫描redis记录
+            $TaskObj = new Task([
+                'method' => 'getLiveGiftOrder',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'GiftOrder_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 0) {
+                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
                 }
@@ -227,7 +230,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 4) {
+                if ($workerId == 1) {
                     Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //10s 发送公告
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::sync($TaskObj);
@@ -235,9 +238,10 @@ class EasySwooleEvent implements Event
                 }
             });
 
+
         }
 
-        if($ListPort['eth0']=='172.17.212.137' || $ListPort['eth0']=='172.17.176.246' ){ //229服务器 172.17.212.130
+        if($ListPort['eth0']=='172.17.212.137' || $ListPort['eth0']=='172.17.176.246' ){ //229服务器 172.17.212.130  0925
 
             //进入直播间   扫描redis记录
             $TaskObj = new Task([
