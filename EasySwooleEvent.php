@@ -337,10 +337,19 @@ class EasySwooleEvent implements Event
                 }
             });
 
+            //----------Laravel定时任务--------------
+            /*$schedule->call(function () {
+                //直播间在线人数存入redis
+                LiveController::CrontabOnlineUserRedis();
+            })->everyMinute()->runInBackground();//每分
 
+            $schedule->call(function () {
+                //直播间在线人数入库，方便调试
+                LiveController::CrontabOnlineUser();
+            })->everyMinute()->runInBackground();//每分*/
 
             //实时在线人数明细处理
-            $TaskObj = new Task([
+            /*$TaskObj = new Task([
                 'method' => 'onlineUser',
                 'path' => [
                     'dir' => '/Crontab',
@@ -352,10 +361,10 @@ class EasySwooleEvent implements Event
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 4) {
                     //暂停使用，改用Laravel定时任务
-//                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
-//                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-//                        TaskManager::async($TaskObj);
-//                    });
+                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
+                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                        TaskManager::async($TaskObj);
+                    });
                 }
             });
 
@@ -372,11 +381,11 @@ class EasySwooleEvent implements Event
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 5) {
                     //暂停使用，改用Laravel定时任务
-                    /*Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
+                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
                         TaskManager::async($TaskObj);
-                    });*/
+                    });
                 }
-            });
+            });*/
 
         }
 
