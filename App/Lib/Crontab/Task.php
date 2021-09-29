@@ -677,6 +677,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     foreach ($forbidden as $k=>$v) {
                         //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
                         $forbid_time = (strtotime($v['forbid_at']) + $v['length']) - $time;
+                        print_r($forbid_time);
                         if ($forbid_time <=0) {
                             //记录已解除禁言用户
                             $forbiddenObj->update($forbiddenObj::$table,['is_forbid'=>2,'forbid_at'=>null,'length'=>0],['id'=>$v['id']]);
