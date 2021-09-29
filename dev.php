@@ -61,14 +61,21 @@ return [
         'POOL_TIME_OUT' => '0.1',
     ],
 
+//    'REDIS'=>[
+//        #'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
+//        'host'          => '172.17.212.131',
+//        'port'          => '6379',
+//        'auth'          => 'NLSG2020*beijin*0906BJ',
+//        'POOL_MAX_NUM'  => '20',
+//        'POOL_MIN_NUM'  => '5',
+//        'POOL_TIME_OUT' => '0.1',
+//    ],
     'REDIS'=>[
-        #'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
-        'host'          => '172.17.212.131',
+        'host'          => '39.105.214.152',
         'port'          => '6379',
-        'auth'          => 'NLSG2020*beijin*0906BJ',
+        'auth'          => 'HYQC2021*beijin.1209BJ',
         'POOL_MAX_NUM'  => '20',
         'POOL_MIN_NUM'  => '5',
         'POOL_TIME_OUT' => '0.1',
     ],
-
 ];
