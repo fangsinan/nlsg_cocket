@@ -698,6 +698,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
+                        print_r($data);
                         //推送消息
                         $PushServiceObj->PushForbid($live_id,$v['user_id'],$data);
                     }
