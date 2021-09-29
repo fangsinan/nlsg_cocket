@@ -47,7 +47,12 @@ class PushService
 
             $server = ServerManager::getInstance()->getSwooleServer();
             $info = $server->getClientInfo($data['fd']);
-            //判断此fd 是否是一个有效的 websocket 连接
+            print_r("---start---");
+            print_r($info);
+            print_r($data);
+            print_r("---end---\n");
+
+        //判断此fd 是否是一个有效的 websocket 连接
             if ($info && $info['websocket_status'] == WEBSOCKET_STATUS_FRAME) {
                   $server->push($data['fd'], $data['data']);
             } else {
