@@ -252,7 +252,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         foreach ($list as $key=>$val){
                             $start=$key;
                             //$arr[]=$val;
-                            $arr[]=json_decode($val,true);
+                            if($key<=5) { //防止高并发评论过度，丢弃一部分评论最多返回5条减轻压力
+                                $arr[] = json_decode($val, true);
+                            }
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
 
