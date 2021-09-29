@@ -96,11 +96,14 @@ class Index extends  Controller
      * 负载  禁言
      */
     public function forbid(){
-
         $params  = $this->request()->getRequestParam();
+        print_r("----- index star ---");
+        print_r($params);
+        print_r("----- --- ---");
         $PushService=new PushService();
         $rst=$PushService->forbidMessage($params);
-
+        print_r($rst);
+        print_r("----- index end ---");
         Io::WriteFile('','forbid_receive',$rst,2);
 
     }
