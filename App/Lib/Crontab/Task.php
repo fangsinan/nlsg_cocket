@@ -672,6 +672,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 }
                 //个人禁言
                 $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_at,length');
+                print_r($forbidden);
                 if(!empty($forbidden) ) {
                     foreach ($forbidden as $k=>$v) {
                         //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0
@@ -696,6 +697,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                         //推送记录
                         $data = Common::ReturnJson(Status::CODE_OK, '发送成功', ['type' => 9, 'content_obj' =>$res,'ios_content' => $res ]);
+                        print_r($data);
                         //推送消息
                         $PushServiceObj->PushForbid($live_id,$v['user_id'],$data);
                     }
