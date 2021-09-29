@@ -77,8 +77,6 @@ class Push extends Controller
             if(!empty($live_son_flag)) {
                 $redis_flag_key = Config::getInstance()->getConf('web.live_son_flag') . $live_id . '_' . $live_son_flag;
                 $RedisObj = new Redis();
-//                $RedisObj->incr($redis_flag_key);
-//                $RedisObj->expire($redis_flag_key, 86400*10); //有效期10天
                 $live_son_flag_num = intval($RedisObj->get($redis_flag_key));
                 if(empty($live_son_flag_num)){
                     $LiveLogin = new LiveLoginModel();
@@ -97,8 +95,6 @@ class Push extends Controller
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
             $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
-            //$data = json_encode(['type' => 5, 'content' => '进入直播间','content_text' => '进入直播间',
-            //    'userinfo' => ['level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
             $data = json_encode([
                 'type' => 5,
                 'content_text' => '进入直播间',
@@ -110,7 +106,6 @@ class Push extends Controller
             $infoObj = new LiveInfo();
             $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
             $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
-//            $Info = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'is_join');
 
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
