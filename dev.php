@@ -48,18 +48,32 @@ return [
         'BACKLOG'     => 256,//数据队列缓冲区大小
     ],
 
-    'MYSQL'=>[
-        'host'          => 'pc-2ze52g145e143cs50.rwlb.rds.aliyuncs.com',
-        #'host'          => 'eoy62ktxmkua664nxx9c-rw4rm.rwlb.rds.aliyuncs.com',
-        'port'          => '3306',
-        'user'          => 'bj_nlsg_v4',
-        'timeout'       => '5',
-        'charset'       => 'utf8mb4',//utf8mb4
-        'password'      => 'Rds_&0331$NLSG^v3@_V4',
-        'database'      => 'nlsg_v4',
-        'POOL_MAX_NUM'  => '20',
-        'POOL_TIME_OUT' => '0.1',
-    ],
+//    'MYSQL'=>[
+//        'host'          => 'pc-2ze52g145e143cs50.rwlb.rds.aliyuncs.com',
+//        #'host'          => 'eoy62ktxmkua664nxx9c-rw4rm.rwlb.rds.aliyuncs.com',
+//        'port'          => '3306',
+//        'user'          => 'bj_nlsg_v4',
+//        'timeout'       => '5',
+//        'charset'       => 'utf8mb4',//utf8mb4
+//        'password'      => 'Rds_&0331$NLSG^v3@_V4',
+//        'database'      => 'nlsg_v4',
+//        'POOL_MAX_NUM'  => '20',
+//        'POOL_TIME_OUT' => '0.1',
+//    ],
+
+
+'MYSQL'=>[
+    'host'          => '39.105.214.152',
+    'port'          => '3306',
+    'user'          => 'bj_root',
+    'timeout'       => '5',
+    'charset'       => 'utf8',
+    'password'      => 'NLSG_2019cs*beijin.0410BJ',
+    'database'      => 'nlsg_v4',
+    'POOL_MAX_NUM'  => '20',
+    'POOL_TIME_OUT' => '0.1',
+],
+
 
 //    'REDIS'=>[
 //        #'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
