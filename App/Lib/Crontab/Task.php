@@ -547,9 +547,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $arr = explode('_', $v);
                 $live_id = $arr[2];
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
-                $key = 'laravel_database_live_PushOrder_'.$info['live_pid'];
+                $key_name = 'laravel_database_live_PushOrder_'.$info['live_pid'];
 
-                $list=$Redis->lrange($key,0,-1);// 获取所有数据
+                $list=$Redis->lrange($key_name,0,-1);// 获取所有数据
                 if(!empty($list)){
 
                     $start=0;
@@ -562,7 +562,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     }
 
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$arr]);
-                    $Redis->ltrim($key,$start+1,-1);//删除已取出数据
+                    $Redis->ltrim($key_name,$start+1,-1);//删除已取出数据
 
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
