@@ -23,7 +23,7 @@ class UserService
 {
 
     //获取用户数据
-    public function GetUserInfo($live_id,$user_id,$content='',$access_user_token=''){
+    public function GetUserInfo($live_id,$user_id,$content='',$access_user_token='',$auth_user_id=0){
         if(empty($live_id)){
             return Status::Error (Status::CODE_NOT_FOUND, '直播live_id为空');
         }
@@ -87,7 +87,7 @@ class UserService
                 $UserInfo['content']=$content;
                 $UserInfo['ShieldKeyFlag'] = 0; // 没有违规词
             }else {
-                $ShieldKeyArr=Common::filterStr($content);
+                $ShieldKeyArr=Common::filterStr($content,$auth_user_id);
                 $UserInfo['content'] = $ShieldKeyArr['content'];
                 $UserInfo['ShieldKeyFlag'] = $ShieldKeyArr['flag']; //1 有违规词
             }

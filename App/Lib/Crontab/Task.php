@@ -204,8 +204,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $arr=[];
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            $arr=[]; //此代码为防止高并发加入直播间，减轻服务器带宽压力，只返回最后一条进入即可
-                            $arr[]=json_decode($val,true);
+                            if($key<=5) { //防止高并发加入直播间人数较多，丢弃一部分最多返回5条减轻压力
+                                $arr[] = json_decode($val, true);
+                            }
                         }
                         $Redis->ltrim($live_join.$live_id,$start+1,-1);//删除已取出数据
                         $list=$data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
@@ -251,7 +252,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $start=0;
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            //$arr[]=$val;
                             if($key<=5) { //防止高并发评论过度，丢弃一部分评论最多返回5条减轻压力
                                 $arr[] = json_decode($val, true);
                             }
@@ -549,10 +549,20 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $info = $infoObj->getOne($infoObj->tableName,['id'=>$live_id],'live_pid');
                 $key = 'laravel_database_live_PushOrder_'.$info['live_pid'];
 
-                $res=$Redis->lrange($key,0,-1);// 获取所有数据
-                if($res){
-                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$res]);
-                    $Redis->ltrim($key,count($res),-1);//删除已取出数据
+                $list=$Redis->lrange($key,0,-1);// 获取所有数据
+                if(!empty($list)){
+
+                    $start=0;
+                    $arr=[];
+                    foreach ($list as $key=>$val){
+                        $start=$key;
+                        if($key<=5) { //防止高并发，丢弃一部分最多返回5条减轻压力
+                            $arr[] = $val;
+                        }
+                    }
+
+                    $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 10, 'content_one_array' =>$arr]);
+                    $Redis->ltrim($key,$start+1,-1);//删除已取出数据
 
                     //推送消息
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);

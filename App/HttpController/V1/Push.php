@@ -133,7 +133,7 @@ class Push extends Controller
 
         $client = $this->caller()->getClient();
         $message=$this->caller()->getArgs();//获取所有参数
-        print_r($message);
+
         if(empty($message['accessUserToken'])){$message['accessUserToken']=0;};
         if(empty($message['user_id'])){$message['user_id']=0;};
         if(empty($message['live_id'])){$message['live_id']=0;};
@@ -141,12 +141,13 @@ class Push extends Controller
         $message['live_id']=intval($message['live_id']);
         $message['user_id']=intval($message['user_id']);
 
-        $UserServiceObj = new UserService();
-        $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken']);
-
         $infoObj = new LiveInfo();
         $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
-        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper');
+        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
+
+        $UserServiceObj = new UserService();
+        $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken'],$lupInfo['user_id']);
+
         $admin_arr=explode('-',$lupInfo['helper']);
         if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
             return ;
@@ -169,7 +170,7 @@ class Push extends Controller
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
             $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
                 'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
-            print_r($data);
+
             $user_id=$UserInfo['result']['id'];
 
             $live_comment=Config::getInstance()->getConf('web.live_comment');
@@ -192,7 +193,6 @@ class Push extends Controller
 
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag,$ShieldKeyFlag) {
-
 
                 if($ShieldKeyFlag==0) { //1是有敏感词不发送
                     $RedisObj = new Redis();
