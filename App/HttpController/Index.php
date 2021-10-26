@@ -82,6 +82,7 @@ class Index extends  Controller
 
         $params  = $this->request()->getRequestParam();
         $ListPort = swoole_get_local_ip(); //获取监听ip
+
         $PushService=new PushService();
         $rst=$PushService->Broadcast($ListPort['eth0'],$params);
 
@@ -96,9 +97,11 @@ class Index extends  Controller
      * 负载  禁言
      */
     public function forbid(){
+
         $params  = $this->request()->getRequestParam();
         $PushService=new PushService();
         $rst=$PushService->forbidMessage($params);
+
         Io::WriteFile('','forbid_receive',$rst,2);
 
     }
