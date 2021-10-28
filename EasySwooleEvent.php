@@ -262,7 +262,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.138' || $ListPort['eth0']=='172.17.176.246' ){ //172.17.212.131(113)
+        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.176.246' ){ //172.17.212.131(113)
 
             //开始|结束直播
             $TaskObj = new Task([
