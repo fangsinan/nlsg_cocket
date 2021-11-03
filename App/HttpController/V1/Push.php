@@ -67,7 +67,10 @@ class Push extends Controller
 
         $user_id = intval($message['user_id']);
         $live_id = intval($message['live_id']);
-        $live_son_flag = $message['live_son_flag']?intval($message['live_son_flag']):0;
+        $live_son_flag=0;
+        if(!empty($message['live_son_flag'])){
+            $live_son_flag=intval($message['live_son_flag']);
+        }
 
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo ($live_id,$user_id);
@@ -140,6 +143,10 @@ class Push extends Controller
 
         $message['live_id']=intval($message['live_id']);
         $message['user_id']=intval($message['user_id']);
+        $live_son_flag=0;
+        if(!empty($message['live_son_flag'])){
+            $live_son_flag=intval($message['live_son_flag']);
+        }
 
         $infoObj = new LiveInfo();
         $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
@@ -165,7 +172,6 @@ class Push extends Controller
             $live_id=$message['live_id'];
             $live_pid=$infoPid['live_pid'];
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
-            $live_son_flag=$message['live_son_flag'];
 
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
             $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
