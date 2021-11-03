@@ -141,7 +141,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $LiveLoginObj=new LiveLoginModel();
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
-                    $live_id=$arr[2];
+                    $live_id=intval($arr[2]);
 
                     //人气值改版
                     $NumInfo=$LiveLoginObj->db->where('live_id',$live_id)->get($LiveLoginObj::$table,[0,1],'count(id) counts');
