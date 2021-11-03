@@ -305,8 +305,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         foreach ($list as $key=>$val){
                             $start=$key;
 //                            $arr[]=$val;
-//                            $arr[]=json_decode($val,true);
-                            $arr=json_decode($val,true); //只返回一条
+                            $arr=[];
+                            $arr[]=json_decode($val,true);//只返回一条
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 12, 'content_arr' => $arr,]);
                         $Redis->ltrim($live_gift.$live_id,$start+1,-1);//删除已取出数据
