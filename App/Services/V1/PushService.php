@@ -77,7 +77,7 @@ class PushService
         }
 
         $Redis = new Redis();
-        $resultData = $Redis->get('live_serverload_iplist'); //服务器ip列表
+        $resultData = $Redis->get('111live_serverload_iplist'); //服务器ip列表
         if(!empty($resultData)){
             $IpLoadArr=explode(',',$resultData);
         }else{

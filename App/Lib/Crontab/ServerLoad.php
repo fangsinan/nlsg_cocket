@@ -74,7 +74,7 @@ class ServerLoad extends AbstractCronTask
             $ConfigObj=new Config();
             $Redis = new Redis();
             $IpInfo = $ConfigObj->db->where('id',54)->getOne($ConfigObj->tableName, 'value');
-            $Redis->set('live_serverload_iplist',$IpInfo['value'],86400);
+            $Redis->set('111live_serverload_iplist',$IpInfo['value'],86400);
 
             //写入redis
             Io::WriteFile ('/serverLoad', 'load_ip_', 1,2);
