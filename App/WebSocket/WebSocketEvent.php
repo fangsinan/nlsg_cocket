@@ -124,9 +124,9 @@ class WebSocketEvent
         if(empty($params['live_id'])){$params['live_id']=0;}
         if(empty($params['user_id'])){$params['user_id']=0;}
         if(empty($params['live_son_flag'])){$params['live_son_flag']=0;}
-        $live_id=$params['live_id']+0;
-        $user_id=$params['user_id']+0;
-        $live_son_flag=$params['live_son_flag']+0;
+        $live_id=intval($params['live_id']);
+        $user_id=intval($params['user_id']);
+        $live_son_flag=intval($params['live_son_flag']);
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
         $Redis = new Redis();

@@ -23,7 +23,8 @@ class Index extends Controller
         $message = $this->caller ()->getArgs ();//获取所有参数
         if(empty($message['live_id']))$message['live_id']=0;
         if(empty($message['user_id']))$message['user_id']=0;
-        $live_id = $message['live_id']+0;
+//        $live_id = $message['live_id']+0;
+        $live_id = intval($message['live_id']);
 
         $server = ServerManager::getInstance()->getSwooleServer();
         $getfd=$client->getFd();
