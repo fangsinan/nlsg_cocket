@@ -123,7 +123,7 @@ class Push extends Controller
 //                $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
                 //写入redis缓存
                 $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
-                $RedisObj->sAdd('111_live_join', $map);
+                $RedisObj->rpush('111_live_join', $map);
             });
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
@@ -216,7 +216,7 @@ class Push extends Controller
                     );*/
                     //写入redis
                     $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]);
-                    $RedisObj->sAdd('111_live_comment', $map);
+                    $RedisObj->rpush('111_live_comment', $map);
                 }
             });
 
@@ -265,7 +265,7 @@ class Push extends Controller
 //                $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>$time]);
 
                 $map=json_encode(['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>$time]);
-                $RedisObj->sAdd('111_live_gift', $map);
+                $RedisObj->rpush('111_live_gift', $map);
 
             });
 
