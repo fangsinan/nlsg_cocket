@@ -113,14 +113,17 @@ class Push extends Controller
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
 
+                $RedisObj = new Redis();
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
-                    $RedisObj = new Redis();
                     $RedisObj->rpush($live_join . $live_id, $data);
                 }
                 $time=time();
                 $created_at=date('Y-m-d H:i:s',$time);
-                $LiveLogin = new LiveLoginModel();
-                $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
+//                $LiveLogin = new LiveLoginModel();
+//                $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
+                //写入redis缓存
+                $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
+                $RedisObj->rpush('111_live_join', $map);
             });
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
@@ -204,11 +207,16 @@ class Push extends Controller
                     $RedisObj = new Redis();
                     $RedisObj->rpush($live_comment . $live_id, $data);
 
-                    $LiveComment = new LiveCommentModel();
+                    $time=date('Y-m-d H:i:s', time());
+
+                    /*$LiveComment = new LiveCommentModel();
                     //此时的live_Id 用的是直播间id
                     $LiveComment->add(LiveCommentModel::$table,
-                        ['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => date('Y-m-d H:i:s', time())]
-                    );
+                        ['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]
+                    );*/
+                    //写入redis
+                    $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]);
+                    $RedisObj->rpush('111_live_comment', $map);
                 }
             });
 
@@ -250,9 +258,14 @@ class Push extends Controller
 
                 $RedisObj=new Redis();
                 $RedisObj->rpush($live_gift.$live_id,$data);
+
+                $time=date('Y-m-d H:i:s',time());
                 //送礼物
-                $LiveCommentObj=new LiveCommentModel();
-                $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>date('Y-m-d H:i:s',time())]);
+//                $LiveCommentObj=new LiveCommentModel();
+//                $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>$time]);
+
+                $map=json_encode(['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>$time]);
+                $RedisObj->rpush('111_live_gift', $map);
 
             });
 
