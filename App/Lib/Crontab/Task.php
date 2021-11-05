@@ -658,7 +658,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $arr = explode('_', $val);
                 $live_id = $arr[2];
                 $time=time();
-                //是否全场禁言  有且仅有一条
+                /*//是否全场禁言  有且仅有一条
                 $forbidden = $forbiddenObj->getOne(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'user_id'=>0],'id,user_id,is_forbid,forbid_at,length');
                 if(!empty($forbidden)){ //操作的是一条记录
                     if($forbidden['is_forbid']==2){//user_id  0时 为直播间全员控制 is_forbid 1 禁言 2解禁 forbid_ctime 开始禁言时间 forbid_time 禁言时长
@@ -682,7 +682,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
                     continue;
 
-                }
+                }*/
                 //个人禁言
                 $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_at,length');
                 if(!empty($forbidden) ) {
