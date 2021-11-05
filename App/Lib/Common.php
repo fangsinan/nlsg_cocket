@@ -39,7 +39,8 @@ class Common
         $UserInfo['content'] ="'" . mysql_real_escape_string(stripslashes($content)) . "'";*/
 
         if($auth_user_id!=169209) { //李婷老师不过滤
-            $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
+//            $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
+            $reg = '/([a-zA-Z]|7|8|9|0|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
             $replace = Common::textDecode('\ud83c\udf39');  // 替换成此字符串
             $str = preg_replace($reg, $replace, $str);  // 进行替换
         }
