@@ -133,15 +133,20 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //获取所有在线直播id
 //            keys 11_live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
+//            $listRst=$Redis->keys($live_id_key.'*');
+
+            //查询直播中
+            $LiveInfoObj=new LiveInfo();
+            $listRst = $LiveInfoObj->db->where('is_begin',1)->get($LiveInfoObj->tableName, [0,10],'id,live_pid');
+
             if(!empty($listRst)){
 //                $LiveModel=new LiveNumberModel();
                 $LiveObj=new Live();
-//                $LiveInfoObj=new LiveInfo();
                 $LiveLoginObj=new LiveLoginModel();
                 foreach ($listRst as $val){
-                    $arr = explode ('_', $val);
-                    $live_id=intval($arr[2]);
+//                    $arr = explode ('_', $val);
+//                    $live_id=intval($arr[2]);
+                    $live_id=$val['live_pid'];
 
                     //人气值改版
                     $NumInfo=$LiveLoginObj->db->where('live_id',$live_id)->get($LiveLoginObj::$table,[0,1],'count(id) counts');
@@ -193,7 +198,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //获取所有在线直播id
 //            keys 11_live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
+            $listRst=$Redis->keys($live_join.'*');
             if(!empty($listRst)){ //获取直播间
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
@@ -241,7 +246,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //获取所有在线直播id
 //            keys 11_live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
+            $listRst=$Redis->keys($live_comment.'*');
             if(!empty($listRst)){ //获取直播间
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
