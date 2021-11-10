@@ -209,7 +209,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $arr=[];
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            if($key<=5) { //防止高并发加入直播间人数较多，丢弃一部分最多返回5条减轻压力
+                            if($key<2) { //防止高并发加入直播间人数较多，丢弃一部分最多返回5条减轻压力
                                 $arr[] = json_decode($val, true);
                             }
                         }
@@ -257,7 +257,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         $start=0;
                         foreach ($list as $key=>$val){
                             $start=$key;
-                            if($key<=5) { //防止高并发评论过度，丢弃一部分评论最多返回5条减轻压力
+                            if($key<10) { //防止高并发评论过度，丢弃一部分评论最多返回5条减轻压力
                                 $arr[] = json_decode($val, true);
                             }
                         }
@@ -562,7 +562,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $arr=[];
                     foreach ($list as $key=>$val){
                         $start=$key;
-                        if($key<=5) { //防止高并发，丢弃一部分最多返回5条减轻压力
+                        if($key<10) { //防止高并发，丢弃一部分最多返回5条减轻压力
                             $arr[] = $val;
                         }
                     }
