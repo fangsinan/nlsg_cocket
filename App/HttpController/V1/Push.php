@@ -65,6 +65,12 @@ class Push extends Controller
         $client = $this->caller ()->getClient ();
         $message = $this->caller ()->getArgs ();//获取所有参数
 
+        if(empty($message['live_id'])){
+            $message['live_id']=0;
+        }
+        if(empty($message['user_id'])){
+            $message['user_id']=0;
+        }
         $user_id = intval($message['user_id']);
         $live_id = intval($message['live_id']);
         $live_son_flag=0;
@@ -106,9 +112,27 @@ class Push extends Controller
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
 
             $live_join=Config::getInstance()->getConf('web.live_join');
-            $infoObj = new LiveInfo();
-            $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
-            $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
+//            $infoObj = new LiveInfo();
+//            $infoPid = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'live_pid,is_begin');
+//            $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
+
+            $Redis = new Redis();
+            $key_name='1111:live_join_'.$live_id;
+            $liveInfoRedis = $Redis->get($key_name);
+            if(empty($liveInfoRedis)) {
+                $infoObj = new LiveInfo();
+                $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
+                $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
+                $liveInfoRedis=json_encode([
+                    'InfoPid'=>['live_pid'=>$infoPid['live_pid'],'is_begin'=>$infoPid['is_begin']],
+                    'Info'=>['is_join'=>$Info['is_join']]
+                ]);
+                $Redis->set($key_name, $liveInfoRedis, 3600); //1小时
+            }else{
+                $liveInfoRedis=json_decode($liveInfoRedis,true);
+                $infoPid=$liveInfoRedis['InfoPid'];
+                $Info=$liveInfoRedis['Info'];
+            }
 
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
@@ -151,9 +175,28 @@ class Push extends Controller
             $live_son_flag=intval($message['live_son_flag']);
         }
 
-        $infoObj = new LiveInfo();
-        $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
-        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
+//        $infoObj = new LiveInfo();
+//        $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+//        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
+
+        $Redis = new Redis();
+        $key_name='1111:live_comment_'.$message['live_id'];
+        $liveInfoRedis = $Redis->get($key_name);
+        if(empty($liveInfoRedis)) {
+            $infoObj = new LiveInfo();
+            $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+            $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
+
+            $liveInfoRedis=json_encode([
+                'InfoPid'=>['live_pid'=>$infoPid['live_pid']],
+                'lupInfo'=>['is_forb'=>$lupInfo['is_forb'],'helper'=>$lupInfo['helper'],'user_id'=>$lupInfo['user_id']]
+            ]);
+            $Redis->set($key_name, $liveInfoRedis, 3600); //1小时
+        }else{
+            $liveInfoRedis=json_decode($liveInfoRedis,true);
+            $infoPid=$liveInfoRedis['InfoPid'];
+            $lupInfo=$liveInfoRedis['lupInfo'];
+        }
 
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken'],$lupInfo['user_id']);
