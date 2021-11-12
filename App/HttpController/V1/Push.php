@@ -122,6 +122,9 @@ class Push extends Controller
             if(empty($liveInfoRedis)) {
                 $infoObj = new LiveInfo();
                 $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
+                if(empty($infoPid)){
+                    return ;
+                }
                 $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
                 $liveInfoRedis=json_encode([
                     'InfoPid'=>['live_pid'=>$infoPid['live_pid'],'is_begin'=>$infoPid['is_begin']],
@@ -185,6 +188,9 @@ class Push extends Controller
         if(empty($liveInfoRedis)) {
             $infoObj = new LiveInfo();
             $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+            if(empty($infoPid)){
+                return ;
+            }
             $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
 
             $liveInfoRedis=json_encode([
