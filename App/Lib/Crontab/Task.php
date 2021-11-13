@@ -247,11 +247,15 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //获取所有在线直播id
 //            keys 11_live_key_*
             $listRst=$Redis->keys($live_comment.'*');
+            print_r($listRst);
+            print_r($live_comment);
             if(!empty($listRst)){ //获取直播间
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
                     $list=$Redis->lrange($live_comment.$live_id,0,-1);// 获取所有数据
+                    print_r($list);
+
                     if(!empty($list)){
                         $arr=[];
                         $start=0;
