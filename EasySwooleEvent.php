@@ -135,7 +135,7 @@ class EasySwooleEvent implements Event
         $ListPort = swoole_get_local_ip(); //获取监听ip
         #172.17.212.138,172.17.212.137,172.17.212.131
         #172.17.212.147,172.17.212.148,172.17.212.138
-        if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.176.246') {//172.17.212.138(215)
+        if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.138(215)
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
@@ -199,7 +199,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.213' || $ListPort['eth0']=='172.17.176.246' ) { //172.17.212.137(216)
+        if($ListPort['eth0']=='172.17.212.213' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.212.137(216)
 
             //发送评论  扫描redis记录
             $TaskObj = new Task([
@@ -262,7 +262,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.176.246' ){ //172.17.212.131(113)
+        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //172.17.212.131(113)
 
             //开始|结束直播
             $TaskObj = new Task([
