@@ -135,6 +135,7 @@ class EasySwooleEvent implements Event
         $ListPort = swoole_get_local_ip(); //获取监听ip
         #172.17.212.138,172.17.212.137,172.17.212.131
         #172.17.212.147,172.17.212.148,172.17.212.138
+        print_r($ListPort);
         if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.138(215)
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
