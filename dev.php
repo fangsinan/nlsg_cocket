@@ -63,7 +63,7 @@ return [
 
 
 'MYSQL'=>[
-    'host'          => '39.105.214.152',
+    'host'          => '101.201.141.10',
     'port'          => '3306',
     'user'          => 'bj_root',
     'timeout'       => '5',
@@ -75,7 +75,7 @@ return [
 ],
 
     'REDIS'=>[
-        'host'          => '39.105.214.152',
+        'host'          => '101.201.141.10',
         'port'          => '6379',
         'auth'          => 'HYQC2021*beijin.1209BJ',
         'POOL_MAX_NUM'  => '20',
