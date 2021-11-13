@@ -199,7 +199,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.148' || $ListPort['eth0']=='172.17.176.246' ) { //172.17.212.137(216)
+        if($ListPort['eth0']=='172.17.212.213' || $ListPort['eth0']=='172.17.176.246' ) { //172.17.212.137(216)
 
             //发送评论  扫描redis记录
             $TaskObj = new Task([
