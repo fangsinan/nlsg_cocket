@@ -232,6 +232,57 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     }
 
+    //广播评论redis
+    public function CommentRedis($taskId, $fromWorkerId,$data,$path){
+        try {
+
+            //获取redis
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            $ip=$ListPort['eth0'];
+            $ip_str=str_replace(".","_",$ip);
+            $key_name="1111livecomment:".$ip_str.":"; //11111:live_comment_172.17.212.131_19
+
+            $Redis = new Redis();
+            $listRst=$Redis->keys($key_name.'*');
+            if(!empty($listRst)) { //获取直播间
+                foreach ($listRst as $val) {
+                    $arr = explode(':', $val);
+                    $live_id = $arr[2];
+
+                    $list=$Redis->lrange($key_name.$live_id,0,-1);// 获取所有数据
+                    if(!empty($list)){
+                        $arr=[];
+                        $start=0;
+                        foreach ($list as $key=>$val){
+                            $start=$key;
+                            if($key<10) { //防止高并发评论过度，丢弃一部分评论最多返回5条减轻压力
+                                $arr[] = json_decode($val, true);
+                            }
+                        }
+                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
+                        $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
+                        $data=[
+                            'live_id'=>$live_id,
+                            'data'=>$list
+                        ];
+                        PushService::Broadcast($ListPort['eth0'],$data);
+                    }
+
+                }
+            }
+
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
     //广播评论
     public function Comment($taskId, $fromWorkerId,$data,$path){
         try {
@@ -247,15 +298,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //获取所有在线直播id
 //            keys 11_live_key_*
             $listRst=$Redis->keys($live_comment.'*');
-            print_r($listRst);
-            print_r($live_comment);
             if(!empty($listRst)){ //获取直播间
                 foreach ($listRst as $val){
                     $arr = explode ('_', $val);
                     $live_id=$arr[2];
                     $list=$Redis->lrange($live_comment.$live_id,0,-1);// 获取所有数据
-                    print_r($list);
-
                     if(!empty($list)){
                         $arr=[];
                         $start=0;
