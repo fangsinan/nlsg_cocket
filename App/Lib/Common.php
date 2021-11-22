@@ -38,6 +38,30 @@ class Common
         $UserInfo['content'] = mysql_escape_string ($content);
         $UserInfo['content'] ="'" . mysql_real_escape_string(stripslashes($content)) . "'";*/
 
+        $content_json=json_encode($str);
+        $content_json = str_replace("\ud83d\udc4f",'#1#',$content_json); //鼓掌
+        $content_json = str_replace("\ud83d\udc4d",'#2#',$content_json); //点赞
+        $content_json = str_replace("\ud83c\udf39",'#3#',$content_json); //小红花
+        $str=json_decode($content_json);
+
+        $str = preg_replace_callback('/./u', function (array $match) {
+            return strlen($match[0]) >= 4 ? '' : $match[0];
+        }, $str);
+
+//        $regex='/[\xf0-\xf7].{3}/'; // 全局匹配
+//        $str = preg_replace($regex,'',$str);
+
+        if(empty($str)){
+            $replace_content=self::textDecode('\ud83d\udc4f');  //   \ud83d\udc4f  鼓掌
+            $str=$replace_content.$replace_content.$replace_content;
+        }
+        $replace_gz=self::textDecode('\ud83d\udc4f');  // \ud83d\udc4f  鼓掌
+        $replace_dz=self::textDecode('\ud83d\udc4d');  // \ud83d\udc4d  点赞
+        $replace_xhh=self::textDecode('\ud83c\udf39');  // \ud83c\udf39  小红花
+        $str = str_replace("#1#",$replace_gz,$str); //鼓掌
+        $str = str_replace("#2#",$replace_dz,$str); //点赞
+        $str = str_replace("#3#",$replace_xhh,$str); //小红花
+
         if($auth_user_id!=169209) { //李婷老师不过滤
 //            $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|一|二|三|四|五|六|七|八|九|十)/';
             $reg = '/([a-zA-Z]|7|8|9|0|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
