@@ -9,6 +9,7 @@ use App\Model\V1\LiveLoginModel;
 use App\Model\V1\ShieldUser;
 use App\Services\V1\UserService;
 use App\Lib\Common;
+use App\Utility\Tools\Io;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Swoole\Task\TaskManager;
 use EasySwoole\Socket\AbstractInterface\Controller;
@@ -254,10 +255,22 @@ class Push extends Controller
 
                 if($ShieldKeyFlag==0) { //1是有敏感词不发送
                     $RedisObj = new Redis();
-                    $RedisObj->rpush($live_comment . $live_id, $data);
+//                    $RedisObj->rpush($live_comment . $live_id, $data);
+
+                    $resultData = $RedisObj->get('111live_serverload_iplist'); //服务器ip列表
+                    if (!empty($resultData)) {
+                        $IpLoadArr = explode(',', $resultData);
+                    } else {
+                        //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
+                        $IpLoadArr = Config::getInstance()->getConf('web.load_ip_arr');
+                    }
+                    foreach ($IpLoadArr as $key => $val) {
+                        $ip_str=str_replace(".","_",$val);
+                        $RedisObj->rpush("1111livecomment:".$ip_str . ':' . $live_id, $data);
+//                        Io::WriteFile('/Crontab','commentRedis',$ip_str.$data,2);
+                    }
 
                     $time=date('Y-m-d H:i:s', time());
-
                     /*$LiveComment = new LiveCommentModel();
                     //此时的live_Id 用的是直播间id
                     $LiveComment->add(LiveCommentModel::$table,
