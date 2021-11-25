@@ -154,7 +154,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.138(215)
+        if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.147
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
@@ -198,27 +198,9 @@ class EasySwooleEvent implements Event
                 }
             });
 
-            //订单推送  扫描redis记录
-            $TaskObj = new Task([
-                'method' => 'getLivePushOrder',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'order_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 3) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
-
         }
 
-        if($ListPort['eth0']=='172.17.212.213' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.212.137(216)
+        if($ListPort['eth0']=='172.17.212.148' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.212.148
 
             //发送评论  扫描redis记录
             /*$TaskObj = new Task([
@@ -281,21 +263,21 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //172.17.212.131(113)
+        if ($ListPort['eth0'] == '172.17.212.213' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.213
 
-            //开始|结束直播
+            //订单推送  扫描redis记录
             $TaskObj = new Task([
-                'method' => 'pushEnd',
+                'method' => 'getLivePushOrder',
                 'path' => [
                     'dir' => '/Crontab',
-                    'name' => 'startEnd_',
+                    'name' => 'order_',
                 ],
                 'data' => [
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 1) {
-                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
                         TaskManager::async($TaskObj);
                     });
                 }
@@ -320,6 +302,28 @@ class EasySwooleEvent implements Event
                 }
             });
 
+        }
+
+        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //172.17.212.131(113)
+
+            //开始|结束直播
+            $TaskObj = new Task([
+                'method' => 'pushEnd',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'startEnd_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 1) {
+                    Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
             //推送打赏礼物  扫描redis记录
             $TaskObj = new Task([
                 'method' => 'getLiveGiftOrder',
@@ -331,7 +335,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 3) {
+                if ($workerId == 2) {
                     Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
@@ -350,7 +354,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 4) {
+                if ($workerId == 3) {
                     Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //30s
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
