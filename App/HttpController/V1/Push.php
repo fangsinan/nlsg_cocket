@@ -208,6 +208,11 @@ class Push extends Controller
         $UserServiceObj = new UserService();
         $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken'],$lupInfo['user_id']);
 
+        $str_num=strlen($message['content']);
+        if($str_num>2500){
+            return ;
+        }
+        
         $admin_arr=explode('-',$lupInfo['helper']);
         if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
             return ;
