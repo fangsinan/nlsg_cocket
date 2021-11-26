@@ -212,7 +212,7 @@ class Push extends Controller
         if($str_num>2500){
             return ;
         }
-        
+
         $admin_arr=explode('-',$lupInfo['helper']);
         if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
             return ;
