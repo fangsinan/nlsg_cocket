@@ -118,7 +118,7 @@ class Push extends Controller
 //            $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
 
             $Redis = new Redis();
-            $key_name='1111:live_join_'.$live_id;
+            $key_name='1111live:live_join_'.$live_id;
             $liveInfoRedis = $Redis->get($key_name);
             if(empty($liveInfoRedis)) {
                 $infoObj = new LiveInfo();
@@ -143,7 +143,25 @@ class Push extends Controller
 
                 $RedisObj = new Redis();
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
-                    $RedisObj->rpush($live_join . $live_id, $data);
+//                    $RedisObj->rpush($live_join . $live_id, $data);
+
+                    $resultData = $RedisObj->get('111live_serverload_iplist'); //服务器ip列表
+                    if (!empty($resultData)) {
+                        $IpLoadArr = explode(',', $resultData);
+                    } else {
+                        $IpLoadArr = Config::getInstance()->getConf('web.load_ip_arr');
+                    }
+                    foreach ($IpLoadArr as $key => $val) {
+                        $ip_str=str_replace(".","_",$val);
+
+                        $join_push_key="1111livejoin:".$ip_str . ':' . $live_id;
+                        $join_push_num=$RedisObj->llen($join_push_key);
+                        if($join_push_num>=10){
+                            break;
+                        }
+                        $RedisObj->rpush($join_push_key, $data);
+                    }
+
                 }
                 $time=time();
                 $created_at=date('Y-m-d H:i:s',$time);
@@ -184,7 +202,7 @@ class Push extends Controller
 //        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
 
         $Redis = new Redis();
-        $key_name='1111:live_comment_'.$message['live_id'];
+        $key_name='1111live:live_comment_'.$message['live_id'];
         $liveInfoRedis = $Redis->get($key_name);
         if(empty($liveInfoRedis)) {
             $infoObj = new LiveInfo();
@@ -277,7 +295,8 @@ class Push extends Controller
                         if($comment_push_num>=10){
                             break;
                         }
-//                        $RedisObj->rpush("1111livecomment:".$ip_str . ':' . $live_id, $data);
+                        $RedisObj->rpush($comment_push_key, $data);
+
 //                        Io::WriteFile('/Crontab','commentRedis',$ip_str.$data,2);
                     }
 
