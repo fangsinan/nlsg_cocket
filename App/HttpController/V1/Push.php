@@ -212,7 +212,7 @@ class Push extends Controller
         if($str_num>2500){
             return ;
         }
-
+        
         $admin_arr=explode('-',$lupInfo['helper']);
         if( $lupInfo['is_forb'] == 1 && !in_array($UserInfo['result']['username'],$admin_arr)){ //仅管理员评论
             return ;
@@ -271,7 +271,13 @@ class Push extends Controller
                     }
                     foreach ($IpLoadArr as $key => $val) {
                         $ip_str=str_replace(".","_",$val);
-                        $RedisObj->rpush("1111livecomment:".$ip_str . ':' . $live_id, $data);
+
+                        $comment_push_key="1111livecomment:".$ip_str . ':' . $live_id;
+                        $comment_push_num=$RedisObj->llen($comment_push_key);
+                        if($comment_push_num>=10){
+                            break;
+                        }
+//                        $RedisObj->rpush("1111livecomment:".$ip_str . ':' . $live_id, $data);
 //                        Io::WriteFile('/Crontab','commentRedis',$ip_str.$data,2);
                     }
 
