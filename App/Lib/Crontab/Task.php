@@ -259,14 +259,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                                 $arr[] = json_decode($val, true);
                             }
                         }
-                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
-//                        if($live_id!=19) {
                         $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
-//                        }
-                        $data=[
-                            'live_id'=>$live_id,
-                            'data'=>$list
-                        ];
+                        $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
                         PushService::Broadcast($ListPort['eth0'],$data);
                     }
 
