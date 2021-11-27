@@ -118,7 +118,7 @@ class Push extends Controller
 //            $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
 
             $Redis = new Redis();
-            $key_name='1111live:live_join_'.$live_id;
+            $key_name='11live:live_join_'.$live_id;
             $liveInfoRedis = $Redis->get($key_name);
             if(empty($liveInfoRedis)) {
                 $infoObj = new LiveInfo();
@@ -159,7 +159,7 @@ class Push extends Controller
                         if($join_push_num>=10){
                             break;
                         }
-                        $RedisObj->rpush($join_push_key, $data);
+                        $RedisObj->rpush($join_push_key, $data); //推送写入
                     }
 
                 }
@@ -169,7 +169,7 @@ class Push extends Controller
 //                $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
                 //写入redis缓存
                 $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
-                $RedisObj->rpush('111_live_join', $map);
+                $RedisObj->rpush('11LiveConsole:live_join', $map); //数据库写入
             });
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
@@ -202,7 +202,7 @@ class Push extends Controller
 //        $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
 
         $Redis = new Redis();
-        $key_name='1111live:live_comment_'.$message['live_id'];
+        $key_name='11live:live_comment_'.$message['live_id'];
         $liveInfoRedis = $Redis->get($key_name);
         if(empty($liveInfoRedis)) {
             $infoObj = new LiveInfo();
@@ -295,7 +295,7 @@ class Push extends Controller
                         if($comment_push_num>=10){
                             break;
                         }
-                        $RedisObj->rpush($comment_push_key, $data);
+                        $RedisObj->rpush($comment_push_key, $data); //推送写入
 
 //                        Io::WriteFile('/Crontab','commentRedis',$ip_str.$data,2);
                     }
@@ -308,7 +308,7 @@ class Push extends Controller
                     );*/
                     //写入redis
                     $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]);
-                    $RedisObj->rpush('111_live_comment', $map);
+                    $RedisObj->rpush('11LiveConsole:live_comment', $map); //数据库写入
                 }
             });
 
@@ -349,7 +349,7 @@ class Push extends Controller
             TaskManager::async (function () use ($client, $data,$live_id,$user_id,$content,$live_gift) {
 
                 $RedisObj=new Redis();
-                $RedisObj->rpush($live_gift.$live_id,$data);
+                $RedisObj->rpush($live_gift.$live_id,$data); //推送扫描
 
                 $time=date('Y-m-d H:i:s',time());
                 //送礼物
@@ -357,7 +357,7 @@ class Push extends Controller
 //                $LiveCommentObj->add(LiveCommentModel::$table,['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>$time]);
 
                 $map=json_encode(['type'=>1,'live_id'=>$live_id,'user_id'=>$user_id,'content'=>json_encode($content),'created_at'=>$time]);
-                $RedisObj->rpush('111_live_gift', $map);
+                $RedisObj->rpush('11LiveConsole:live_gift', $map); //入库列表
 
             });
 
