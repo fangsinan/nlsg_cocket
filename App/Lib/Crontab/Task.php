@@ -232,6 +232,59 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
     }
 
+    //广播加入直播redis
+    public function JoinRedis($taskId, $fromWorkerId,$data,$path){
+        try {
+
+            //获取redis
+            $ListPort = swoole_get_local_ip (); //获取监听ip
+            $ip=$ListPort['eth0'];
+            $ip_str=str_replace(".","_",$ip);
+            $key_name="1111livejoin:".$ip_str.":"; //1111livejoin:172.17.212.131:19
+
+            $Redis = new Redis();
+            $listRst=$Redis->keys($key_name.'*');
+            if(!empty($listRst)) { //获取直播间
+                foreach ($listRst as $val) {
+                    $arr = explode(':', $val);
+                    $live_id = $arr[2];
+
+                    $list=$Redis->lrange($key_name.$live_id,0,-1);// 获取所有数据
+                    if(!empty($list)){
+                        $arr=[];
+                        $start=0;
+                        foreach ($list as $key=>$val){
+                            $start=$key;
+                            if($key<5) { //防止高并发加入过度，丢弃一部分最多返回5条减轻压力
+                                $arr[] = json_decode($val, true);
+                            }
+                        }
+                        $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
+//                        if($live_id!=19) {
+                        $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
+//                        }
+                        $data=[
+                            'live_id'=>$live_id,
+                            'data'=>$list
+                        ];
+                        PushService::Broadcast($ListPort['eth0'],$data);
+                    }
+
+                }
+            }
+
+            return [
+                'data' => 1,
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $SysArr=Config::getInstance()->getConf('web.SYS_ERROR');
+            //短信通知
+            Tool::SendSms (["system"=>'live4.0版','content'=>$e->getMessage()], $SysArr['phone'], $SysArr['tpl']);
+        }
+
+    }
+
     //广播评论redis
     public function CommentRedis($taskId, $fromWorkerId,$data,$path){
         try {
@@ -240,7 +293,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $ListPort = swoole_get_local_ip (); //获取监听ip
             $ip=$ListPort['eth0'];
             $ip_str=str_replace(".","_",$ip);
-            $key_name="1111livecomment:".$ip_str.":"; //11111:live_comment_172.17.212.131_19
+            $key_name="1111livecomment:".$ip_str.":"; //1111livecomment:172_17_212_131:19
 
             $Redis = new Redis();
             $listRst=$Redis->keys($key_name.'*');
@@ -260,7 +313,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             }
                         }
                         $list=Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 2, 'content_arr' => $arr,]);
-                        $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
+//                        if($live_id!=19) {
+                            $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
+//                        }
                         $data=[
                             'live_id'=>$live_id,
                             'data'=>$list
