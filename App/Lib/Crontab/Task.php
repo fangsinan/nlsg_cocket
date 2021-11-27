@@ -260,7 +260,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             }
                         }
                         $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
-                        $data = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
+                        $list = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
+                        $data=[
+                            'live_id'=>$live_id,
+                            'data'=>$list
+                        ];
                         PushService::Broadcast($ListPort['eth0'],$data);
                     }
 
