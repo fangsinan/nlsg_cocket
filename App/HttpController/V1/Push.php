@@ -143,9 +143,9 @@ class Push extends Controller
 
                 $RedisObj = new Redis();
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
-//                    $RedisObj->rpush($live_join . $live_id, $data);
+                    $RedisObj->rpush($live_join . $live_id, $data);
 
-                    $resultData = $RedisObj->get('111live_serverload_iplist'); //服务器ip列表
+                    /*$resultData = $RedisObj->get('111live_serverload_iplist'); //服务器ip列表
                     if (!empty($resultData)) {
                         $IpLoadArr = explode(',', $resultData);
                     } else {
@@ -160,7 +160,7 @@ class Push extends Controller
                             break;
                         }
                         $RedisObj->rpush($join_push_key, $data); //推送写入
-                    }
+                    }*/
 
                 }
                 $time=time();

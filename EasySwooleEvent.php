@@ -155,7 +155,7 @@ class EasySwooleEvent implements Event
         });
 
         //当前服务器扫描加入直播
-        $TaskObj = new Task([
+        /*$TaskObj = new Task([
             'method' => 'JoinRedis',
             'path' => [
                 'dir' => '/Crontab',
@@ -171,7 +171,7 @@ class EasySwooleEvent implements Event
                     TaskManager::async($TaskObj);
                 });
             }
-        });
+        });*/
 
         if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.147
 
@@ -196,7 +196,7 @@ class EasySwooleEvent implements Event
             });
 
             //进入直播间   扫描redis记录
-            /*$TaskObj = new Task([
+            $TaskObj = new Task([
                 'method' => 'Joinlive',
                 'path' => [
                     'dir' => '/Crontab',
@@ -206,13 +206,13 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 2) {
+                if ($workerId == 1) {
                     Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
                 }
-            });*/
+            });
 
         }
 
