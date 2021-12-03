@@ -23,7 +23,7 @@ class UserService
 {
 
     //获取用户数据
-    public function GetUserInfo($live_id,$user_id,$content='',$access_user_token='',$auth_user_id=0){
+    public function GetUserInfo($live_id,$user_id,$content='',$access_user_token='',$auth_user_id=0,$admin_arr=[]){
         if(empty($live_id)){
             return Status::Error (Status::CODE_NOT_FOUND, '直播live_id为空');
         }
@@ -81,7 +81,17 @@ class UserService
 
         }
         if(!empty($content)) {
-            $LUPObj=new LiveUserPrivilege();
+
+            if(!empty($admin_arr) && in_array($UserInfo['username'],$admin_arr)){
+                $UserInfo['content']=$content;
+                $UserInfo['ShieldKeyFlag'] = 0; // 没有违规词
+            }else{
+                $ShieldKeyArr=Common::filterStr($content,$auth_user_id);
+                $UserInfo['content'] = $ShieldKeyArr['content'];
+                $UserInfo['ShieldKeyFlag'] = $ShieldKeyArr['flag']; //1 有违规词
+            }
+
+            /*$LUPObj=new LiveUserPrivilege();
             $lupInfo=$LUPObj->getOne($LUPObj->tableName,['user_id'=>$UserInfo['id']],'id');
             if(!empty($lupInfo)){ //管理员不过滤
                 $UserInfo['content']=$content;
@@ -90,7 +100,7 @@ class UserService
                 $ShieldKeyArr=Common::filterStr($content,$auth_user_id);
                 $UserInfo['content'] = $ShieldKeyArr['content'];
                 $UserInfo['ShieldKeyFlag'] = $ShieldKeyArr['flag']; //1 有违规词
-            }
+            }*/
         }
         $UserInfo['level'] = 0;//不返用户等级
         return Status::Success('获取成功',$UserInfo);
