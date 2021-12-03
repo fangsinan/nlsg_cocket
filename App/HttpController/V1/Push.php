@@ -211,20 +211,25 @@ class Push extends Controller
                 return ;
             }
             $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
-
+            $admin_arr=[];
+            if(!empty($lupInfo['helper'])){
+                $admin_arr=explode(',',$lupInfo['helper']);
+            }
             $liveInfoRedis=json_encode([
                 'InfoPid'=>['live_pid'=>$infoPid['live_pid']],
-                'lupInfo'=>['is_forb'=>$lupInfo['is_forb'],'helper'=>$lupInfo['helper'],'user_id'=>$lupInfo['user_id']]
+                'lupInfo'=>['is_forb'=>$lupInfo['is_forb'],'helper'=>$lupInfo['helper'],'user_id'=>$lupInfo['user_id']],
+                'admin_arr'=>$admin_arr
             ]);
             $Redis->set($key_name, $liveInfoRedis, 3600); //1小时
         }else{
             $liveInfoRedis=json_decode($liveInfoRedis,true);
             $infoPid=$liveInfoRedis['InfoPid'];
             $lupInfo=$liveInfoRedis['lupInfo'];
+            $admin_arr=$liveInfoRedis['admin_arr'];
         }
 
         $UserServiceObj = new UserService();
-        $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken'],$lupInfo['user_id']);
+        $UserInfo = $UserServiceObj->GetUserInfo($message['live_id'],$message['user_id']+0,$message['content'],$message['accessUserToken'],$lupInfo['user_id'],$admin_arr);
 
         $str_num=strlen($message['content']);
         if($str_num>2500){
