@@ -220,7 +220,7 @@ class Push extends Controller
                 'lupInfo'=>['is_forb'=>$lupInfo['is_forb'],'helper'=>$lupInfo['helper'],'user_id'=>$lupInfo['user_id']],
                 'admin_arr'=>$admin_arr
             ]);
-            $Redis->set($key_name, $liveInfoRedis, 3600); //1小时
+            $Redis->set($key_name, $liveInfoRedis, 300); //1小时
         }else{
             $liveInfoRedis=json_decode($liveInfoRedis,true);
             $infoPid=$liveInfoRedis['InfoPid'];
