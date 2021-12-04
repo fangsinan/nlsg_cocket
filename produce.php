@@ -62,8 +62,8 @@ return [
     ],
 
     'REDIS'=>[
-        #'host'          => 'r-2ze3z2t3v3ieiduxdj.redis.rds.aliyuncs.com',
-        'host'          => '172.17.212.131',
+        'host'          => 'r-2zej3nhbjn6z357e0y.redis.rds.aliyuncs.com',
+        #'host'          => '172.17.212.131',
         'port'          => '6379',
         'auth'          => 'NLSG2020*beijin*0906BJ',
         'POOL_MAX_NUM'  => '20',
