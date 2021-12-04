@@ -538,7 +538,20 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $push_key_name='11111livepush:'.$ip_str . ':';
             $listRst=$Redis->keys($push_key_name.'*');
 
+            $time=date('Y-m-d H:i:s');
             foreach($listRst as $key => $val) {
+
+                $PushFlagInfo=$Redis->get($val);
+                if(!empty($PushFlagInfo)){
+                    $PushFlagArr=json_decode($PushFlagInfo,true);
+                    if($PushFlagArr['status']==0){ //标记已扫描
+                        $data=json_encode(['status'=>1,'time'=>$time]);
+                        $Redis->setex($val,3600*5,$data);
+                    }else{
+                        continue;
+                    }
+                }
+
                 $arr = explode(':', $val);
                 $push_id = $arr[2];
 
@@ -558,7 +571,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         'data'=>$data
                     ];
                     PushService::Broadcast($ListPort['eth0'],$data);
-                    $Redis->del($val);
+                    $Redis->del($val); //清空执行成功标记
                 }
             }
             return [
