@@ -529,37 +529,36 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     public static function PushProduct($taskId, $fromWorkerId,$data,$path){
 
         try {
-            $live_id_key=Config::getInstance()->getConf('web.live_redis_key');
             $Redis = new Redis();
             $pushObj = new LivePush();
-            $PushServiceObj=new PushService();
 
             //获取所有在线直播id
-//            keys live_key_*
-            $listRst=$Redis->keys($live_id_key.'*');
-            $now = time();
             $ListPort = swoole_get_local_ip (); //获取监听ip
+            $ip_str=str_replace(".","_",$ListPort['eth0']);
+            $push_key_name='11111livepush:'.$ip_str . ':';
+            $listRst=$Redis->keys($push_key_name.'*');
 
             foreach($listRst as $key => $val) {
-                $arr = explode('_', $val);
-                $live_id = $arr[2];
+                $arr = explode(':', $val);
+                $push_id = $arr[2];
 
                 $where = [
-                    'live_info_id' => $live_id,
-                    '(push_at < ?)'=>[date('Y-m-d H:i:s',$now)],
-                    'is_push' => 1,
-                    'is_done' => 0,
-                    'is_del' => 0,
+                    'id' => $push_id,
                 ];
                 $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done,length';
                 $push_info = $pushObj->getOne($pushObj->tableName,$where,$field);
                 if(!empty($push_info)){
-                    //多个
-                    $res = self::getLivePushDetail([$push_info]);
+                    $res = self::getLivePushDetail($push_info);
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
                     //推送消息
-                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
+//                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
 
+                    $data=[
+                        'live_id'=>$push_info['live_info_id'],
+                        'data'=>$data
+                    ];
+                    PushService::Broadcast($ListPort['eth0'],$data);
+                    $Redis->del($val);
                 }
             }
             return [
@@ -576,63 +575,59 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     }
 
     //产品推送扩展
-    public static function getLivePushDetail($push_info){
+    public static function getLivePushDetail($val){
         //获取产品信息
         $res=[];
-        $colObj   = new Column();
-        $workObj  = new Works();
-        $WorkInfoObj=new WorksInfo();
-        $goodsObj = new Goods();
-        $liveObj = new Live();
-        foreach($push_info as $key=>$val){
-            //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量 7:讲座 8:听书  9直播   10 直播外链  11 训练营
-            //push_gid 推送产品id，专栏id  精品课id  商品id
-            if(($val['push_type'] == 1 or $val['push_type'] == 7 or $val['push_type'] == 11) && !empty($val['push_gid']) ){
-                $fields = 'id,name,price,subtitle,details_pic img,user_id';
-                $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
-            }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
-                $fields = 'id,title name,type,price,detail_img img';
-                $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
-                $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
-                $Info['workinfo_id']=$WorkInfoData['id'];
-            }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
-                $fields = 'id,name,price,subtitle,picture img';
-                $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
-            }else if($val['push_type'] == 4){ //线下门票
-                $fields = 'id,title name,price,subtitle,image img,cover_img image';
-                $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
-            }else if($val['push_type'] == 6){
-                $Info=[
-                    'name'=>'幸福360会员',
-                    'price'=>360,
-                    'subtitle'=>'',
-                    'image'=>'/nlsg/works/20201124144228445465.png', //方图
-                    'img'=>'/nlsg/works/20201124144228445466.png'  //长图
-                ];
-            }else if($val['push_type'] == 9){
-                $fields = 'id, title name, `describe` subtitle, cover_img img,cover_img image,begin_at, end_at, user_id, price, is_free';
-                $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
-                $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid']],"id");
-                $Info['live_info_id'] = $live_Info['id'];
-            }else if($val['push_type'] == 10){ //外链
-                $fields = 'id, name, `describe`, `url`,image,img';
-                $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid']],$fields);
-            }
-            if($Info){
-                $res[]= [
-                    'push_info' => $val,
-                    'son_info' => $Info,
-                ];
-            }
-
+        //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量 7:讲座 8:听书  9直播   10 直播外链  11 训练营
+        //push_gid 推送产品id，专栏id  精品课id  商品id
+        if(($val['push_type'] == 1 or $val['push_type'] == 7 or $val['push_type'] == 11) && !empty($val['push_gid']) ){
+            $fields = 'id,name,price,subtitle,details_pic img,user_id';
+            $colObj   = new Column();
+            $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
+        }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
+            $fields = 'id,title name,type,price,detail_img img';
+            $workObj  = new Works();
+            $WorkInfoObj=new WorksInfo();
+            $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
+            $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
+            $Info['workinfo_id']=$WorkInfoData['id'];
+        }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
+            $fields = 'id,name,price,subtitle,picture img';
+            $goodsObj = new Goods();
+            $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
+        }else if($val['push_type'] == 4){ //线下门票
+            $fields = 'id,title name,price,subtitle,image img,cover_img image';
+            $goodsObj = new Goods();
+            $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
+        }else if($val['push_type'] == 6){
+            $Info=[
+                'name'=>'幸福360会员',
+                'price'=>360,
+                'subtitle'=>'',
+                'image'=>'/nlsg/works/20201124144228445465.png', //方图
+                'img'=>'/nlsg/works/20201124144228445466.png'  //长图
+            ];
+        }else if($val['push_type'] == 9){
+            $fields = 'id, title name, `describe` subtitle, cover_img img,cover_img image,begin_at, end_at, user_id, price, is_free';
+            $liveObj = new Live();
+            $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
+            $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid']],"id");
+            $Info['live_info_id'] = $live_Info['id'];
+        }else if($val['push_type'] == 10){ //外链
+            $fields = 'id, name, `describe`, `url`,image,img';
+            $liveObj = new Live();
+            $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid']],$fields);
         }
-        if(!empty($push_info)){
-
-            //修改标记
-            $idArr=array_column($push_info, 'id');
-            $LivePushObj=new LivePush();
-            $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$idArr]);
+        if(!empty($Info)){
+            $res[]= [
+                'push_info' => $val,
+                'son_info' => $Info,
+            ];
         }
+
+        //修改标记
+        $LivePushObj=new LivePush();
+        $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$val['id']]);
 
         return $res;
     }

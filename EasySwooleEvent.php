@@ -154,6 +154,25 @@ class EasySwooleEvent implements Event
             }
         });
 
+        //购物车商品推送
+        $TaskObj = new Task([
+            'method' => 'PushProduct',
+            'path' => [
+                'dir' => '/Crontab',
+                'name' => 'pro_',
+            ],
+            'data' => [
+            ]
+        ]);
+        $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+            if ($workerId == 1) {
+                Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
+                    //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
+                    TaskManager::async($TaskObj);
+                });
+            }
+        });
+
         //当前服务器扫描加入直播
         /*$TaskObj = new Task([
             'method' => 'JoinRedis',
@@ -177,7 +196,7 @@ class EasySwooleEvent implements Event
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
             //购物车商品推送
-            $TaskObj = new Task([
+            /*$TaskObj = new Task([
                 'method' => 'PushProduct',
                 'path' => [
                     'dir' => '/Crontab',
@@ -187,13 +206,13 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 2) {
+                if ($workerId == 1) {
                     Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
                     });
                 }
-            });
+            });*/
 
             //进入直播间   扫描redis记录
             $TaskObj = new Task([
@@ -206,7 +225,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 1) {
+                if ($workerId == 2) {
                     Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
