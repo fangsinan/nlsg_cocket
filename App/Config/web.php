@@ -50,13 +50,14 @@ return [
     'live_redis_number'=>'live_number_',
     'live_id_list'=>'live_id_list', //记录服务器 fd下对应的直播间和用户信息
     'live_comment'=>'live_comment_',//评论
-    'live_son_flag'=>'live_son_flag_',//渠道人气
+    'live_son_flag'=>'live_son_flag:',//渠道人气
     'live_join'=>'live_join_',//加入直播间
     'live_gift'=>'live_gift_',//送礼物
     'load_ip_arr'=>[ //负载服务器
-//         '172.17.212.147',
-//         '172.17.212.148',
-//         '172.17.212.131',
+//        '172.17.212.147',
+//        '172.17.212.148',
+//        '172.17.212.213',
+//        '172.17.212.131',
         '172.17.212.212',
     ],
 
