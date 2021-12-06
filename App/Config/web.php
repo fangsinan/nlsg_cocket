@@ -47,7 +47,7 @@ return [
     //直播key
     'live_redis_key'=>'live_key_', //主要用于存储负载时各个服务器的fd链接  172.17.212.112,51,23,211370  ip,fd,live_id,user_id
     //直播人数
-    'live_redis_number'=>'live_number_',
+    'live_redis_number'=>'live_number:',
     'live_id_list'=>'live_id_list', //记录服务器 fd下对应的直播间和用户信息
     'live_comment'=>'live_comment_',//评论
     'live_son_flag'=>'live_son_flag:',//渠道人气
