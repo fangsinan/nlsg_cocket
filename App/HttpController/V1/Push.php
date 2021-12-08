@@ -101,6 +101,11 @@ class Push extends Controller
                 }
                 $live_son_flag_num++;
             }
+            //人气值
+            $time=time();
+            $created_at=date('Y-m-d H:i:s',$time);
+            $LiveLogin = new LiveLoginModel();
+            $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
             
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
@@ -111,11 +116,6 @@ class Push extends Controller
                 'live_son_flag' => $live_son_flag,
                 'live_son_flag_num' => $live_son_flag_num,
                 'userinfo' => ['user_id' => $UserInfo['result']['id'],'level' => $UserInfo['result']['level'], 'nickname' => $UserInfo['result']['nickname'],'headimg'=> $headimg]]);
-
-            $live_join=Config::getInstance()->getConf('web.live_join');
-//            $infoObj = new LiveInfo();
-//            $infoPid = $infoObj->db->where('id',$live_id)->getOne($infoObj->tableName, 'live_pid,is_begin');
-//            $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
 
             $Redis = new Redis();
             $key_name='11live:live_join_'.$live_id;
@@ -138,39 +138,37 @@ class Push extends Controller
                 $Info=$liveInfoRedis['Info'];
             }
 
+            $live_join=Config::getInstance()->getConf('web.live_join');
+            if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
+
+//                $Redis->rpush($live_join . $live_id, $data); //老版本
+
+                $resultData = $Redis->get('111live_serverload_iplist'); //服务器ip列表
+                if (!empty($resultData)) {
+                    $IpLoadArr = explode(',', $resultData);
+                } else {
+                    $IpLoadArr = Config::getInstance()->getConf('web.load_ip_arr');
+                }
+                foreach ($IpLoadArr as $key => $val) {
+                    $ip_str = str_replace(".", "_", $val);
+                    $join_push_key = "1111livejoin:" . $ip_str . ':' . $live_id;
+                    $Redis->rpush($join_push_key, $data); //推送写入
+                }
+            }
+
             // 异步推送
-            TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
+            /*TaskManager::async (function () use ($client, $data,$user_id,$live_id,$live_join,$Info,$live_son_flag) {
 
                 $RedisObj = new Redis();
                 if( $Info['is_join'] == 0) { //屏蔽加入直播间信息
                     $RedisObj->rpush($live_join . $live_id, $data);
-
-                    /*$resultData = $RedisObj->get('111live_serverload_iplist'); //服务器ip列表
-                    if (!empty($resultData)) {
-                        $IpLoadArr = explode(',', $resultData);
-                    } else {
-                        $IpLoadArr = Config::getInstance()->getConf('web.load_ip_arr');
-                    }
-                    foreach ($IpLoadArr as $key => $val) {
-                        $ip_str=str_replace(".","_",$val);
-
-                        $join_push_key="1111livejoin:".$ip_str . ':' . $live_id;
-                        $join_push_num=$RedisObj->llen($join_push_key);
-                        if($join_push_num>=10){
-                            break;
-                        }
-                        $RedisObj->rpush($join_push_key, $data); //推送写入
-                    }*/
-
                 }
                 $time=time();
                 $created_at=date('Y-m-d H:i:s',$time);
-//                $LiveLogin = new LiveLoginModel();
-//                $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
                 //写入redis缓存
                 $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
                 $RedisObj->rpush('11LiveConsole:live_join', $map); //数据库写入
-            });
+            });*/
         }else{
             $server = ServerManager::getInstance()->getSwooleServer();
             $getfd = $client->getFd ();

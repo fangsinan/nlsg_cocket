@@ -252,14 +252,17 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $list=$Redis->lrange($key_name.$live_id,0,-1);// 获取所有数据
                     if(!empty($list)){
                         $arr=[];
-                        $start=0;
+                        $count=count($list);
                         foreach ($list as $key=>$val){
-                            $start=$key;
                             if($key<5) { //防止高并发加入过度，丢弃一部分最多返回5条减轻压力
                                 $arr[] = json_decode($val, true);
+                            }else{
+                                break;
                             }
                         }
-                        $Redis->ltrim($key_name . $live_id, $start + 1, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
+//                        if($live_id!=19) {
+                            $Redis->ltrim($key_name . $live_id, $count, -1);//删除已取出数据   保留指定区间内的元素，不在指定区间之内的元素都将被删除
+//                        }
                         $list = Common::ReturnJson(Status::CODE_OK,'进入直播间',['type' => 5, 'content_arr' => $arr,]);;
                         $data=[
                             'live_id'=>$live_id,
