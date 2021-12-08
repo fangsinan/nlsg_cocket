@@ -49,7 +49,7 @@ class UserService
             }
 
             $UserObj = new UserModel();
-            $UserInfo = $UserObj->getOne (UserModel::$table, ['token' => $token], 'id,level,expire_time,phone username,nickname');
+            $UserInfo = $UserObj->getOne (UserModel::$table, ['token' => $token], 'id,level,expire_time,phone username,nickname,is_test_pay');
             if (empty($UserInfo) ) { //不是有效用户
                 return Status::Error (Status::CODE_FORBIDDEN, '用户信息不存在');
 
@@ -67,7 +67,7 @@ class UserService
                 return Status::Error (Status::CODE_FORBIDDEN, '被禁言');
             }
             $UserObj = new UserModel();
-            $UserInfo = $UserObj->getOne (UserModel::$table, ['id' => $user_id], 'id,level,expire_time,phone username,nickname,headimg');
+            $UserInfo = $UserObj->getOne (UserModel::$table, ['id' => $user_id], 'id,level,expire_time,phone username,nickname,headimg,is_test_pay');
             if ( empty($UserInfo) ) { //不是有效用户
                 return Status::Error (Status::CODE_NOT_FOUND, '用户信息不存在');
 
@@ -82,7 +82,7 @@ class UserService
         }
         if(!empty($content)) {
 
-            if(!empty($admin_arr) && in_array($UserInfo['username'],$admin_arr)){
+            if($UserInfo['is_test_pay']==1 || (!empty($admin_arr) && in_array($UserInfo['username'],$admin_arr))){
                 $UserInfo['content']=$content;
                 $UserInfo['ShieldKeyFlag'] = 0; // 没有违规词
             }else{
