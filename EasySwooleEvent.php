@@ -133,7 +133,7 @@ class EasySwooleEvent implements Event
          */
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        #172.17.212.147,172.17.212.148,172.17.212.213,172.17.212.131
+        #172.17.213.52,172.17.213.53,172.17.213.54,172.17.213.55,172.17.212.213
 
         //当前服务器扫描评论
         $TaskObj = new Task([
@@ -192,7 +192,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        if ($ListPort['eth0'] == '172.17.212.147' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.147
+        if ($ListPort['eth0'] == '172.17.213.52' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
             //购物车商品推送
@@ -254,7 +254,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.148' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.212.148
+        if($ListPort['eth0']=='172.17.213.53' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
 
             //发送评论  扫描redis记录
             /*$TaskObj = new Task([
@@ -298,7 +298,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if ($ListPort['eth0'] == '172.17.212.213' || $ListPort['eth0'] == '172.17.212.212') {//172.17.212.213
+        if ($ListPort['eth0'] == '172.17.213.54' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.54
 
             //订单推送  扫描redis记录
             $TaskObj = new Task([
@@ -339,10 +339,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //172.17.212.131(113)
-
-            //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
-            Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
+        if($ListPort['eth0']=='172.17.213.55' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.55
 
             //开始|结束直播
             $TaskObj = new Task([
@@ -362,6 +359,12 @@ class EasySwooleEvent implements Event
                 }
             });
 
+        }
+        if($ListPort['eth0']=='172.17.212.213' || $ListPort['eth0']=='172.17.212.212' ){ //172.17.212.213(5)
+
+            //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
+            Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
+
             //推送打赏礼物  扫描redis记录
             $TaskObj = new Task([
                 'method' => 'getLiveGiftOrder',
@@ -373,7 +376,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 4) {
+                if ($workerId == 3) {
                     Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
@@ -392,7 +395,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 5) {
+                if ($workerId == 4) {
                     Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //30s
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
