@@ -135,7 +135,7 @@ class EasySwooleEvent implements Event
         $ListPort = swoole_get_local_ip(); //获取监听ip
         #172.17.213.52,172.17.213.53,172.17.213.54,172.17.213.55,172.17.212.213
 
-        //当前服务器扫描评论
+        //扫描评论
         $TaskObj = new Task([
             'method' => 'CommentRedis',
             'path' => [
@@ -173,7 +173,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        //当前服务器扫描加入直播
+        //扫描加入直播
         $TaskObj = new Task([
             'method' => 'JoinRedis',
             'path' => [
@@ -195,43 +195,6 @@ class EasySwooleEvent implements Event
         if ($ListPort['eth0'] == '172.17.213.52' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
-            //购物车商品推送
-            /*$TaskObj = new Task([
-                'method' => 'PushProduct',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'pro_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 1) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 更新在线人数
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });*/
-
-            //进入直播间   扫描redis记录
-            /*$TaskObj = new Task([
-                'method' => 'Joinlive',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'Join_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 2) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 扫码评论
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });*/
 
             //公告推送
             $TaskObj = new Task([
@@ -255,26 +218,6 @@ class EasySwooleEvent implements Event
         }
 
         if($ListPort['eth0']=='172.17.213.53' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
-
-            //发送评论  扫描redis记录
-            /*$TaskObj = new Task([
-                'method' => 'Comment',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'comment_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 0) {
-                    Timer::getInstance()->loop(1 * 1000, function () use ($TaskObj) {  //2s 扫码评论
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-
-                    });
-                }
-            });*/
 
             //笔记推送
             $TaskObj = new Task([
@@ -402,57 +345,7 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
-
-            //----------Laravel定时任务--------------
-            /*$schedule->call(function () {
-                //直播间在线人数存入redis
-                LiveController::CrontabOnlineUserRedis();
-            })->everyMinute()->runInBackground();//每分
-
-            $schedule->call(function () {
-                //直播间在线人数入库，方便调试
-                LiveController::CrontabOnlineUser();
-            })->everyMinute()->runInBackground();//每分*/
-
-            //实时在线人数明细处理
-            /*$TaskObj = new Task([
-                'method' => 'onlineUser',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'onlineUser_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 4) {
-                    //暂停使用，改用Laravel定时任务
-                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {  //60s 更新在线人数信息
-                        //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });
-
-            //处理redis在线用户数据入库
-            $TaskObj = new Task([
-                'method' => 'PushLiveUser',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'liveuser_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 5) {
-                    //暂停使用，改用Laravel定时任务
-                    Timer::getInstance()->loop(60 * 1000, function () use ($TaskObj) {
-                        TaskManager::async($TaskObj);
-                    });
-                }
-            });*/
-
+            
         }
 
         //热重载代码更新  关闭防止正式环境重启代理业务问题
