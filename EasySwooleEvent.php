@@ -345,7 +345,7 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
-            
+
         }
 
         //热重载代码更新  关闭防止正式环境重启代理业务问题
