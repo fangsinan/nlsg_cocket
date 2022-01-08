@@ -280,6 +280,11 @@ class EasySwooleEvent implements Event
                 }
             });
 
+        }
+        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //8.140.167.113
+            //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
+            Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
+
             //开始|结束直播
             $TaskObj = new Task([
                 'method' => 'pushEnd',
@@ -298,11 +303,6 @@ class EasySwooleEvent implements Event
                 }
             });
 
-        }
-        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //8.140.167.113
-            //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
-            Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
-
             //推送打赏礼物  扫描redis记录
             $TaskObj = new Task([
                 'method' => 'getLiveGiftOrder',
@@ -314,7 +314,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 3) {
+                if ($workerId == 4) {
                     Timer::getInstance()->loop(5 * 1000, function () use ($TaskObj) {
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
@@ -333,7 +333,7 @@ class EasySwooleEvent implements Event
                 ]
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 4) {
+                if ($workerId == 5) {
                     Timer::getInstance()->loop(10 * 1000, function () use ($TaskObj) {  //30s
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::async($TaskObj);
