@@ -208,7 +208,7 @@ class EasySwooleEvent implements Event
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 3) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //10s 发送公告
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 发送公告
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::sync($TaskObj);
                     });
@@ -231,7 +231,7 @@ class EasySwooleEvent implements Event
             ]);
             $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
                 if ($workerId == 3) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //10s 发送公告
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 发送公告
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::sync($TaskObj);
                     });
@@ -300,7 +300,6 @@ class EasySwooleEvent implements Event
 
         }
         if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //8.140.167.113
-
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
             Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
 
@@ -341,6 +340,7 @@ class EasySwooleEvent implements Event
                     });
                 }
             });
+            
         }
 
         //热重载代码更新  关闭防止正式环境重启代理业务问题
