@@ -133,7 +133,7 @@ class EasySwooleEvent implements Event
          */
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        #172.17.212.131,172.17.213.210,172.17.213.211,172.17.213.212
+        #172.17.212.131,172.17.214.39,172.17.214.40,172.17.214.41
 
         //扫描评论
         $TaskObj = new Task([
@@ -192,7 +192,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        if ($ListPort['eth0'] == '172.17.213.210' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
+        if ($ListPort['eth0'] == '172.17.214.39' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
 
@@ -217,7 +217,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.213.211' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
+        if($ListPort['eth0']=='172.17.214.40' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
 
             //笔记推送
             $TaskObj = new Task([
@@ -241,7 +241,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if ($ListPort['eth0'] == '172.17.213.212' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.54
+        if ($ListPort['eth0'] == '172.17.214.41' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.54
 
             //订单推送  扫描redis记录
             $TaskObj = new Task([
