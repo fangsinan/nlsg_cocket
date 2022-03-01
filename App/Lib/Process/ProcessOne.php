@@ -6,7 +6,7 @@
  * Time: 20:08
  */
 
-namespace App\Process;
+namespace App\Lib\Process;
 
 use App\Lib\Redis\Redis;
 use EasySwoole\Component\Process\AbstractProcess;
