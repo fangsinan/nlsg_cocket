@@ -9,7 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 use App\Lib\Crontab\ServerLoad;
-use App\Process\ProcessOne;
+use App\Lib\Process\ProcessOne;
 use App\WebSocket\WebSocketEvent;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
