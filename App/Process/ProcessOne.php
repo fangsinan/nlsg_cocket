@@ -19,24 +19,42 @@ class ProcessOne extends AbstractProcess
         ini_set('default_socket_timeout', -1);
 
         Logger::getInstance()->console($this->getProcessName() . " start");
+
         go(function () {
             $redis = new \Redis();
             $conf = Config::getInstance()->getConf('REDIS');
             $redis->connect($conf['host']);
             $redis->auth($conf['auth']);
-            $redis->subscribe(['channel','channel1','channel2','channel3'],function (){
-                var_dump(func_get_args());
+            $redis->subscribe(['pushOrder'],function (){
+                $data=func_get_args();
+                if(isset($data[1])){
+                    switch ($data[1]){
+                        case 'pushOrder':
+                            if(isset($data[2])){
+                                $redis = new \Redis();
+                                $conf = Config::getInstance()->getConf('REDIS');
+                                $redis->connect($conf['host']);
+                                $redis->auth($conf['auth']);
+                                $redis->rpush('push_order_list',$data[2]);
+                            }
+                            break;
+                    }
+                }
+
             });
         });
     }
 
     public function onShutDown()
     {
+        var_dump('onShutDown');
+
         // TODO: Implement onShutDown() method.
     }
 
     public function onReceive(string $str)
     {
+        var_dump($str);
         // TODO: Implement onReceive() method.
     }
 }

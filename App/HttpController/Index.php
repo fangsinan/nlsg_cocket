@@ -72,8 +72,10 @@ class Index extends  Controller
             $channel=$params['channel'];
         }
         $RedisObj = new Redis();
+        $res=$RedisObj->lPop('push_order_list');
 
-        $res=$RedisObj->publish($channel, date('Y-m-d H:i:s').'-'.$channel);
+
+//        $res=$RedisObj->publish($channel, date('Y-m-d H:i:s').'-'.$channel);
 
         return $this->writeJson(Status::CODE_OK,[$res],'success');
 
