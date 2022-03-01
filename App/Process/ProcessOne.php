@@ -8,6 +8,7 @@
 
 namespace App\Process;
 
+use App\Lib\Redis\Redis;
 use EasySwoole\Component\Process\AbstractProcess;
 use EasySwoole\EasySwoole\Config;
 use EasySwoole\EasySwoole\Logger;
@@ -21,26 +22,27 @@ class ProcessOne extends AbstractProcess
         Logger::getInstance()->console($this->getProcessName() . " start");
 
         go(function () {
+
+//            $redis = new Redis();
+//            while (true){
+//                $res=$redis->rpush('push_order_list','111');
+//                var_dump($res);
+//                $redis->subscribe(['pushOrder']);
+//                $res=$redis->rpush('push_order_list','111');
+//                var_dump($res);
+//            }
+
             $redis = new \Redis();
             $conf = Config::getInstance()->getConf('REDIS');
             $redis->connect($conf['host']);
             $redis->auth($conf['auth']);
-            $redis->subscribe(['pushOrder'],function (){
-                $data=func_get_args();
-                if(isset($data[1])){
-                    switch ($data[1]){
-                        case 'pushOrder':
-                            if(isset($data[2])){
-                                $redis = new \Redis();
-                                $conf = Config::getInstance()->getConf('REDIS');
-                                $redis->connect($conf['host']);
-                                $redis->auth($conf['auth']);
-                                $redis->rpush('push_order_list',$data[2]);
-                            }
-                            break;
-                    }
+            $redis->subscribe(['pushOrder'],function ($redis, $chan, $msg){
+                switch ($chan){
+                    case 'pushOrder':
+                        $redisObj= new Redis();
+                        $redisObj->rpush('push_order_list',$msg);
+                        break;
                 }
-
             });
         });
     }
