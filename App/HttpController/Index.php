@@ -64,6 +64,19 @@ class Index extends  Controller
 
     public function index()
     {
+
+        $params  = $this->request()->getRequestParam();
+        if(empty($params['channel'])){
+            $channel='channel';
+        }else{
+            $channel=$params['channel'];
+        }
+        $RedisObj = new Redis();
+
+        $res=$RedisObj->publish($channel, date('Y-m-d H:i:s').'-'.$channel);
+
+        return $this->writeJson(Status::CODE_OK,[$res],'success');
+
 //        $url = "http://182.92.56.200:9581/index/broadcast";
 //        $url = "http://39.105.214.152:9581/index/broadcast";
 //        $data_str = '{"controller":"Push","action":"Comment","data":{"content":"快看，11111~","user_id":254378,"live_id":645}}';
