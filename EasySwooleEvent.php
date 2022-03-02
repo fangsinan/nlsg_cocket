@@ -9,7 +9,7 @@
 namespace EasySwoole\EasySwoole;
 
 use App\Lib\Crontab\ServerLoad;
-use App\Process\ProcessOne;
+use App\Lib\Process\ProcessOne;
 use App\WebSocket\WebSocketEvent;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
@@ -344,7 +344,6 @@ class EasySwooleEvent implements Event
             
         }
 
-
         //热重载代码更新  关闭防止正式环境重启代理业务问题
 //        $swooleServer = ServerManager::getInstance()->getSwooleServer();
 //        $swooleServer->addProcess((new HotReload('HotReload', ['disableInotify' => false]))->getProcess());
@@ -352,9 +351,8 @@ class EasySwooleEvent implements Event
         /**
          * 除了进程名，其余参数非必须
          */
-        $myProcess = new ProcessOne("processName",time(),false,2,true);
+        $myProcess = new ProcessOne("processPushOrder",['ip'=>$ListPort['eth0']],false,2,true);
         ServerManager::getInstance()->getSwooleServer()->addProcess($myProcess->getProcess());
-
 
     }
     //跨域处理
