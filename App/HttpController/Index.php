@@ -90,8 +90,10 @@ class Index extends  Controller
     }
     public function test(){
 
+        $params  = $this->request()->getRequestParam();
+        $live_id=$params['live_id']??1;
         $RedisObj = new Redis();
-        $res = $RedisObj->publish('pushOrder', json_encode(['test'=>11]));
+        $res = $RedisObj->publish('pushOrder', json_encode(['live_id'=>$live_id]));
         return $this->writeJson(Status::CODE_OK,[$res],'success');
 
     }

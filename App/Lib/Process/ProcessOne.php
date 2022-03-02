@@ -19,8 +19,7 @@ class ProcessOne extends AbstractProcess
     {
 
         Logger::getInstance()->console($this->getProcessName() . " start");
-
-        go(function () {
+        go(function ()use ($arg) {
 
 //            $redis = new Redis();
 //            while (true){
@@ -38,11 +37,19 @@ class ProcessOne extends AbstractProcess
             $redis->pconnect($conf['host']);
             $redis->auth($conf['auth']);
             $redis->setOption(\Redis::OPT_READ_TIMEOUT, -1);
-            $redis->subscribe(['pushOrder'],function ($redis, $chan, $msg){
+            $redis->subscribe(['pushOrder'],function ($redis, $chan, $msg)use ($arg){
+
                 switch ($chan){
+
                     case 'pushOrder':
                         $redisObj= new Redis();
-                        $redisObj->rpush('push_order_list',$msg);
+                        $msg_arr=json_decode($msg,true);
+                        $live_id=$msg_arr['live_id']??'';
+                        if($live_id){
+                            $key='push_order_list:'.$arg['ip'].':'.$live_id;
+                            $res=$redisObj->rpush($key,$msg);
+//                            var_dump($key,$res);
+                        }
                         break;
                 }
             });
