@@ -17,7 +17,6 @@ class ProcessOne extends AbstractProcess
 {
     public function run($arg)
     {
-        ini_set('default_socket_timeout', -1);
 
         Logger::getInstance()->console($this->getProcessName() . " start");
 
@@ -32,10 +31,13 @@ class ProcessOne extends AbstractProcess
 //                var_dump($res);
 //            }
 
+            ini_set('default_socket_timeout', -1);
+
             $redis = new \Redis();
             $conf = Config::getInstance()->getConf('REDIS');
-            $redis->connect($conf['host']);
+            $redis->pconnect($conf['host']);
             $redis->auth($conf['auth']);
+            $redis->setOption(\Redis::OPT_READ_TIMEOUT, -1);
             $redis->subscribe(['pushOrder'],function ($redis, $chan, $msg){
                 switch ($chan){
                     case 'pushOrder':

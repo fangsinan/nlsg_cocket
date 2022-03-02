@@ -74,7 +74,6 @@ class Index extends  Controller
         $RedisObj = new Redis();
         $res=$RedisObj->lPop('push_order_list');
 
-
 //        $res=$RedisObj->publish($channel, date('Y-m-d H:i:s').'-'.$channel);
 
         return $this->writeJson(Status::CODE_OK,[$res],'success');
@@ -87,6 +86,13 @@ class Index extends  Controller
 //        echo (new Aes())->encrypt('bbab2ae18acc51354c1f438d70a3636933d7b368||1222233232');
         //注意此处如果继承了基类base 数据和提示消息互换
         return $this->writeJson(Status::CODE_OK,[],'success');
+
+    }
+    public function test(){
+
+        $RedisObj = new Redis();
+        $res = $RedisObj->publish('pushOrder', json_encode(['test'=>11]));
+        return $this->writeJson(Status::CODE_OK,[$res],'success');
 
     }
 
