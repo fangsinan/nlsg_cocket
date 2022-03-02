@@ -351,7 +351,7 @@ class EasySwooleEvent implements Event
         /**
          * 除了进程名，其余参数非必须
          */
-        $myProcess = new ProcessOne("processPushOrder",time(),false,2,true);
+        $myProcess = new ProcessOne("processPushOrder",['ip'=>$ListPort['eth0']],false,2,true);
         ServerManager::getInstance()->getSwooleServer()->addProcess($myProcess->getProcess());
 
     }
