@@ -63,7 +63,7 @@ return [
 
     //https://help.aliyun.com/document_detail/150458.htm?spm=a2c4g.11186623.0.0.4adc1dbdZn6swZ#concept-2388285
     'REDIS'=>[
-        'host'          => 'r-2zeho5t45tqnl9m0ci.redis.rds.aliyuncs.com',
+        'host'          => 'r-2zeyu6aw5wozyw1ot2.redis.rds.aliyuncs.com',
         #'host'          => '172.17.212.131',
         'port'          => '6379',
         'auth'          => 'NLSG2020*beijin*0906BJ',

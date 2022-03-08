@@ -9,7 +9,6 @@
 namespace EasySwoole\EasySwoole;
 
 use App\Lib\Crontab\ServerLoad;
-use App\Lib\Process\ProcessOne;
 use App\WebSocket\WebSocketEvent;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
@@ -134,7 +133,7 @@ class EasySwooleEvent implements Event
          */
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        #172.17.212.131,172.17.214.39,172.17.214.40,172.17.214.41
+        #172.17.214.178,172.17.214.179,172.17.214.180
 
         //扫描评论
         $TaskObj = new Task([
@@ -193,7 +192,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        if ($ListPort['eth0'] == '172.17.214.39' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
+        if ($ListPort['eth0'] == '172.17.214.178' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
 
@@ -218,7 +217,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.214.40' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
+        if($ListPort['eth0']=='172.17.214.179' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
 
             //笔记推送
             $TaskObj = new Task([
@@ -242,7 +241,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if ($ListPort['eth0'] == '172.17.214.41' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.54
+        if ($ListPort['eth0'] == '172.17.214.180' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.54
 
             //订单推送  扫描redis记录
             $TaskObj = new Task([
@@ -324,7 +323,7 @@ class EasySwooleEvent implements Event
             });
 
             //禁言
-            $TaskObj = new Task([
+            /*$TaskObj = new Task([
                 'method' => 'pushForbiddenWords',
                 'path' => [
                     'dir' => '/Crontab',
@@ -340,19 +339,13 @@ class EasySwooleEvent implements Event
                         TaskManager::async($TaskObj);
                     });
                 }
-            });
+            });*/
             
         }
 
         //热重载代码更新  关闭防止正式环境重启代理业务问题
 //        $swooleServer = ServerManager::getInstance()->getSwooleServer();
 //        $swooleServer->addProcess((new HotReload('HotReload', ['disableInotify' => false]))->getProcess());
-
-        /**
-         * 除了进程名，其余参数非必须
-         */
-        $myProcess = new ProcessOne("processPushOrder",['ip'=>$ListPort['eth0']],false,2,true);
-        ServerManager::getInstance()->getSwooleServer()->addProcess($myProcess->getProcess());
 
     }
     //跨域处理
