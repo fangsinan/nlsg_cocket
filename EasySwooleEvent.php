@@ -281,7 +281,7 @@ class EasySwooleEvent implements Event
             });
 
         }
-        if($ListPort['eth0']=='172.17.212.131' || $ListPort['eth0']=='172.17.212.212' ){ //8.140.167.113
+        if($ListPort['eth0']=='172.17.215.15' || $ListPort['eth0']=='172.17.212.212' ){ //123.56.92.249
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
             Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
 
