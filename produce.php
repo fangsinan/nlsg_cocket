@@ -49,7 +49,7 @@ return [
     ],
 
     'MYSQL'=>[
-        'host'          => 'pc-2ze52g145e143cs50.rwlb.rds.aliyuncs.com',
+        'host'          => 'pc-2zez59c07f1cg80b5.rwlb.rds.aliyuncs.com',
         #'host'          => 'eoy62ktxmkua664nxx9c-rw4rm.rwlb.rds.aliyuncs.com',
         'port'          => '3306',
         'user'          => 'bj_nlsg_v4',
