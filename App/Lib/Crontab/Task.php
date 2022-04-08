@@ -633,6 +633,19 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $fields = 'id, name, `describe`, `url`,image,img';
             $liveObj = new Live();
             $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid']],$fields);
+        }else if($val['push_type'] == 12){ //上传二维码弹窗
+            $fields = 'id, qr_url';
+            $liveObj = new Live();
+            $qr_code = $liveObj->getOne('nlsg_live_push_qrcode',['id'=>$val['push_gid']],$fields);
+
+            $Info=[
+                'name'      =>  '二维码弹窗',
+                'price'     =>  0,
+                'subtitle'  =>  '',
+                'image'     =>  $qr_code['qr_url'],
+                'img'       =>  $qr_code['qr_url'],
+            ];
+
         }
         if(!empty($Info)){
             $res[]= [
