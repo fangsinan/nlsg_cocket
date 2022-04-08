@@ -723,9 +723,29 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 if(!empty($liveInfo)){
                     $is_push=0;
                     if($liveInfo['is_begin']==1 && $liveInfo['begin_status'] != $liveInfo['is_begin'] ){ //开始直播
+
+                        /*$IsBeginList=$Redis->get('111live_isbegin_idlist');
+                        if(!empty($IsBeginList)){
+                            $LiveIDList=json_decode($IsBeginList,true);
+                        }
+                        if(!isset($LiveIDList[$live_id])){
+                            $LiveIDList[$live_id]=0;
+                        }
+                        $Redis->set('111live_isbegin_idlist',json_encode($LiveIDList),3600*5); //直播间直播中id*/
+
                         $is_push=1;
                         $liveObj->update($liveObj->tableName,['begin_status'=>$liveInfo['is_begin']],['id'=>$live_id]);
                     }else if($liveInfo['is_begin']==0 && $liveInfo['is_finish']==1 && $liveInfo['begin_status'] != $liveInfo['is_begin'] ){
+
+                        /*$IsBeginList=$Redis->get('111live_isbegin_idlist');
+                        if(!empty($IsBeginList)){
+                            $LiveIDList=json_decode($IsBeginList,true);
+                        }
+                        if(isset($LiveIDList[$live_id])){
+                            unset($LiveIDList[$live_id]);
+                        }
+                        $Redis->set('111live_isbegin_idlist',json_encode($LiveIDList),3600*5); //直播间直播中id*/
+
                         $is_push=1;
                         $liveObj->update($liveObj->tableName,['begin_status'=>$liveInfo['is_begin']],['id'=>$live_id]);
                     }
