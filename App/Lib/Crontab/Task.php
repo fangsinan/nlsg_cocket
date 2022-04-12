@@ -574,7 +574,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         'data'=>$data
                     ];
                     PushService::Broadcast($ListPort['eth0'],$data);
-                    $Redis->del($val); //清空执行成功标记
+                    // $Redis->del($val); //清空执行成功标记
                 }
             }
             return [
