@@ -540,12 +540,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $ip_str=str_replace(".","_",$ListPort['eth0']);
             $push_key_name='11111livepush:'.$ip_str . ':';
             $listRst=$Redis->keys($push_key_name.'*');
-            echo $push_key_name;
+            print_r($listRst);
             $time=date('Y-m-d H:i:s');
             foreach($listRst as $key => $val) {
 
                 $PushFlagInfo=$Redis->get($val);
-                print_r($PushFlagInfo);
                 if(!empty($PushFlagInfo)){
                     $PushFlagArr=json_decode($PushFlagInfo,true);
                     if($PushFlagArr['status']==0){ //标记已扫描
@@ -562,12 +561,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 $where = [
                     'id' => $push_id,
                 ];
-                print_r($where);
                 $field = 'id,live_id,live_info_id,push_type,push_gid,user_id,click_num,close_num,is_push,is_done,length';
                 $push_info = $pushObj->getOne($pushObj->tableName,$where,$field);
                 if(!empty($push_info)){
                     $res = self::getLivePushDetail($push_info);
-                    print_r($res);
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 6, 'content' => $res,'ios_content' =>$res ]);
                     //推送消息
 //                    $PushServiceObj->pushMessage($ListPort['eth0'],$live_id,$data);
@@ -577,7 +574,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                         'data'=>$data
                     ];
                     PushService::Broadcast($ListPort['eth0'],$data);
-                    // $Redis->del($val); //清空执行成功标记
+                    $Redis->del($val); //清空执行成功标记
                 }
             }
             return [
