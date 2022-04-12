@@ -538,7 +538,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             //获取所有在线直播id
             $ListPort = swoole_get_local_ip (); //获取监听ip
             $ip_str=str_replace(".","_",$ListPort['eth0']);
-            $push_key_name='11111livepush:'.$ip_str . ':';
+            $push_key_name='Productlivepush:'.$ip_str . ':';
             $listRst=$Redis->keys($push_key_name.'*');
             $time=date('Y-m-d H:i:s');
             foreach($listRst as $key => $val) {
