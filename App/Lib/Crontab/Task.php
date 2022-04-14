@@ -656,8 +656,9 @@ print_r($val);
 print_r($Info);
         //修改标记
         $LivePushObj=new LivePush();
-        $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:ss',time())],['id'=>$val['id']]);
-
+        $qqq = $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:ss',time())],['id'=>$val['id']]);
+        print_r($qqq);
+        print_r('======');
         return $res;
     }
 
