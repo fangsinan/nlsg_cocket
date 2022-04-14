@@ -652,15 +652,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 'son_info' => $Info,
             ];
         }
-print_r($val);
-print_r($Info);
+
         //修改标记
         $LivePushObj=new LivePush();
-        $qqq = $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:ss',time())],['id'=>$val['id']]);
-        print_r('---');
-        print_r(['is_done'=>1,'done_at'=>date('Y-m-d H:i:ss',time())]);
-        print_r(['id'=>$val['id']]);
-        print_r('======');
+        $LivePushObj->update($LivePushObj->tableName,['is_done'=>1,'done_at'=>date('Y-m-d H:i:s',time())],['id'=>$val['id']]);
+
         return $res;
     }
 
