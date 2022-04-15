@@ -540,6 +540,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $ip_str=str_replace(".","_",$ListPort['eth0']);
             $push_key_name='111Productlivepush:'.$ip_str . ':';
             $listRst=$Redis->keys($push_key_name.'*');
+
             $time=date('Y-m-d H:i:s');
             foreach($listRst as $key => $val) {
 
