@@ -234,7 +234,7 @@ class Push extends Controller
         }
 
         $str_num=strlen($message['content']);
-        if($str_num>2500){
+        if($str_num>400){ //韩建会发评论，比较长358
             return ;
         }
         
