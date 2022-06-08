@@ -133,7 +133,7 @@ class EasySwooleEvent implements Event
          */
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
-        #172.17.214.178,172.17.214.179,172.17.214.180
+        #172.17.226.68,172.17.226.69
 
         //扫描评论
         $TaskObj = new Task([
@@ -192,7 +192,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        if ($ListPort['eth0'] == '172.17.214.178' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
+        if ($ListPort['eth0'] == '172.17.226.68' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
 
@@ -215,9 +215,27 @@ class EasySwooleEvent implements Event
                 }
             });
 
+            //订单推送  扫描redis记录
+            $TaskObj = new Task([
+                'method' => 'getLivePushOrder',
+                'path' => [
+                    'dir' => '/Crontab',
+                    'name' => 'order_',
+                ],
+                'data' => [
+                ]
+            ]);
+            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
+                if ($workerId == 4) {
+                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
+                        TaskManager::async($TaskObj);
+                    });
+                }
+            });
+
         }
 
-        if($ListPort['eth0']=='172.17.214.179' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
+        if($ListPort['eth0']=='172.17.226.69' || $ListPort['eth0']=='172.17.212.212' ) { //172.17.213.53
 
             //笔记推送
             $TaskObj = new Task([
@@ -234,29 +252,6 @@ class EasySwooleEvent implements Event
                     Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {  //2s 发送公告
                         //为了防止因为任务阻塞，引起定时器不准确，把任务给异步进程处理
                         TaskManager::sync($TaskObj);
-                    });
-                }
-            });
-
-
-        }
-
-        if ($ListPort['eth0'] == '172.17.214.180' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.54
-
-            //订单推送  扫描redis记录
-            $TaskObj = new Task([
-                'method' => 'getLivePushOrder',
-                'path' => [
-                    'dir' => '/Crontab',
-                    'name' => 'order_',
-                ],
-                'data' => [
-                ]
-            ]);
-            $register->add(EventRegister::onWorkerStart, function (\swoole_server $server, $workerId) use ($TaskObj) {
-                if ($workerId == 3) {
-                    Timer::getInstance()->loop(2 * 1000, function () use ($TaskObj) {
-                        TaskManager::async($TaskObj);
                     });
                 }
             });
@@ -280,7 +275,9 @@ class EasySwooleEvent implements Event
                 }
             });
 
+
         }
+
         if($ListPort['eth0']=='172.17.215.15' || $ListPort['eth0']=='172.17.212.212' ){ //123.56.92.249
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
             Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
