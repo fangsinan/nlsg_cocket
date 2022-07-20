@@ -321,7 +321,6 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                             'live_id'=>$live_id,
                             'data'=>$list
                         ];
-                        print_r($data);
                         PushService::Broadcast($ListPort['eth0'],$data);
                     }
 
