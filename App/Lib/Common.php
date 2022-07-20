@@ -82,7 +82,6 @@ class Common
             $Redis->set($redis_shield_key, $ShieldingWords, 60*2); //设置对应屏蔽词库
         }
         $flag = 0; //违规词的个数
-
         //serialize（）explode（）json_deocde()   经测算serialize（）更优
         //第一种
         $RegExp="/".$ShieldingWords."/i";
@@ -104,6 +103,7 @@ class Common
                 break;
             }
         }*/
+
         return [
             'content'=>$str,
             'flag'=>$flag
