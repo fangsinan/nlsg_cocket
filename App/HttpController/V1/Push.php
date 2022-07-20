@@ -245,7 +245,8 @@ class Push extends Controller
             //已屏蔽过一次，直接终止
             return ;
         }
-
+        echo ("\n 6、 异步推送 ".$UserInfo['result']['ShieldKeyFlag']." \n");
+        print_r($UserInfo);
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
@@ -275,7 +276,7 @@ class Push extends Controller
                     return ;
                 }
             }
-            echo ("\n 6、 异步推送 ".$ShieldKeyFlag." \n");
+            
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag,$ShieldKeyFlag) {
 
