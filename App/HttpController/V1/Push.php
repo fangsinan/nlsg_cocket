@@ -245,8 +245,7 @@ class Push extends Controller
             //已屏蔽过一次，直接终止
             return ;
         }
-        echo ("\n 6、 异步推送 ".$UserInfo['result']['ShieldKeyFlag']." \n");
-        print_r($UserInfo);
+        
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
@@ -291,11 +290,13 @@ class Push extends Controller
                         //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
                         $IpLoadArr = Config::getInstance()->getConf('web.load_ip_arr');
                     }
+                    print_r($IpLoadArr);
                     foreach ($IpLoadArr as $key => $val) {
                         $ip_str=str_replace(".","_",$val);
 
                         $comment_push_key="1111livecomment:".$ip_str . ':' . $live_id;
                         $comment_push_num=$RedisObj->llen($comment_push_key);
+                        print_r($comment_push_num);
                         if($comment_push_num>=10){
                             break;
                         }
