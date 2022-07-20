@@ -47,7 +47,7 @@ class Common
         $str = preg_replace_callback('/./u', function (array $match) {
             return strlen($match[0]) >= 4 ? '' : $match[0];
         }, $str);
-
+        echo ("\n 1:".$str."\n");
 //        $regex='/[\xf0-\xf7].{3}/'; // 全局匹配
 //        $str = preg_replace($regex,'',$str);
 
@@ -68,7 +68,7 @@ class Common
             $replace = Common::textDecode('\ud83c\udf39');  // 替换成此字符串
             $str = preg_replace($reg, $replace, $str);  // 进行替换
         }
-
+        echo ("\n 2:".$str."\n");
         //读取缓存
         $redis_shield_key='111_ShieldKey';
         $Redis = new Redis();
@@ -82,6 +82,7 @@ class Common
             $Redis->set($redis_shield_key, $ShieldingWords, 60*2); //设置对应屏蔽词库
         }
         $flag = 0; //违规词的个数
+        echo ("\n 3:".$str."\n");
         //serialize（）explode（）json_deocde()   经测算serialize（）更优
         //第一种
         $RegExp="/".$ShieldingWords."/i";
@@ -103,7 +104,7 @@ class Common
                 break;
             }
         }*/
-
+        echo ("\n 5:".$str."\n");
         return [
             'content'=>$str,
             'flag'=>$flag
