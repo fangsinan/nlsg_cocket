@@ -62,7 +62,7 @@ class Common
         $str = str_replace("#2#",$replace_dz,$str); //点赞
         $str = str_replace("#3#",$replace_xhh,$str); //小红花
 
-        if($auth_user_id!=169209) { //李婷老师不过滤
+        if(!in_array($auth_user_id,[169209,214932])) { //不过滤 169209 李婷   214932 姬广亮
             $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
 //            $reg = '/([a-zA-Z]|7|8|9|0|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
             $replace = Common::textDecode('\ud83c\udf39');  // 替换成此字符串
