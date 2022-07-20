@@ -86,6 +86,9 @@ class Common
         //serialize（）explode（）json_deocde()   经测算serialize（）更优
         //第一种
         $RegExp="/".$ShieldingWords."/i";
+        echo ("\n 33:".$RegExp."\n");
+        print_r(preg_match_all($RegExp, $str, $matches));
+        print_r($matches);
         if(preg_match_all($RegExp, $str, $matches)){ //匹配到了结果
             $patternList = $matches[0];  //匹配到的数组
             $count = count($patternList);  //匹配到需过滤数量
