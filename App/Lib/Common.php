@@ -11,6 +11,7 @@ namespace App\Lib;
 
 use App\Lib\Message\Status;
 use App\Lib\Redis\Redis;
+use App\Model\V1\Config;
 use App\Model\V1\ShieldKey;
 use EasySwoole\Http\Response;
 use EasySwoole\Utility\SnowFlake;
@@ -62,6 +63,11 @@ class Common
         $str = str_replace("#2#",$replace_dz,$str); //点赞
         $str = str_replace("#3#",$replace_xhh,$str); //小红花
 
+//        $ConfigObj=new Config();
+//        $ConfigInfo = $ConfigObj->getOne($ConfigObj->tableName,['id'=>84], 'value');
+//        if(!empty($ConfigInfo) && isset($ConfigInfo['value'])){
+//
+//        }
         if(!in_array($auth_user_id,[169209,214932])) { //不过滤 169209 李婷   214932 姬广亮
             $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
 //            $reg = '/([a-zA-Z]|7|8|9|0|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
