@@ -613,7 +613,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $goodsObj = new Goods();
             $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
         }else if($val['push_type'] == 4){ //线下门票
-            $fields = 'id,title name,price,subtitle,image img,cover_img image,show_address';
+            // $fields = 'id,title name,price,subtitle,image img,cover_img image,show_address';
+            $fields = 'id,title name,price,subtitle,image img,image,show_address';
             $goodsObj = new Goods();
             $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
         }else if($val['push_type'] == 6){
