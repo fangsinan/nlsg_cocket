@@ -609,7 +609,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
             $Info['workinfo_id']=$WorkInfoData['id'];
         }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
-            $fields = 'id,name,price,subtitle,picture img';
+            $fields = 'id,name,price,subtitle,picture img,picture image';
             $goodsObj = new Goods();
             $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
         }else if($val['push_type'] == 4){ //线下门票
