@@ -596,6 +596,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         $res=[];
         //push_type 产品type  1专栏 2精品课 3商品 4 经营能量 5 一代天骄 6 演说能量 7:讲座 8:听书  9直播   10 直播外链  11 训练营
         //push_gid 推送产品id，专栏id  精品课id  商品id
+        $show_address = 0;
         if(($val['push_type'] == 1 or $val['push_type'] == 7 or $val['push_type'] == 11) && !empty($val['push_gid']) ){
             $fields = 'id,name,price,subtitle,details_pic img,user_id';
             $colObj   = new Column();
@@ -612,7 +613,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             $goodsObj = new Goods();
             $Info = $goodsObj->getOne($goodsObj->tableName,['id'=>$val['push_gid'],'status'=>2],$fields);
         }else if($val['push_type'] == 4){ //线下门票
-            $fields = 'id,title name,price,subtitle,image img,cover_img image';
+            $fields = 'id,title name,price,subtitle,image img,cover_img image,show_address';
             $goodsObj = new Goods();
             $Info = $goodsObj->getOne('nlsg_offline_products',['id'=>$val['push_gid']],$fields);
         }else if($val['push_type'] == 6){
@@ -648,6 +649,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
         }
         if(!empty($Info)){
+            // 线下产品显示填写地址按钮
+            if(empty($Info['show_address'])){
+                $Info['show_address'] = $show_address;
+            }
+
             $res[]= [
                 'push_info' => $val,
                 'son_info' => $Info,
