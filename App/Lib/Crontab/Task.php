@@ -598,11 +598,11 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         //push_gid 推送产品id，专栏id  精品课id  商品id
         $show_address = 0;
         if(($val['push_type'] == 1 or $val['push_type'] == 7 or $val['push_type'] == 11) && !empty($val['push_gid']) ){
-            $fields = 'id,name,price,subtitle,details_pic img,user_id';
+            $fields = 'id,name,price,subtitle,details_pic img,user_id,details_pic as image';
             $colObj   = new Column();
             $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
         }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
-            $fields = 'id,title name,type,price,detail_img img';
+            $fields = 'id,title name,type,price,detail_img img,detail_img as image';
             $workObj  = new Works();
             $WorkInfoObj=new WorksInfo();
             $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
