@@ -15,10 +15,12 @@
 <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script>
 
-    var live_id=23;
+    var live_id=856;
     var user_id=211172;
     var wsServer = 'wss://live.apiv4.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
-    // var wsServer = 'wss://live.api.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
+    var wsServer = 'ws://live.apiv4.test.nlsgapp.com?live_id='+live_id+'&user_id='+user_id;
+    // var wsServer = 'ws://192.168.3.4:8024/v1/live/ws?live_id='+live_id+'&user_id='+user_id;
+    // var wsServer = 'ws://127.0.0.1:8024/v1/live/ws?live_id='+live_id+'&user_id='+user_id;
     var websocket = null;
     var lockReconnect = false;  //避免ws重复连接
 
@@ -45,9 +47,10 @@
         };
         web.onmessage = function (evt) {
             var obj = JSON.parse(evt.data);
+
             if(obj.status==200){
                 if(1){
-
+                    console.log(obj.data);
                 }else {
                     if (obj.data['type'] == 1) { //检测心跳
                         console.log('心跳返回' + obj.data['fd'] + ' 直播人数 ' + obj.data['num']);
@@ -69,7 +72,7 @@
                     }
                 }
             }else{
-                alert(obj.message +' '+obj.data['type']);
+                // alert(obj.message +' '+obj.data['type']);
             }
 
         };
@@ -117,6 +120,8 @@
     };
 
     function comment() {
+        // web.close()
+
         var content = $("#says").val();
         web.send(JSON.stringify({
             controller:'Push',
