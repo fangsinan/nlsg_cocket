@@ -18,6 +18,8 @@ use EasySwoole\Utility\SnowFlake;
 
 class Common
 {
+    // 平台类型 1能量时光 2幸福学社
+    const APP_PROJECT_TYPE = 1;
 
     /**
      * @param $phone

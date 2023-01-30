@@ -137,7 +137,8 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //查询直播中
             $LiveInfoObj=new LiveInfo();
-            $listRst = $LiveInfoObj->db->where('is_begin',1)->get($LiveInfoObj->tableName, [0,10],'id,live_pid');
+            $listRst = $LiveInfoObj->db->where('is_begin',1)
+                ->where('app_project_type',Common::APP_PROJECT_TYPE)->get($LiveInfoObj->tableName, [0,10],'id,live_pid');
 
             if(!empty($listRst)){
 //                $LiveModel=new LiveNumberModel();
@@ -149,10 +150,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $live_id=$val['live_pid'];
 
                     //人气值改版
-                    $NumInfo=$LiveLoginObj->db->where('live_id',$live_id)->get($LiveLoginObj::$table,[0,1],'count(id) counts');
+                    $NumInfo=$LiveLoginObj->db->where('live_id',$live_id)->where('app_project_type',Common::APP_PROJECT_TYPE)->get($LiveLoginObj::$table,[0,1],'count(id) counts');
                     if(!empty($NumInfo[0])){
                         $num=($NumInfo[0]['counts']);
-                        $Liveinfo = $LiveObj->db->where('id',$live_id)->getOne($LiveObj->tableName, 'virtual_online_num');
+                        $Liveinfo = $LiveObj->db->where('id',$live_id)->where('app_project_type',Common::APP_PROJECT_TYPE)->getOne($LiveObj->tableName, 'virtual_online_num');
                         $num=$num+$Liveinfo['virtual_online_num'];
                         $Redis->set($live_id_num.$live_id,$num,3600*4); //设置在线人数
                     }
@@ -458,7 +459,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>1, 'is_send'=>1,'is_del'=>0,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>1, 'is_send'=>1,'is_del'=>0,'is_done'=>0,'app_project_type'=>Common::APP_PROJECT_TYPE],'id,live_id,live_info_id,content,length,created_at,type,content_type');
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 7,'ios_content' =>$noticeList[0], 'content_obj' =>$noticeList[0]]);
                     //修改标记
@@ -502,7 +503,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>2, 'is_send'=>1,'is_done'=>0],'id,live_id,live_info_id,content,length,created_at,type,content_type,is_del');
+                $noticeList = $noticeObj->get($noticeObj->tableName,['live_info_id'=>$live_id,'type'=>2, 'is_send'=>1,'is_done'=>0,'app_project_type' => Common::APP_PROJECT_TYPE],'id,live_id,live_info_id,content,length,created_at,type,content_type,is_del');
                 if(!empty($noticeList)){
                     $data = Common::ReturnJson (Status::CODE_OK,'发送成功',['type' => 13,'ios_content' =>$noticeList, 'content' =>$noticeList, ]);
                     //修改标记
@@ -600,13 +601,13 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         if(($val['push_type'] == 1 or $val['push_type'] == 7 or $val['push_type'] == 11) && !empty($val['push_gid']) ){
             $fields = 'id,name,price,subtitle,details_pic img,user_id,details_pic as image';
             $colObj   = new Column();
-            $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1],$fields);
+            $Info = $colObj->getOne($colObj->tableName,['id'=>$val['push_gid'],'status'=>1,'app_project_type'=>Common::APP_PROJECT_TYPE],$fields);
         }elseif(($val['push_type'] == 2 or $val['push_type'] == 8) && !empty($val['push_gid']) ){
             $fields = 'id,title name,type,price,detail_img img,detail_img as image';
             $workObj  = new Works();
             $WorkInfoObj=new WorksInfo();
-            $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4],$fields);
-            $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4],'id',['`rank`'=>0]);
+            $Info = $workObj->getOne($workObj->tableName,['id'=>$val['push_gid'],'status'=>4,'app_project_type'=>Common::APP_PROJECT_TYPE],$fields);
+            $WorkInfoData=$WorkInfoObj->getOne($WorkInfoObj->tableName,['pid'=>$val['push_gid'],'status'=>4,'app_project_type'=>Common::APP_PROJECT_TYPE],'id',['`rank`'=>0]);
             $Info['workinfo_id']=$WorkInfoData['id'];
         }else if($val['push_type'] == 3 && !empty($val['push_gid'])){
             $fields = 'id,name,price,subtitle,picture img,picture image';
@@ -628,17 +629,17 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }else if($val['push_type'] == 9){
             $fields = 'id, title name, `describe` subtitle, cover_img img,cover_img image,begin_at, end_at, user_id, price, is_free';
             $liveObj = new Live();
-            $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
-            $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid']],"id");
+            $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0,'app_project_type'=>Common::APP_PROJECT_TYPE],$fields);
+            $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid'],'app_project_type'=>Common::APP_PROJECT_TYPE],"id");
             $Info['live_info_id'] = $live_Info['id'];
         }else if($val['push_type'] == 10){ //外链
             $fields = 'id, name, `describe`, `url`,image,img';
             $liveObj = new Live();
-            $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid']],$fields);
+            $Info = $liveObj->getOne('nlsg_live_url',['id'=>$val['push_gid'],'app_project_type'=>Common::APP_PROJECT_TYPE],$fields);
         }else if($val['push_type'] == 12){ //上传二维码弹窗
             $fields = 'id, qr_url';
             $liveObj = new Live();
-            $qr_code = $liveObj->getOne('nlsg_live_push_qrcode',['id'=>$val['push_gid']],$fields);
+            $qr_code = $liveObj->getOne('nlsg_live_push_qrcode',['id'=>$val['push_gid'],'app_project_type'=>Common::APP_PROJECT_TYPE],$fields);
 
             $Info=[
                 'name'      =>  '二维码弹窗',
@@ -739,7 +740,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             foreach($listRst as $key => $val){
                 $arr = explode ('_', $val);
                 $live_id=$arr[2];
-                $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id,'status'=>1],'id,end_at,is_begin,begin_at,begin_status,is_finish');
+                $liveInfo=$liveObj->getOne($liveObj->tableName,['id'=>$live_id,'status'=>1,'app_project_type'=>Common::APP_PROJECT_TYPE],'id,end_at,is_begin,begin_at,begin_status,is_finish');
                 if(!empty($liveInfo)){
                     $is_push=0;
                     if($liveInfo['is_begin']==1 && $liveInfo['begin_status'] != $liveInfo['is_begin'] ){ //开始直播
@@ -844,7 +845,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
                 }*/
                 //个人禁言
-                $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1],'id,user_id,is_forbid,forbid_at,length');
+                $forbidden = $forbiddenObj->get(LiveForbiddenWordsModel::$table,['live_info_id'=>$live_id,'is_forbid'=>1,'app_project_type'=>Common::APP_PROJECT_TYPE],'id,user_id,is_forbid,forbid_at,length');
                 if(!empty($forbidden) ) {
                     foreach ($forbidden as $k=>$v) {
                         //  禁言时间 + 禁言时长 - 当前时间  大于0(禁言中)  否则0

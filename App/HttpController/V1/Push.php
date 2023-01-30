@@ -90,7 +90,7 @@ class Push extends Controller
                 $live_son_flag_num = intval($RedisObj->get($redis_flag_key));
                 if(empty($live_son_flag_num)){
                     $LiveLogin = new LiveLoginModel();
-                    $NumInfo=$LiveLogin->db->where('live_id',$live_id)->where('live_son_flag',$live_son_flag)->get(LiveLoginModel::$table,[0,1],'count(id) counts');
+                    $NumInfo=$LiveLogin->db->where('live_id',$live_id)->where('live_son_flag',$live_son_flag)->where('app_project_type',Common::APP_PROJECT_TYPE)->get(LiveLoginModel::$table,[0,1],'count(id) counts');
                     if(!empty($NumInfo[0]['counts'])) {
                         $live_son_flag_num = intval($NumInfo[0]['counts']);
                         $RedisObj->set($redis_flag_key,$live_son_flag_num+1,3600*5);
@@ -105,7 +105,7 @@ class Push extends Controller
             $time=time();
             $created_at=date('Y-m-d H:i:s',$time);
             $LiveLogin = new LiveLoginModel();
-            $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
+            $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at,'app_project_type'=>Common::APP_PROJECT_TYPE]);
             
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
@@ -122,11 +122,12 @@ class Push extends Controller
             $liveInfoRedis = $Redis->get($key_name);
             if(empty($liveInfoRedis)) {
                 $infoObj = new LiveInfo();
-                $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
+                $infoPid = $infoObj->db->where('id',$message['live_id'])
+                    ->where('app_project_type',Common::APP_PROJECT_TYPE)->getOne($infoObj->tableName, 'live_pid,is_begin');
                 if(empty($infoPid)){
                     return ;
                 }
-                $Info = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_join');
+                $Info = $infoObj->db->where('id',$infoPid['live_pid'])->where('app_project_type',Common::APP_PROJECT_TYPE)->getOne('nlsg_live', 'is_join');
                 $liveInfoRedis=json_encode([
                     'InfoPid'=>['live_pid'=>$infoPid['live_pid'],'is_begin'=>$infoPid['is_begin']],
                     'Info'=>['is_join'=>$Info['is_join']]
@@ -166,7 +167,7 @@ class Push extends Controller
                 $time=time();
                 $created_at=date('Y-m-d H:i:s',$time);
                 //写入redis缓存
-                $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
+                $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at,'app_project_type'=>Common::APP_PROJECT_TYPE,]);
                 $RedisObj->rpush('11LiveConsole:live_join', $map); //数据库写入
             });*/
         }else{
@@ -204,11 +205,11 @@ class Push extends Controller
         $liveInfoRedis = $Redis->get($key_name);
         if(empty($liveInfoRedis)) {
             $infoObj = new LiveInfo();
-            $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid');
+            $infoPid = $infoObj->db->where('id',$message['live_id'])->where('app_project_type',Common::APP_PROJECT_TYPE)->getOne($infoObj->tableName, 'live_pid');
             if(empty($infoPid)){
                 return ;
             }
-            $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->getOne('nlsg_live', 'is_forb,helper,user_id');
+            $lupInfo = $infoObj->db->where('id',$infoPid['live_pid'])->where('app_project_type',Common::APP_PROJECT_TYPE)->getOne('nlsg_live', 'is_forb,helper,user_id');
             $admin_arr=[];
             if(!empty($lupInfo['helper'])){
                 $admin_arr=explode(',',$lupInfo['helper']);
@@ -240,7 +241,7 @@ class Push extends Controller
         
         //处理屏蔽一次，则相同直播间不推送评论
         $ShieldUserObj=new ShieldUser();
-        $ShieldUserInfo=$ShieldUserObj->db->where('live_id',$message['live_id'])->where('user_id',$message['user_id']+0)->getOne($ShieldUserObj->tableName, 'id');
+        $ShieldUserInfo=$ShieldUserObj->db->where('live_id',$message['live_id'])->where('user_id',$message['user_id']+0)->where('app_project_type',Common::APP_PROJECT_TYPE)->getOne($ShieldUserObj->tableName, 'id');
         if(!empty($ShieldUserInfo)){
             //已屏蔽过一次，直接终止
             return ;
@@ -270,7 +271,9 @@ class Push extends Controller
                         'live_id'=>$message['live_id']+0,
                         'user_id'=>$message['user_id']+0,
                         'content'=>$rk_comment,
-                        'created_at'=>date('Y-m-d H:i:s')
+                        'app_project_type'=>Common::APP_PROJECT_TYPE,
+                        'created_at'=>date('Y-m-d H:i:s'),
+
                     ]);
                     return ;
                 }
@@ -310,7 +313,7 @@ class Push extends Controller
                         ['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]
                     );*/
                     //写入redis
-                    $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]);
+                    $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time,'app_project_type'=>Common::APP_PROJECT_TYPE, ]);
                     $RedisObj->rpush('11LiveConsole:live_comment', $map); //数据库写入
                 }
             });
