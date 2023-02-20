@@ -651,6 +651,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
         }else if($val['push_type'] == 13){
             $Info=[
+                'id'=>1,
                 'name'=>'幸福学社合伙人',
                 'price'=>2580.0,
                 'subtitle'=>'',
