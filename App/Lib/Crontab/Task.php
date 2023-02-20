@@ -649,6 +649,14 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 'img'       =>  $qr_code['qr_url'],
             ];
 
+        }else if($val['push_type'] == 13){
+            $Info=[
+                'name'=>'幸福学社合伙人',
+                'price'=>2580.0,
+                'subtitle'=>'',
+                'image'=>'/nlsg/works/20201124144228445465.png', //方图
+                'img'=>'/nlsg/works/20201124144228445466.png'  //长图
+            ];
         }
         if(!empty($Info)){
             // 线下产品显示填写地址按钮
