@@ -254,8 +254,12 @@ class Push extends Controller
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
 
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
+            $is_admin=0;
+            if(in_array($UserInfo['result']['username'],$admin_arr)){
+                $is_admin=1;
+            }
             $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
-                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname']]]);
+                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname'],'is_admin'=>$is_admin]]);
 
             $user_id=$UserInfo['result']['id'];
 
