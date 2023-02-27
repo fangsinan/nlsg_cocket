@@ -650,14 +650,9 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
             ];
 
         }else if($val['push_type'] == 13){
-            $Info=[
-                'id'=>1,
-                'name'=>'幸福学社合伙人',
-                'price'=>2580.0,
-                'subtitle'=>'',
-                'image'=>'/nlsg/works/20201124144228445465.png', //方图
-                'img'=>'/nlsg/works/20201124144228445466.png'  //长图
-            ];
+            $liveObj = new Live();
+            $message_info = $liveObj->getOne('nlsg_config',['id'=>$val['push_gid'],],"value");
+            $Info = json_decode($message_info,true);
         }
         if(!empty($Info)){
             // 线下产品显示填写地址按钮
