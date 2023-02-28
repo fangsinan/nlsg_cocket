@@ -18,6 +18,7 @@ use EasySwoole\Utility\SnowFlake;
 
 class Common
 {
+
     /**
      * @param $phone
      * @return string
