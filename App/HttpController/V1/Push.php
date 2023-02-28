@@ -105,7 +105,7 @@ class Push extends Controller
             $time=time();
             $created_at=date('Y-m-d H:i:s',$time);
             $LiveLogin = new LiveLoginModel();
-            $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at,]);
+            $LiveLogin->add(LiveLoginModel::$table, ['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
             
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
             $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
@@ -122,8 +122,7 @@ class Push extends Controller
             $liveInfoRedis = $Redis->get($key_name);
             if(empty($liveInfoRedis)) {
                 $infoObj = new LiveInfo();
-                $infoPid = $infoObj->db->where('id',$message['live_id'])
-                    ->getOne($infoObj->tableName, 'live_pid,is_begin');
+                $infoPid = $infoObj->db->where('id',$message['live_id'])->getOne($infoObj->tableName, 'live_pid,is_begin');
                 if(empty($infoPid)){
                     return ;
                 }
@@ -167,7 +166,7 @@ class Push extends Controller
                 $time=time();
                 $created_at=date('Y-m-d H:i:s',$time);
                 //写入redis缓存
-                $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at,]);
+                $map=json_encode(['user_id' => $user_id, 'live_id' => $live_id, 'ctime' => $time,'live_son_flag'=>$live_son_flag,'created_at'=>$created_at]);
                 $RedisObj->rpush('11LiveConsole:live_join', $map); //数据库写入
             });*/
         }else{
@@ -246,7 +245,7 @@ class Push extends Controller
             //已屏蔽过一次，直接终止
             return ;
         }
-        
+
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
@@ -275,13 +274,12 @@ class Push extends Controller
                         'live_id'=>$message['live_id']+0,
                         'user_id'=>$message['user_id']+0,
                         'content'=>$rk_comment,
-                        'created_at'=>date('Y-m-d H:i:s'),
-
+                        'created_at'=>date('Y-m-d H:i:s')
                     ]);
                     return ;
                 }
             }
-            
+
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag,$ShieldKeyFlag) {
 
@@ -316,7 +314,7 @@ class Push extends Controller
                         ['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]
                     );*/
                     //写入redis
-                    $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time, ]);
+                    $map=json_encode(['live_id' => $live_pid, 'live_info_id' => $live_id, 'user_id' => $user_id, 'content' => $rk_comment, 'live_son_flag' => $live_son_flag, 'created_at' => $time]);
                     $RedisObj->rpush('11LiveConsole:live_comment', $map); //数据库写入
                 }
             });
