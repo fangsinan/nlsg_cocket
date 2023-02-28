@@ -253,6 +253,7 @@ class Push extends Controller
             $UserInfo['result']['nickname']=Common::textDecode($UserInfo['result']['nickname']);
 
             $content = $UserInfo['result']['content']; //入库内容信息 处理表情
+            //幸福学社
             $is_admin=0;
             if(in_array($UserInfo['result']['username'],$admin_arr)){
                 $is_admin=1;

@@ -648,7 +648,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                 'img'       =>  $qr_code['qr_url'],
             ];
 
-        }else if($val['push_type'] == 13){
+        }else if($val['push_type'] == 13){ //幸福学社
             $liveObj = new Live();
             $message_info = $liveObj->getOne('nlsg_config',['id'=>90,],"value");
             $Info = json_decode($message_info,true);
