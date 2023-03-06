@@ -628,9 +628,10 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
         }else if($val['push_type'] == 9){
             $fields = 'id, title name, `describe` subtitle, cover_img img,cover_img image,begin_at, end_at, user_id, price, is_free';
             $liveObj = new Live();
-            $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0,'is_test'=>0],$fields);
+            $Info = $liveObj->getOne($liveObj->tableName,['id'=>$val['push_gid'],'status'=>4,'is_del'=>0],$fields); //,'is_test'=>0
             $live_Info = $liveObj->getOne("nlsg_live_info",['live_pid'=>$val['push_gid']],"id");
             $Info['live_info_id'] = $live_Info['id'];
+            $Info['show_address']=1;//配合渠道推购物车出现填地址入口
         }else if($val['push_type'] == 10){ //外链
             $fields = 'id, name, `describe`, `url`,image,img';
             $liveObj = new Live();
