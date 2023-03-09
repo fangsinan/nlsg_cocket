@@ -258,8 +258,11 @@ class Push extends Controller
             if(in_array($UserInfo['result']['username'],$admin_arr)){
                 $is_admin=1;
             }
+            $IMAGES_URL =Config::getInstance ()->getConf ('web.IMAGES_URL');
+            $headimg = $UserInfo['result']['headimg'] ? $IMAGES_URL.$UserInfo['result']['headimg'] : 'wechat/head.png';
+
             $data = json_encode(['type' => 2, 'content_text'=>$content,'live_son_flag' => $live_son_flag, 'userinfo' => ['user_id'=>$message['user_id'],
-                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname'],'is_admin'=>$is_admin]]);
+                'level' => $UserInfo['result']['level'],'nickname' => $UserInfo['result']['nickname'],'headimg' => $headimg,'is_admin'=>$is_admin]]);
 
             $user_id=$UserInfo['result']['id'];
 
