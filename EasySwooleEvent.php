@@ -192,7 +192,7 @@ class EasySwooleEvent implements Event
             }
         });
 
-        if ($ListPort['eth0'] == '172.17.226.68' || $ListPort['eth0'] == '172.17.212.212') {//172.17.213.52
+        if ($ListPort['eth0'] == '172.17.225.223') {//172.17.213.52
 
             //https://www.easyswoole.com/Manual/3.x/Cn/_book/SystemComponent/crontab.html?h=crontab
 
@@ -254,7 +254,7 @@ class EasySwooleEvent implements Event
 
         }
 
-        if($ListPort['eth0']=='172.17.215.15' || $ListPort['eth0']=='172.17.212.212' ){ //123.56.92.249
+        if($ListPort['eth0']=='172.17.225.223' ){ //123.56.92.249
             //linux定时任务 分 此方式使用异步进程异步执行，crontab工作机制->异步进程异步执行
             Crontab::getInstance()->addTask(ServerLoad::class); //1 分钟执行一次  更新服务器负载ip
 
