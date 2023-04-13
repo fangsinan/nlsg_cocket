@@ -134,7 +134,7 @@ class EasySwooleEvent implements Event
 
         $ListPort = swoole_get_local_ip(); //获取监听ip
         #172.17.225.216,172.17.225.217
-
+        print_r($ListPort);
         //扫描评论
         $TaskObj = new Task([
             'method' => 'CommentRedis',
