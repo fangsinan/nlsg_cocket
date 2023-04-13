@@ -245,7 +245,7 @@ class Push extends Controller
             //已屏蔽过一次，直接终止
             return ;
         }
-        print_r($UserInfo);
+
         if ( $UserInfo['statusCode'] == 200 ) { //获取成功
 
             $live_id=$message['live_id'];
@@ -280,7 +280,7 @@ class Push extends Controller
                     return ;
                 }
             }
-print_r($data);
+
             // 异步推送
             TaskManager::async (function () use ($client, $data,$user_id,$content,$live_id,$live_comment,$live_pid,$rk_comment,$live_son_flag,$ShieldKeyFlag) {
 
@@ -295,6 +295,7 @@ print_r($data);
                         //当前服务器发送，多直播间时容易导致定时任务拥堵 全部采用分发
                         $IpLoadArr = Config::getInstance()->getConf('web.load_ip_arr');
                     }
+                    print_r($IpLoadArr);
                     foreach ($IpLoadArr as $key => $val) {
                         $ip_str=str_replace(".","_",$val);
 
