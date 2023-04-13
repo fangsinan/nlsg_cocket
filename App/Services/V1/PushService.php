@@ -114,6 +114,7 @@ class PushService
         $clients = $Redis->sMembers ($data['live_id'].':'.$ip); //获取有序集合
 
         if(!empty($clients)) {
+            print_r($clients);
             //遍历当前服务器fd
             foreach ($clients as $key => $fd) {
                 $info = $server->getClientInfo($fd);

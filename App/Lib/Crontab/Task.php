@@ -289,7 +289,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     //广播评论redis
     public function CommentRedis($taskId, $fromWorkerId,$data,$path){
         try {
-
+        print_r("评论");
             //获取redis
             $ListPort = swoole_get_local_ip (); //获取监听ip
             $ip=$ListPort['eth0'];
@@ -304,6 +304,7 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
                     $live_id = $arr[2];
 
                     $list=$Redis->lrange($key_name.$live_id,0,-1);// 获取所有数据
+                    print_r($list);
                     if(!empty($list)){
                         $arr=[];
                         $start=0;
