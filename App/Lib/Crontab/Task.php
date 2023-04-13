@@ -292,21 +292,18 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
 
             //获取redis
             $ListPort = swoole_get_local_ip (); //获取监听ip
-            print_r($ListPort);
             $ip=$ListPort['eth0'];
             $ip_str=str_replace(".","_",$ip);
             $key_name="1111livecomment:".$ip_str.":"; //1111livecomment:172_17_212_131:19
 
             $Redis = new Redis();
             $listRst=$Redis->keys($key_name.'*');
-            print_r($listRst);
             if(!empty($listRst)) { //获取直播间
                 foreach ($listRst as $val) {
                     $arr = explode(':', $val);
                     $live_id = $arr[2];
 
                     $list=$Redis->lrange($key_name.$live_id,0,-1);// 获取所有数据
-                    print_r($list);
                     if(!empty($list)){
                         $arr=[];
                         $start=0;
