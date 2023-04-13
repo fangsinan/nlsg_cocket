@@ -289,15 +289,17 @@ class Task extends \EasySwoole\EasySwoole\Swoole\Task\AbstractAsyncTask
     //广播评论redis
     public function CommentRedis($taskId, $fromWorkerId,$data,$path){
         try {
-        print_r("评论");
+
             //获取redis
             $ListPort = swoole_get_local_ip (); //获取监听ip
+            print_r($ListPort);
             $ip=$ListPort['eth0'];
             $ip_str=str_replace(".","_",$ip);
             $key_name="1111livecomment:".$ip_str.":"; //1111livecomment:172_17_212_131:19
 
             $Redis = new Redis();
             $listRst=$Redis->keys($key_name.'*');
+            print_r($listRst);
             if(!empty($listRst)) { //获取直播间
                 foreach ($listRst as $val) {
                     $arr = explode(':', $val);
