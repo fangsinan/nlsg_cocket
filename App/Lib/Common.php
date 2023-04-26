@@ -63,12 +63,25 @@ class Common
         $str = str_replace("#2#",$replace_dz,$str); //点赞
         $str = str_replace("#3#",$replace_xhh,$str); //小红花
 
-//        $ConfigObj=new Config();
-//        $ConfigInfo = $ConfigObj->getOne($ConfigObj->tableName,['id'=>84], 'value');
-//        if(!empty($ConfigInfo) && isset($ConfigInfo['value'])){
-//
-//        }
-        if(!in_array($auth_user_id,[169209,214932])) { //不过滤 169209 李婷   214932 姬广亮
+        $Redis = new Redis();
+
+        //处理直播间数字是否屏蔽
+        $redis_Live_number_key='111_Live_number_key';
+        $Live_number_str = $Redis->get($redis_Live_number_key);
+        if(empty($Live_number_str)) {
+            $ConfigObj = new Config();
+            $ConfigInfo = $ConfigObj->getOne($ConfigObj->tableName, ['id' => 84], 'value');
+            if (!empty($ConfigInfo) && isset($ConfigInfo['value'])) {
+                $Live_number_str=$ConfigInfo['value'];
+            }else{
+                $Live_number_str='[169209,214932,187586]';
+            }
+            $Redis->set($redis_Live_number_key, $ConfigInfo['value'], 60*2);
+        }
+        $Live_number_arr=json_decode($Live_number_str,true);
+
+        if(!in_array($auth_user_id,$Live_number_arr)) { //不过滤 169209 李婷   214932 姬广亮  187586 孟祥玲
+//        if(!in_array($auth_user_id,[169209,214932,187586])) { //不过滤 169209 李婷   214932 姬广亮  187586 孟祥玲
             $reg = '/([a-zA-Z4-5]|7|8|9|0|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
 //            $reg = '/([a-zA-Z]|7|8|9|0|肆|伍|陆|柒|捌|玖|拾|四|五|六|七|八|九|十)/';
             $replace = Common::textDecode('\ud83c\udf39');  // 替换成此字符串
@@ -77,7 +90,6 @@ class Common
 
         //读取缓存
         $redis_shield_key='111_ShieldKey';
-        $Redis = new Redis();
         $ShieldingWords = $Redis->get($redis_shield_key);
         if(empty($ShieldingWords)) {
             $ShieldKeyObj = new ShieldKey();
